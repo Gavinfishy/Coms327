@@ -2,7 +2,7 @@ public class jassignment0 {
     static int totalPaths = 0;
     static final int[] xMoves = {2,2,1,1,-2,-2,-1,-1};
     static final int[] yMoves = {1,-1,2,-2,1,-1,2,-2};
-    static int n = 5;
+    static int n = 6;
 
     static boolean validMove(int x, int y, int[][] solution) {
         return(x >= 0 && x < solution.length && y >= 0 && y < solution.length && solution[x][y] == -1);
