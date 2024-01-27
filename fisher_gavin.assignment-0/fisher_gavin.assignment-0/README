@@ -1,0 +1,4 @@
+Assignment zero is an implementation of the knights tour.
+This program keeps track of two matrices, one for solutions, and one for the current move.
+The program will find every possible tour on a 5x5 board and return the order of moves for each tour.
+
