@@ -66,12 +66,35 @@ void setGates(struct map_key *map) {
     map->w = (rand() % 19 + 1);
     map->terrain_type[0][map->n] = road;
     map->terrain_type[ROW-1][map->s] = road;
-    map->terrain_type[map->e][0] = road;
-    map->terrain_type[map->w][COL-1] = road;
+    map->terrain_type[map->w][0] = road;
+    map->terrain_type[map->e][COL-1] = road;
 }
 
 void setPaths(struct map_key *map) {
+    int horz = (rand() % 76 + 1);
+    int vert = (rand() % 17 + 1);
+    //horz
+    for (int i = 1; i < horz; i++) {
+        map->terrain_type[map->w][i] = road;
+//        map->terrain_type[map->e][i + (78-horz)] = road;
+    }
+    for (int k = COL - 1; k >= horz; k--) {
+        map->terrain_type[map->e][k] = road;
+    }
+    if (map->w > map->e) {
+        for (int j = map->w; j > map ->e; j--) {
+            map->terrain_type[j][horz] = road;
+        }
+    }
+    else {
+        for (int j = map->w; j < map ->e; j++) {
+            map->terrain_type[j][horz] = road;
+        }
+    }
 
+    printf("%d %d\n", map->w, map->e);
+
+    //horz
 }
 
 void mapGen(struct map_key *map) {
