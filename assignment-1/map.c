@@ -27,31 +27,31 @@ struct map_key{
 
 void printMap(struct map_key *map) {
     for (int i = 0; i < ROW; i++) {
-        for (int j = 0; j < COL - 3; j++ ) {
+        for (int j = 0; j < COL; j++ ) {
             switch(map->terrain_type[i][j]) {
                 case boulder:
-                    printf("%c ", '%');
+                    printf("%c", '%');
                     break;
                 case tree:
-                    printf("%c ", '^');
+                    printf("%c", '^');
                     break;
                 case road:
-                    printf("%c ", '#');
+                    printf("%c", '#');
                     break;
                 case center:
-                    printf("%c ", 'C');
+                    printf("%c", 'C');
                     break;
                 case pokemart:
-                    printf("%c ", 'M');
+                    printf("%c", 'M');
                     break;
                 case grass:
-                    printf("%c ", ':');
+                    printf("%c", ':');
                     break;
                 case clearing:
-                    printf("%c ", '.');
+                    printf("%c", '.');
                     break;
                 default:
-                    printf("%c ", '/');
+                    printf("%c", '/');
                     break;
             }
         }
@@ -59,13 +59,41 @@ void printMap(struct map_key *map) {
     }
 }
 
+void setGates(struct map_key *map) {
+    map->n = (rand() % 78 + 1);
+    map->s = (rand() % 78 + 1);
+    map->e = (rand() % 19 + 1);
+    map->w = (rand() % 19 + 1);
+    map->terrain_type[0][map->n] = road;
+    map->terrain_type[ROW-1][map->s] = road;
+    map->terrain_type[map->e][0] = road;
+    map->terrain_type[map->w][COL-1] = road;
+}
+
+void setPaths(struct map_key *map) {
+
+}
+
 void mapGen(struct map_key *map) {
     srand(time(NULL));
+    // Generic fill
     for (int i = 0; i < ROW; i++) {
-        for (int j = 0; j < COL - 3; j++ ) {
-            map->terrain_type[i][j] = 6;
+        for (int j = 0; j < COL; j++ ) {
+            if (i == 0 || j == 0 || i == ROW-1 || j == COL-1) {
+                map->terrain_type[i][j] = boulder;
+            }
+            else {
+                map->terrain_type[i][j] = clearing;
+            }
         }
     }
+    // Gates
+    setGates(map);
+    // Paths
+    setPaths(map);
+
+    // etc
+
 }
 
 
