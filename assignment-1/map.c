@@ -1,27 +1,34 @@
 //Author: Gavin D Fisher gdf73278
 
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <stdint.h>
+#include <math.h>
+
 
 #define ROW 21
 #define COL 80
 #define boulder 0
 #define tree 1
-#define road 2
-#define center 3
-#define pokemart 4
-#define grass 5
-#define clearing 6
-
+#define grass 2
+#define clearing 3
+#define road 4
+#define center 5
+#define pokemart 6
 
 
 struct map_key{
     int cost_map[ROW][COL];
     int terrain_type[ROW][COL];
     int n,e,s,w;
+};
+
+struct Point {
+    int x;
+    int y;
 };
 
 
@@ -59,6 +66,7 @@ void printMap(struct map_key *map) {
     }
 }
 
+
 void setGates(struct map_key *map) {
     map->n = (rand() % 78 + 1);
     map->s = (rand() % 78 + 1);
@@ -69,6 +77,62 @@ void setGates(struct map_key *map) {
     map->terrain_type[map->w][0] = road;
     map->terrain_type[map->e][COL-1] = road;
 }
+
+
+void terGen(struct map_key *map) {
+//    int dx[] = {-1, 0, 1, 0};
+//    int dy[] = {0, 1, 0, -1};
+//
+//    int max_seeds = ROW * COL;
+//    int (*seeds)[2] = malloc(max_seeds * sizeof(*seeds));
+//
+//    int seed_num = 0;
+//    bool space_left = true;
+//
+//    for (int i = 0; i < 15; i++) {
+//        int x = rand() % (ROW - 2) + 1;
+//        int y = rand() % (COL - 2) + 1;
+//        int terrain = rand() % 4;
+//
+//        seeds[seed_num][0] = x + 1;
+//        seeds[seed_num][1] = y + 1;
+//        seed_num++;
+//        map->terrain_type[x][y] = terrain;
+//    }
+//
+//    int radius = 1;
+//
+//    while (space_left) {
+//        space_left = false;
+//        for (int i = 0; i < seed_num; i++) {
+//            int x = seeds[i][0];
+//            int y = seeds[i][1];
+//            int terrain = map->terrain_type[x][y];
+//
+//            for (int dx = -radius; dx <= radius; dx++) {
+//                for (int dy = -radius; dy <= radius; dy++) {
+//                    double distance = sqrt(dx*dx + dy*dy);
+//                    if (distance > radius) {
+//                        continue;  // Skip points outside the radius
+//                    }
+//
+//                    int new_x = x + dx;
+//                    int new_y = y + dy;
+//
+//
+//                    if (new_x > 0 && new_x < ROW - 1 && new_y > 0 && new_y < COL - 1 && map->terrain_type[new_x][new_y] == 7) {
+//                        map->terrain_type[new_x][new_y] = terrain;
+//                        space_left = true;
+//                    }
+//                }
+//            }
+//        }
+//    }
+//
+//    free(seeds);
+}
+
+
 
 void setPaths(struct map_key *map) {
     int horz = (rand() % 76 + 1);
@@ -109,10 +173,28 @@ void setPaths(struct map_key *map) {
             map->terrain_type[vert][j] = road;
         }
     }
-
-    printf("%d %d\n", map->w, map->e);
-
 }
+
+
+void placeBuildings(struct map_key *map) {
+    int house_num = center;
+    bool placed = false;
+    while (!placed) {
+        int y = (rand() % 76 + 1);
+        int x = (rand() % 17 + 1);
+        printf("%d %d\n", x,y);
+
+        if (map->terrain_type[x][y] != road && ((x > 0 && map->terrain_type[x-1][y] == road) || (y > 0 && map->terrain_type[x][y-1] == road) || (x < COL - 1 && map->terrain_type[x+1][y] == road) || (y < ROW - 1 && map->terrain_type[x][y+1] == road))) {
+            map->terrain_type[x][y] = house_num;
+            if (house_num == pokemart) {
+                placed = true;
+            }
+            house_num = pokemart;
+
+        }
+    }
+}
+
 
 void mapGen(struct map_key *map) {
     srand(time(NULL));
@@ -123,17 +205,18 @@ void mapGen(struct map_key *map) {
                 map->terrain_type[i][j] = boulder;
             }
             else {
-                map->terrain_type[i][j] = clearing;
+                map->terrain_type[i][j] = 7;
             }
         }
     }
     // Gates
     setGates(map);
+    // Terrain
+//    terGen(map);
     // Paths
     setPaths(map);
-
-    // etc
-
+    // Buildings
+    placeBuildings(map);
 }
 
 
