@@ -26,11 +26,6 @@ struct map_key{
     int n,e,s,w;
 };
 
-struct Point {
-    int x;
-    int y;
-};
-
 
 void printMap(struct map_key *map) {
     for (int i = 0; i < ROW; i++) {
@@ -78,8 +73,115 @@ void setGates(struct map_key *map) {
     map->terrain_type[map->e][COL-1] = road;
 }
 
+struct point {
+    int x;
+    int y;
+};
+
+struct queue_node {
+    struct queue_node *next;
+    struct point pt;
+};
+
+
+struct queue {
+    struct queue_node *head, *tail;
+    int length;
+};
+
+int queue_init(struct queue *q){
+    q->head = q->tail = NULL;
+    q->length = 0;
+    return 0;
+}
+
+int queue_enqueue(struct queue *q, struct point pt) {
+    struct queue_node *tmp;
+    if (!(tmp = malloc(sizeof (*tmp)))) {
+        return 1;
+    }
+    tmp->pt = pt;
+    tmp->next = NULL;
+    if (!q->head) {
+        q->head = q->tail = tmp;
+    }
+    else {
+        q->tail->next = tmp;
+        q->tail = tmp;
+    }
+    q->length++;
+    return 0;
+}
+
+int queue_dequeue(struct queue *q, struct point *pt) {
+    if (!q->head) {
+        return 1;
+    }
+    struct queue_node *tmp = q->head;
+    *pt = tmp->pt;
+    q->head = q->head->next;
+    free(tmp);
+    tmp = NULL;
+    if (!q->head) {
+        q->tail = NULL;
+    }
+    free(tmp);
+    tmp = NULL;
+    q->length--;
+    return 0;
+}
+
+int queue_length(struct queue *q) {
+    return q->length;
+}
+
+
+int queue_is_empty(struct queue *q) {
+    return !q->length;
+}
+
+
+void expand_with_queue(struct map_key *map, struct queue *q, struct point start) {
+    int dx[] = {-1, 0, 1, 0};
+    int dy[] = {0, 1, 0, -1};
+
+    queue_enqueue(q, start);
+//    printf("Enqueued: (%d, %d)\n", start.x, start.y);
+
+    while (!queue_is_empty(q)) {
+        struct point pt;
+        queue_dequeue(q, &pt);
+//        printf("Dequeued: (%d, %d)\n", pt.x, pt.y);
+
+        //TODO make this not hard coded
+        map->terrain_type[pt.x][pt.y] = tree;
+
+        for (int i = 0; i < 4; i++) {
+            int nx = pt.x + dx[i];
+            int ny = pt.y + dy[i];
+
+            if (nx >= 1 && nx < ROW-1 && ny >= 1 && ny < COL-1) {
+                if (map->terrain_type[nx][ny] < 0) {
+                    struct point np = {nx, ny};
+                    map->terrain_type[nx][ny] = map->terrain_type[pt.x][pt.y];
+                    queue_enqueue(q, np);
+//                    printf("Enqueued: (%d, %d)\n", np.x, np.y);
+                }
+            }
+        }
+    }
+}
+
+
 
 void terGen(struct map_key *map) {
+    struct queue q;
+    queue_init(&q);
+    struct point start = {5, 15};
+    map->terrain_type[5][15] = tree;
+    expand_with_queue(map, &q, start);
+
+
 //    int dx[] = {-1, 0, 1, 0};
 //    int dy[] = {0, 1, 0, -1};
 //
@@ -197,7 +299,6 @@ void placeBuildings(struct map_key *map) {
 
 
 void mapGen(struct map_key *map) {
-    srand(time(NULL));
     // Generic fill
     for (int i = 0; i < ROW; i++) {
         for (int j = 0; j < COL; j++ ) {
@@ -205,22 +306,23 @@ void mapGen(struct map_key *map) {
                 map->terrain_type[i][j] = boulder;
             }
             else {
-                map->terrain_type[i][j] = 7;
+                map->terrain_type[i][j] = -1;
             }
         }
     }
     // Gates
-    setGates(map);
+//    setGates(map);
     // Terrain
-//    terGen(map);
+    terGen(map);
     // Paths
-    setPaths(map);
+    //setPaths(map);
     // Buildings
-    placeBuildings(map);
+//    placeBuildings(map);
 }
 
 
 int main() {
+    srand(time(NULL));
     struct map_key cur_map;
 
     mapGen(&cur_map);

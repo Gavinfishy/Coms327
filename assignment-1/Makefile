@@ -1,5 +1,5 @@
 map: map.c
-	gcc map.c -o map
+	gcc map.c -o map -ggdb
 
 clean:
 	rm -f map *~ core

@@ -1,3 +1,5 @@
 01/26/2024 9pm-11pm Began project
 01/27/2024 2pm-5pm Set up basics of printing the map
 01/28/2024 6pm-11pm Gates randomly placed, roads randomly placed and connected to each other and gate, perimeter rocks
+01/29/2024 7pm-11pm Attempted to generate background (could randomly place types but could not get it to expand)
+01/30/2024 4pm- Randomly place buildings next to roads, changing background generation to use queues
