@@ -141,20 +141,25 @@ int queue_is_empty(struct queue *q) {
 }
 
 
-void expand_with_queue(struct map_key *map, struct queue *q, struct point start) {
+void expand_with_queue(struct map_key *map, struct queue *q) {
     int dx[] = {-1, 0, 1, 0};
     int dy[] = {0, 1, 0, -1};
+    int seed_num = 15;
 
-    queue_enqueue(q, start);
-//    printf("Enqueued: (%d, %d)\n", start.x, start.y);
+    for (int i = 0; i < seed_num; i++) {
+        int x = rand() % (ROW - 2) + 1;
+        int y = rand() % (COL - 2) + 1;
+        struct point start_seed = {x,y};
+        map->terrain_type[start_seed.x][start_seed.y] = rand() % 4;
+        queue_enqueue(q,start_seed);
+
+    }
 
     while (!queue_is_empty(q)) {
         struct point pt;
         queue_dequeue(q, &pt);
-//        printf("Dequeued: (%d, %d)\n", pt.x, pt.y);
 
-        //TODO make this not hard coded
-        map->terrain_type[pt.x][pt.y] = tree;
+        int terrain = map->terrain_type[pt.x][pt.y];
 
         for (int i = 0; i < 4; i++) {
             int nx = pt.x + dx[i];
@@ -163,9 +168,8 @@ void expand_with_queue(struct map_key *map, struct queue *q, struct point start)
             if (nx >= 1 && nx < ROW-1 && ny >= 1 && ny < COL-1) {
                 if (map->terrain_type[nx][ny] < 0) {
                     struct point np = {nx, ny};
-                    map->terrain_type[nx][ny] = map->terrain_type[pt.x][pt.y];
+                    map->terrain_type[nx][ny] = terrain;
                     queue_enqueue(q, np);
-//                    printf("Enqueued: (%d, %d)\n", np.x, np.y);
                 }
             }
         }
@@ -177,61 +181,7 @@ void expand_with_queue(struct map_key *map, struct queue *q, struct point start)
 void terGen(struct map_key *map) {
     struct queue q;
     queue_init(&q);
-    struct point start = {5, 15};
-    map->terrain_type[5][15] = tree;
-    expand_with_queue(map, &q, start);
-
-
-//    int dx[] = {-1, 0, 1, 0};
-//    int dy[] = {0, 1, 0, -1};
-//
-//    int max_seeds = ROW * COL;
-//    int (*seeds)[2] = malloc(max_seeds * sizeof(*seeds));
-//
-//    int seed_num = 0;
-//    bool space_left = true;
-//
-//    for (int i = 0; i < 15; i++) {
-//        int x = rand() % (ROW - 2) + 1;
-//        int y = rand() % (COL - 2) + 1;
-//        int terrain = rand() % 4;
-//
-//        seeds[seed_num][0] = x + 1;
-//        seeds[seed_num][1] = y + 1;
-//        seed_num++;
-//        map->terrain_type[x][y] = terrain;
-//    }
-//
-//    int radius = 1;
-//
-//    while (space_left) {
-//        space_left = false;
-//        for (int i = 0; i < seed_num; i++) {
-//            int x = seeds[i][0];
-//            int y = seeds[i][1];
-//            int terrain = map->terrain_type[x][y];
-//
-//            for (int dx = -radius; dx <= radius; dx++) {
-//                for (int dy = -radius; dy <= radius; dy++) {
-//                    double distance = sqrt(dx*dx + dy*dy);
-//                    if (distance > radius) {
-//                        continue;  // Skip points outside the radius
-//                    }
-//
-//                    int new_x = x + dx;
-//                    int new_y = y + dy;
-//
-//
-//                    if (new_x > 0 && new_x < ROW - 1 && new_y > 0 && new_y < COL - 1 && map->terrain_type[new_x][new_y] == 7) {
-//                        map->terrain_type[new_x][new_y] = terrain;
-//                        space_left = true;
-//                    }
-//                }
-//            }
-//        }
-//    }
-//
-//    free(seeds);
+    expand_with_queue(map, &q);
 }
 
 
@@ -311,13 +261,13 @@ void mapGen(struct map_key *map) {
         }
     }
     // Gates
-//    setGates(map);
+    setGates(map);
     // Terrain
     terGen(map);
     // Paths
-    //setPaths(map);
+    setPaths(map);
     // Buildings
-//    placeBuildings(map);
+    placeBuildings(map);
 }
 
 
