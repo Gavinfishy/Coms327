@@ -1,13 +1,10 @@
 //Author: Gavin D Fisher gdf73278
 
-
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <stdint.h>
-#include <math.h>
-
 
 #define ROW 21
 #define COL 80
@@ -73,10 +70,12 @@ void setGates(struct map_key *map) {
     map->terrain_type[map->e][COL-1] = road;
 }
 
+
 struct point {
     int x;
     int y;
 };
+
 
 struct queue_node {
     struct queue_node *next;
@@ -89,11 +88,13 @@ struct queue {
     int length;
 };
 
+
 int queue_init(struct queue *q){
     q->head = q->tail = NULL;
     q->length = 0;
     return 0;
 }
+
 
 int queue_enqueue(struct queue *q, struct point pt) {
     struct queue_node *tmp;
@@ -113,6 +114,7 @@ int queue_enqueue(struct queue *q, struct point pt) {
     return 0;
 }
 
+
 int queue_dequeue(struct queue *q, struct point *pt) {
     if (!q->head) {
         return 1;
@@ -131,6 +133,7 @@ int queue_dequeue(struct queue *q, struct point *pt) {
     return 0;
 }
 
+
 int queue_length(struct queue *q) {
     return q->length;
 }
@@ -144,7 +147,9 @@ int queue_is_empty(struct queue *q) {
 void expand_with_queue(struct map_key *map, struct queue *q) {
     int dx[] = {-1, 0, 1, 0};
     int dy[] = {0, 1, 0, -1};
-    int seed_num = 15;
+    int seed_num = (rand() % 25) + 15;
+    printf("%d\n", seed_num);
+
 
     for (int i = 0; i < seed_num; i++) {
         int x = rand() % (ROW - 2) + 1;
@@ -152,7 +157,6 @@ void expand_with_queue(struct map_key *map, struct queue *q) {
         struct point start_seed = {x,y};
         map->terrain_type[start_seed.x][start_seed.y] = rand() % 4;
         queue_enqueue(q,start_seed);
-
     }
 
     while (!queue_is_empty(q)) {
@@ -177,13 +181,11 @@ void expand_with_queue(struct map_key *map, struct queue *q) {
 }
 
 
-
 void terGen(struct map_key *map) {
     struct queue q;
     queue_init(&q);
     expand_with_queue(map, &q);
 }
-
 
 
 void setPaths(struct map_key *map) {
@@ -234,7 +236,7 @@ void placeBuildings(struct map_key *map) {
     while (!placed) {
         int y = (rand() % 76 + 1);
         int x = (rand() % 17 + 1);
-        printf("%d %d\n", x,y);
+//        printf("%d %d\n", x,y);
 
         if (map->terrain_type[x][y] != road && ((x > 0 && map->terrain_type[x-1][y] == road) || (y > 0 && map->terrain_type[x][y-1] == road) || (x < COL - 1 && map->terrain_type[x+1][y] == road) || (y < ROW - 1 && map->terrain_type[x][y+1] == road))) {
             map->terrain_type[x][y] = house_num;
@@ -242,14 +244,12 @@ void placeBuildings(struct map_key *map) {
                 placed = true;
             }
             house_num = pokemart;
-
         }
     }
 }
 
 
 void mapGen(struct map_key *map) {
-    // Generic fill
     for (int i = 0; i < ROW; i++) {
         for (int j = 0; j < COL; j++ ) {
             if (i == 0 || j == 0 || i == ROW-1 || j == COL-1) {
