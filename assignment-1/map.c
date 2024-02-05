@@ -19,6 +19,7 @@
 
 
 struct map_key{
+    //assign pointer and put in 2d array of maps
     int cost_map[ROW][COL];
     int terrain_type[ROW][COL];
     int n,e,s,w;
