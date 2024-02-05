@@ -1,0 +1,13 @@
+Project 2
+02/03/2024 3pm-6pm Began project
+02/04/2024 1pm-2:15pm, 4:15pm-6pm, 7:15pm-10:40pm The roads connect
+
+Project 1
+01/26/2024 9pm-11pm Began project
+01/27/2024 2pm-5pm Set up basics of printing the map
+01/28/2024 6pm-11pm Gates randomly placed, roads randomly placed and connected to each other and gate, perimeter rocks
+01/29/2024 7pm-11pm Attempted to generate background (could randomly place types but could not get it to expand)
+01/30/2024 5pm-7pm Randomly place buildings next to roads, changing background generation to use queues
+01/30/2024 8:30pm-11pm can choose a starting location and the rest of the map will be filled using queues
+01/31/2024 8am-10:30am Random seed generation works!
+
