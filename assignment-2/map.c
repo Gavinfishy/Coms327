@@ -9,6 +9,7 @@
 
 #define ROW 21
 #define COL 80
+#define empty -1
 #define boulder 0
 #define tree 1
 #define grass 2
@@ -72,87 +73,72 @@ void printMap(struct map_key *map) {
 void setGates(struct map_key *map, int x, int y) {
     if (y > -world_size_a && world[x + world_size_a][y-1 + world_size_a] != NULL) {
         map->n = world[x + world_size_a][y-1 + world_size_a]->s;
-    } else {
+    }
+    else if (y == -world_size_a) {
+        map->n = empty;
+    }
+    else {
         map->n = (rand() % 78 + 1);
     }
     if (y < world_size_a && world[x + world_size_a][y+1 + world_size_a] != NULL) {
         map->s = world[x + world_size_a][y+1 + world_size_a]->n;
-    } else {
+    }
+    else if (y == world_size_a) {
+        map->s = empty;
+    }
+    else {
         map->s = (rand() % 78 + 1);
     }
     if (x < world_size_a && world[x+1 + world_size_a][y + world_size_a] != NULL) {
         map->e = world[x+1 + world_size_a][y + world_size_a]->w;
-    } else {
+    }
+    else if (x == world_size_a) {
+        map->e = empty;
+    }
+    else {
         map->e = (rand() % 19 + 1);
     }
     if (x > -world_size_a && world[x-1 + world_size_a][y + world_size_a] != NULL) {
         map->w = world[x-1 + world_size_a][y + world_size_a]->e;
-    } else {
+    }
+    else if (x == -world_size_a) {
+        map->w = empty;
+    }
+    else {
         map->w = (rand() % 19 + 1);
     }
-    map->terrain_type[0][map->n] = road;
-    map->terrain_type[ROW-1][map->s] = road;
-    map->terrain_type[map->w][0] = road;
-    map->terrain_type[map->e][COL-1] = road;
 
-    printf("Gates for map at (%d, %d):\n", x, y);
-    printf("N: %d\n", map->n);
-//    printf("E: %d\n", map->e);
-//    printf("S: %d\n", map->s);
-//    printf("W: %d\n", map->w);
-}
+    if (map->n != empty) {
+        map->terrain_type[0][map->n] = road;
+    }
+    else {
+        map->n = (rand() % 78 + 1);
+    }
+    if (map->s != empty) {
+        map->terrain_type[ROW-1][map->s] = road;
+    }
+    else {
+        map->s = (rand() % 78 + 1);
+    }
+    if (map->e != empty) {
+        map->terrain_type[map->e][COL-1] = road;
+    }
+    else {
+        map->e = (rand() % 19 + 1);
+    }
+    if (map->w != empty) {
+        map->terrain_type[map->w][0] = road;
+    }
+    else {
+        map->w = (rand() % 19 + 1);
+    }
 
-//void setGates(struct map_key *map, int x, int y) {
-//    if (y > -world_size_a) {
-//        if (world[x + world_size_a][y-1 + world_size_a] == NULL) {
-//            world[x + world_size_a][y-1 + world_size_a] = malloc(sizeof(struct map_key));
-//            if (world[x + world_size_a][y-1 + world_size_a]->s == 0) {
-//                world[x + world_size_a][y-1 + world_size_a]->s = (rand() % 78 + 1);
-//            }
-//        }
-//        map->n = world[x + world_size_a][y-1 + world_size_a]->s;
-//    } else {
-//        map->n = (rand() % 78 + 1);
-//    }
-//    if (y < world_size_a && world[x + world_size_a][y+1 + world_size_a] != NULL) {
-//        map->s = world[x + world_size_a][y+1 + world_size_a]->n;
-//    }
-//    else {
-//        map->s = (rand() % 78 + 1);
-//    }
-//    if (x < world_size_a && world[x+1 + world_size_a][y + world_size_a] != NULL) {
-//        map->e = world[x+1 + world_size_a][y + world_size_a]->w;
-//    } else {
-//        map->e = (rand() % 19 + 1);
-//    }
-//    if (x > -world_size_a && world[x-1 + world_size_a][y + world_size_a] != NULL) {
-//        map->w = world[x-1 + world_size_a][y + world_size_a]->e;
-//    } else {
-//        map->w = (rand() % 19 + 1);
-//    }
-//    map->terrain_type[0][map->n] = road;
-//    map->terrain_type[ROW-1][map->s] = road;
-//    map->terrain_type[map->w][0] = road;
-//    map->terrain_type[map->e][COL-1] = road;
-//
 //    printf("Gates for map at (%d, %d):\n", x, y);
 //    printf("N: %d\n", map->n);
 //    printf("E: %d\n", map->e);
 //    printf("S: %d\n", map->s);
 //    printf("W: %d\n", map->w);
-//    if (y > -world_size_a && world[x + world_size_a][y-1 + world_size_a] != NULL) {
-//        printf("South gate of north map: %d\n", world[x + world_size_a][y-1 + world_size_a]->s);
-//    }
-//    if (y < world_size_a && world[x + world_size_a][y+1 + world_size_a] != NULL) {
-//        printf("North gate of south map: %d\n", world[x + world_size_a][y+1 + world_size_a]->n);
-//    }
-//    if (x < world_size_a && world[x+1 + world_size_a][y + world_size_a] != NULL) {
-//        printf("West gate of east map: %d\n", world[x+1 + world_size_a][y + world_size_a]->w);
-//    }
-//    if (x > -world_size_a && world[x-1 + world_size_a][y + world_size_a] != NULL) {
-//        printf("East gate of west map: %d\n", world[x-1 + world_size_a][y + world_size_a]->e);
-//    }
-//}
+}
 
 
 struct point {
@@ -280,7 +266,7 @@ void setPaths(struct map_key *map) {
     for (int i = 1; i < horz; i++) {
         map->terrain_type[map->w][i] = road;
     }
-    for (int k = COL - 1; k >= horz; k--) {
+    for (int k = COL - 2; k >= horz; k--) {
         map->terrain_type[map->e][k] = road;
     }
     if (map->w > map->e) {
@@ -298,7 +284,7 @@ void setPaths(struct map_key *map) {
     for (int i = 1; i < vert; i++) {
         map->terrain_type[i][map->n] = road;
     }
-    for (int k = ROW - 1; k >= vert; k--) {
+    for (int k = ROW - 2; k >= vert; k--) {
         map->terrain_type[k][map->s] = road;
     }
     if (map->n > map->s) {
@@ -340,7 +326,7 @@ void mapGen(struct map_key *map, int x, int y) {
                 map->terrain_type[i][j] = boulder;
             }
             else {
-                map->terrain_type[i][j] = -1;
+                map->terrain_type[i][j] = empty;
             }
         }
     }
@@ -435,7 +421,6 @@ int main() {
 //    struct map_key cur_map;
     gameLoop();
 //    mapGen(&cur_map);
-
 //    printMap(&cur_map);
 
 
