@@ -304,11 +304,16 @@ void placeBuildings(struct map_key *map, int mapx, int mapy) {
         if (map->terrain_type[x][y] != road && ((x > 0 && map->terrain_type[x-1][y] == road) || (y > 0 && map->terrain_type[x][y-1] == road) || (x < COL - 1 && map->terrain_type[x+1][y] == road) || (y < ROW - 1 && map->terrain_type[x][y+1] == road))) {
             int manhattan = (int) (abs(mapx) + abs(mapy));
             int spawnChance = -45*manhattan;
-            spawnChance = ceil(fmax(5, ((spawnChance/200) + 50)));
+//            spawnChance = ceil(fmax(5, ((spawnChance/200) + 50)));
+            spawnChance = ceil(((spawnChance/200) + 50) > 5 ? ((spawnChance/200) + 50) : 5);
             int c = rand() % 100 + 1;
             if (c <= spawnChance || (mapx == 0 && mapy == 0)) {
+//                printf("True\n");
                 map->terrain_type[x][y] = house_num;
             }
+//            else {
+////                printf("False\n");
+//            }
             if (house_num == pokemart) {
                 placed = true;
             }
