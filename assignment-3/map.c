@@ -46,6 +46,7 @@ struct map_key{
 struct map_key* world[world_size][world_size] = {NULL};
 
 int currentX = 0;
+
 int currentY = 0;
 
 struct character {
@@ -55,6 +56,7 @@ struct character {
 };
 
 struct character PC;
+
 struct character NPC[10];
 
 struct adjacencyListNode {
@@ -72,11 +74,11 @@ struct graph {
     struct adjacencyList* array;
 };
 
-struct adjacencyListNode* newAdjacencyListNode(int next, int weight) {
+struct adjacencyListNode* newAdjacencyListNode(int dest, int weight) {
     struct adjacencyListNode* newNode = (struct adjacencyListNode*) malloc(sizeof (struct adjacencyListNode));
-    newNode->next = next;
+    newNode->dest = dest;
     newNode->weight = weight;
-    newNode->next = -1;
+    newNode->next = NULL;
     return newNode;
 }
 
@@ -117,6 +119,21 @@ struct minHeap* createMinHeap(int capacity) {
     minHeap->array = (struct minHeapNode**) malloc(capacity * sizeof (struct minHeapNode*));
     return minHeap;
 }
+
+struct point {
+    int x;
+    int y;
+};
+
+struct queue_node {
+    struct queue_node *next;
+    struct point pt;
+};
+
+struct queue {
+    struct queue_node *head, *tail;
+    int length;
+};
 
 
 void printMap(struct map_key *map) {
@@ -167,6 +184,7 @@ void printMap(struct map_key *map) {
         printf("\n");
     }
 }
+
 
 void setGates(struct map_key *map, int x, int y) {
     if (y > -world_size_a && world[x + world_size_a][y-1 + world_size_a] != NULL) {
@@ -231,24 +249,6 @@ void setGates(struct map_key *map, int x, int y) {
         map->w = (rand() % 19 + 1);
     }
 }
-
-
-struct point {
-    int x;
-    int y;
-};
-
-
-struct queue_node {
-    struct queue_node *next;
-    struct point pt;
-};
-
-
-struct queue {
-    struct queue_node *head, *tail;
-    int length;
-};
 
 
 int queue_init(struct queue *q){
@@ -342,13 +342,13 @@ void expand_with_queue(struct map_key *map, struct queue *q) {
 }
 
 
-void addEdge(struct graph* graph, int previous, int next, int weight) {
-    struct adjacencyListNode* newNode = newAdjacencyListNode(next, weight);
-    newNode->next = graph->array[previous].head;
-    graph->array[previous].head = newNode;
-    newNode = newAdjacencyListNode(previous, weight);
-    newNode->next = graph->array[next].head;
-    graph->array[next].head = newNode;
+void addEdge(struct graph* graph, int src, int dest, int weight) {
+    struct adjacencyListNode* newNode = newAdjacencyListNode(dest, weight);
+    newNode->next = graph->array[src].head;
+    graph->array[src].head = newNode;
+    newNode = newAdjacencyListNode(src, weight);
+    newNode->next = graph->array[dest].head;
+    graph->array[dest].head = newNode;
 }
 
 
@@ -429,8 +429,22 @@ void printArr(int dist[], int n) {
 }
 
 
-void dijkstra(struct graph* graph, int previous) {
-    int V = graph->v;
+void printCostMap(struct map_key *map) {
+    for (int i = 0; i < ROW; i++) {
+        for (int j = 0; j < COL; j++) {
+            if (map->player_cost_map[i][j] == INT_MAX) {
+                printf("   ");
+            } else {
+                printf(" %02d", map->player_cost_map[i][j] % 100);
+            }
+        }
+        printf("\n");
+    }
+}
+
+
+void dijkstra(struct map_key* map, int startX, int startY) {
+    int V = ROW*COL;
     int distance[V];
     struct minHeap* minHeap = createMinHeap(V);
     for (int v = 0; v < V; ++v) {
@@ -438,31 +452,50 @@ void dijkstra(struct graph* graph, int previous) {
         minHeap->array[v] = newMinHeapNode(v, distance[v]);
         minHeap->position[v] = v;
     }
-    minHeap->array[previous] = newMinHeapNode(previous, distance[previous]);
-    minHeap->position[previous] = previous;
-    distance[previous] = 0;
-    decreaseKey(minHeap, previous, distance[previous]);
+    int playerIndex = startX*COL + startY;
+    distance[playerIndex] = 0;
+    decreaseKey(minHeap, playerIndex, distance[playerIndex]);
     minHeap->size = V;
     while (!heapIsEmpty(minHeap)) {
         struct minHeapNode* minHeapNode = extractMin(minHeap);
         int u = minHeapNode->v;
-        struct adjacencyListNode* pCrawl = graph->array[u].head;
-        while (pCrawl != NULL) {
-            int v = pCrawl->next;
-            if (isInMinHeap(minHeap, v) && distance[u] != INT_MAX && pCrawl->weight + distance[u] < distance[v]) {
-                distance[v] = distance[u] + pCrawl->weight;
-                decreaseKey(minHeap, v, distance[v]);
+        int ux = u / COL;
+        int uy = u % COL;
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dy = -1; dy <= 1; dy++) {
+                if (dx == 0 && dy == 0) {
+                    continue;
+                }
+                int vx = ux + dx;
+                int vy = uy + dy;
+                if (vx >= 0 && vx < ROW && vy >= 0 && vy < COL) {
+                    int v = vx * COL + vy;
+                    if (isInMinHeap(minHeap, v) && distance[u] != INT_MAX) {
+                        int newDist = distance[u] + map->player_cost_map[vx][vy];
+                        if (newDist < 0 || newDist > INT_MAX) {
+                            newDist = INT_MAX;
+                        }
+                        if (newDist < distance[v]) {
+                            distance[v] = newDist;
+                            decreaseKey(minHeap, v, distance[v]);
+                        }
+                    }
+                }
             }
-            pCrawl = pCrawl->next;
         }
         free(minHeapNode);
     }
-    printArr(distance, V);
+    for (int i = 0; i < ROW; i++) {
+        for (int j = 0; j < COL; j++) {
+            int index = i * COL + j;
+            map->player_cost_map[i][j] = distance[index];
+        }
+    }
+//    printArr(distance, V);
     free(minHeap->array);
     free(minHeap->position);
     free(minHeap);
 }
-
 
 
 void terGen(struct map_key *map) {
@@ -693,6 +726,8 @@ void mapGen(struct map_key *map, int x, int y) {
     setCostMaps(map);
     // PC and NPCs
     placeCharacters(map);
+    // Dijkstra cost map
+    dijkstra(map, PC.x, PC.y);
 }
 
 
@@ -734,12 +769,12 @@ void gameLoop() {
     char command[10];
     int x;
     int y;
-
     if (world[currentX + world_size_a][currentY + world_size_a] == NULL) {
         world[currentX + world_size_a][currentY + world_size_a] = malloc(sizeof(struct map_key));
     }
     mapGen(world[currentX + world_size_a][currentY + world_size_a], currentX, currentY);
     printMap(world[currentX + world_size_a][currentY + world_size_a]);
+    printCostMap(world[currentX + world_size_a][currentY + world_size_a]);
     while (1) {
         printf("Enter command:\n");
         scanf("%s", command);
@@ -769,11 +804,8 @@ void gameLoop() {
 }
 
 
-
 int main() {
     srand(time(NULL));
     gameLoop();
-
-
     return 0;
 }
