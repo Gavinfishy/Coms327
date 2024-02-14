@@ -7,10 +7,12 @@
 #include <stdint.h>
 #include <string.h>
 #include <math.h>
+#include <limits.h>
+#include "heap.c"
 
 #define ROW 21
 #define COL 80
-#define empty -1
+#define empty (-1)
 #define boulder 0
 #define tree 1
 #define grass 2
@@ -19,14 +21,26 @@
 #define road 5
 #define center 6
 #define pokemart 7
+#define hiker 8
+#define rival 9
+#define swimmer 10
+#define player 11
+#define pacers 12
+#define wanderers 13
+#define sentries 14
+#define explorers 15
 #define world_size 401
 #define world_size_a (world_size/2)
 
 
 struct map_key{
-    int cost_map[ROW][COL];
     int terrain_type[ROW][COL];
     int n,e,s,w;
+    int road_cost_map[ROW][COL];
+    int player_cost_map[ROW][COL];
+    int hiker_cost_map[ROW][COL];
+    int rival_cost_map[ROW][COL];
+    int swimmer_cost_map[ROW][COL];
 };
 
 struct map_key* world[world_size][world_size] = {NULL};
@@ -34,10 +48,93 @@ struct map_key* world[world_size][world_size] = {NULL};
 int currentX = 0;
 int currentY = 0;
 
+struct character {
+    int x;
+    int y;
+    int prev_terrain;
+};
+
+struct character PC;
+struct character NPC[10];
+
+struct adjacencyListNode {
+    int dest;
+    int weight;
+    struct adjacencyListNode* next;
+};
+
+struct adjacencyList {
+    struct adjacencyListNode* head;
+};
+
+struct graph {
+    int v;
+    struct adjacencyList* array;
+};
+
+struct adjacencyListNode* newAdjacencyListNode(int next, int weight) {
+    struct adjacencyListNode* newNode = (struct adjacencyListNode*) malloc(sizeof (struct adjacencyListNode));
+    newNode->next = next;
+    newNode->weight = weight;
+    newNode->next = -1;
+    return newNode;
+}
+
+struct graph* createGraph(int v) {
+    struct graph* graph = (struct graph*) malloc(sizeof(struct graph));
+    graph->v=v;
+    graph->array = (struct adjacencyList*) malloc(v * sizeof(struct adjacencyList));
+    for (int i = 0; i < v; i++) {
+        graph->array[i].head = NULL;
+    }
+    return graph;
+}
+
+struct minHeap {
+    int size;
+    int capacity;
+    int *position;
+    struct minHeapNode **array;
+};
+
+struct minHeapNode {
+    int v;
+    int distance;
+};
+
+struct minHeapNode* newMinHeapNode(int v, int distance) {
+    struct minHeapNode* minHeapNode = (struct minHeapNode*) malloc(sizeof (struct minHeapNode));
+    minHeapNode->v=v;
+    minHeapNode->distance=distance;
+    return minHeapNode;
+}
+
+struct minHeap* createMinHeap(int capacity) {
+    struct minHeap* minHeap = (struct minHeap*) malloc(sizeof(struct minHeap));
+    minHeap->position = (int *)malloc(capacity * sizeof(int));
+    minHeap->size = 0;
+    minHeap->capacity = capacity;
+    minHeap->array = (struct minHeapNode**) malloc(capacity * sizeof (struct minHeapNode*));
+    return minHeap;
+}
+
+
 void printMap(struct map_key *map) {
     for (int i = 0; i < ROW; i++) {
         for (int j = 0; j < COL; j++ ) {
             switch(map->terrain_type[i][j]) {
+                case player:
+                    printf("%c", '@');
+                    break;
+                case hiker:
+                    printf("%c", 'h');
+                    break;
+                case rival:
+                    printf("%c", 'r');
+                    break;
+                case swimmer:
+                    printf("%c", 's');
+                    break;
                 case boulder:
                     printf("%c", '%');
                     break;
@@ -47,12 +144,6 @@ void printMap(struct map_key *map) {
                 case road:
                     printf("%c", '#');
                     break;
-                case center:
-                    printf("%c", 'C');
-                    break;
-                case pokemart:
-                    printf("%c", 'M');
-                    break;
                 case grass:
                     printf("%c", ':');
                     break;
@@ -61,6 +152,12 @@ void printMap(struct map_key *map) {
                     break;
                 case water:
                     printf("%c", '~');
+                    break;
+                case center:
+                    printf("%c", 'C');
+                    break;
+                case pokemart:
+                    printf("%c", 'M');
                     break;
                 default:
                     printf("%c", '/');
@@ -245,6 +342,129 @@ void expand_with_queue(struct map_key *map, struct queue *q) {
 }
 
 
+void addEdge(struct graph* graph, int previous, int next, int weight) {
+    struct adjacencyListNode* newNode = newAdjacencyListNode(next, weight);
+    newNode->next = graph->array[previous].head;
+    graph->array[previous].head = newNode;
+    newNode = newAdjacencyListNode(previous, weight);
+    newNode->next = graph->array[next].head;
+    graph->array[next].head = newNode;
+}
+
+
+void swapMinHeapNode(struct minHeapNode** a, struct minHeapNode** b) {
+    struct minHeapNode* tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+
+
+void minHeapify(struct minHeap* minHeap, int index) {
+    int smallest;
+    int left;
+    int right;
+    smallest = index;
+    left = 2 * index + 1;
+    right = 2 * index + 2;
+    if (left < minHeap->size && minHeap->array[left]->distance < minHeap->array[smallest]->distance ) {
+        smallest = left;
+    }
+    if (right < minHeap->size && minHeap->array[right]->distance < minHeap->array[smallest]->distance ) {
+        smallest = right;
+    }
+    if (smallest != index) {
+        struct minHeapNode *smallestNode = minHeap->array[smallest];
+        struct minHeapNode *indexNode = minHeap->array[index];
+        minHeap->position[smallestNode->v] = index;
+        minHeap->position[indexNode->v] = smallest;
+        swapMinHeapNode(&minHeap->array[smallest], &minHeap->array[index]);
+        minHeapify(minHeap, smallest);
+    }
+}
+
+
+int heapIsEmpty(struct minHeap* minHeap) {
+    return minHeap->size == 0;
+}
+
+
+struct minHeapNode* extractMin(struct minHeap* minHeap) {
+    if (heapIsEmpty(minHeap)) {
+        return NULL;
+    }
+    struct minHeapNode* root = minHeap->array[0];
+    struct minHeapNode* lastNode = minHeap->array[minHeap->size - 1];
+    minHeap->array[0] = lastNode;
+    minHeap->position[root->v] = minHeap->size-1;
+    minHeap->position[lastNode->v] = 0;
+    --minHeap->size;
+    minHeapify(minHeap, 0);
+    return root;
+}
+
+
+void decreaseKey(struct minHeap* minHeap, int v, int distance) {
+    int i = minHeap->position[v];
+    minHeap->array[i]->distance = distance;
+    while (i && minHeap->array[i]->distance < minHeap->array[(i - 1) / 2]->distance) {
+        minHeap->position[minHeap->array[i]->v] = (i-1)/2;
+        minHeap->position[minHeap->array[(i-1)/2]->v] = i;
+        swapMinHeapNode(&minHeap->array[i],  &minHeap->array[(i - 1) / 2]);
+        i = (i - 1) / 2;
+    }
+}
+
+
+bool isInMinHeap(struct minHeap *minHeap, int v) {
+    if (minHeap->position[v] < minHeap->size)
+        return true;
+    return false;
+}
+
+
+void printArr(int dist[], int n) {
+    printf("Vertex Distance from Source\n");
+    for (int i = 0; i < n; ++i)
+        printf("%d \t\t %d\n", i, dist[i]);
+}
+
+
+void dijkstra(struct graph* graph, int previous) {
+    int V = graph->v;
+    int distance[V];
+    struct minHeap* minHeap = createMinHeap(V);
+    for (int v = 0; v < V; ++v) {
+        distance[v] = INT_MAX;
+        minHeap->array[v] = newMinHeapNode(v, distance[v]);
+        minHeap->position[v] = v;
+    }
+    minHeap->array[previous] = newMinHeapNode(previous, distance[previous]);
+    minHeap->position[previous] = previous;
+    distance[previous] = 0;
+    decreaseKey(minHeap, previous, distance[previous]);
+    minHeap->size = V;
+    while (!heapIsEmpty(minHeap)) {
+        struct minHeapNode* minHeapNode = extractMin(minHeap);
+        int u = minHeapNode->v;
+        struct adjacencyListNode* pCrawl = graph->array[u].head;
+        while (pCrawl != NULL) {
+            int v = pCrawl->next;
+            if (isInMinHeap(minHeap, v) && distance[u] != INT_MAX && pCrawl->weight + distance[u] < distance[v]) {
+                distance[v] = distance[u] + pCrawl->weight;
+                decreaseKey(minHeap, v, distance[v]);
+            }
+            pCrawl = pCrawl->next;
+        }
+        free(minHeapNode);
+    }
+    printArr(distance, V);
+    free(minHeap->array);
+    free(minHeap->position);
+    free(minHeap);
+}
+
+
+
 void terGen(struct map_key *map) {
     struct queue q;
     queue_init(&q);
@@ -294,6 +514,88 @@ void setPaths(struct map_key *map) {
 }
 
 
+void setPathCost(struct map_key *map) {
+    for (int i = 0; i < ROW; i++) {
+        for (int j = 0; j < COL; j++) {
+            switch(map->terrain_type[i][j]) {
+                case boulder:
+                    map->road_cost_map[i][j] = 100;
+                    break;
+                case tree:
+                    map->road_cost_map[i][j] = 50;
+                    break;
+                case grass:
+                    map->road_cost_map[i][j] = 20;
+                    break;
+                case clearing:
+                    map->road_cost_map[i][j] = 5;
+                    break;
+                case water:
+                    map->road_cost_map[i][j] = 80;
+                    break;
+                default:
+                    map->road_cost_map[i][j] = INT_MAX;
+                    break;
+            }
+        }
+    }
+}
+
+
+void setCostMaps(struct map_key *map) {
+    for (int i = 0; i < ROW; i++) {
+        for (int j = 0; j < COL; j++) {
+            switch(map->terrain_type[i][j]) {
+                case boulder:
+                case tree:
+                    map->player_cost_map[i][j] = INT_MAX;
+                    map->hiker_cost_map[i][j] = 15;
+                    map->rival_cost_map[i][j] = INT_MAX;
+                    map->swimmer_cost_map[i][j] = INT_MAX;
+                    break;
+                case road:
+                    map->player_cost_map[i][j] = 10;
+                    map->hiker_cost_map[i][j] = 10;
+                    map->rival_cost_map[i][j] = 10;
+                    map->swimmer_cost_map[i][j] = INT_MAX;
+                    break;
+                case center:
+                case pokemart:
+                    map->player_cost_map[i][j] = 10;
+                    map->hiker_cost_map[i][j] = 50;
+                    map->rival_cost_map[i][j] = 50;
+                    map->swimmer_cost_map[i][j] = INT_MAX;
+                    break;
+                case grass:
+                    map->player_cost_map[i][j] = 20;
+                    map->hiker_cost_map[i][j] = 15;
+                    map->rival_cost_map[i][j] = 20;
+                    map->swimmer_cost_map[i][j] = INT_MAX;
+                    break;
+                case clearing:
+                    map->player_cost_map[i][j] = 10;
+                    map->hiker_cost_map[i][j] = 10;
+                    map->rival_cost_map[i][j] = 10;
+                    map->swimmer_cost_map[i][j] = INT_MAX;
+                    break;
+                case water:
+                    map->player_cost_map[i][j] = INT_MAX;
+                    map->hiker_cost_map[i][j] = INT_MAX;
+                    map->rival_cost_map[i][j] = INT_MAX;
+                    map->swimmer_cost_map[i][j] = 7;
+                    break;
+                default:
+                    map->player_cost_map[i][j] = INT_MAX;
+                    map->hiker_cost_map[i][j] = INT_MAX;
+                    map->rival_cost_map[i][j] = INT_MAX;
+                    map->swimmer_cost_map[i][j] = INT_MAX;
+                    break;
+            }
+        }
+    }
+}
+
+
 void placeBuildings(struct map_key *map, int mapx, int mapy) {
     int house_num = center;
     bool placed = false;
@@ -301,7 +603,7 @@ void placeBuildings(struct map_key *map, int mapx, int mapy) {
         int y = (rand() % 76 + 1);
         int x = (rand() % 17 + 1);
 
-        if (map->terrain_type[x][y] != road && ((x > 0 && map->terrain_type[x-1][y] == road) || (y > 0 && map->terrain_type[x][y-1] == road) || (x < COL - 1 && map->terrain_type[x+1][y] == road) || (y < ROW - 1 && map->terrain_type[x][y+1] == road))) {
+        if (map->terrain_type[x][y] != road && ((x > 1 && map->terrain_type[x-1][y] == road) || (y > 1 && map->terrain_type[x][y-1] == road) || (x < COL - 2 && map->terrain_type[x+1][y] == road) || (y < ROW - 2 && map->terrain_type[x][y+1] == road))) {
             int manhattan = (int) (abs(mapx) + abs(mapy));
             int spawnChance = -45*manhattan;
             spawnChance = ceil(fmax(5, ((spawnChance/200) + 50)));
@@ -314,6 +616,54 @@ void placeBuildings(struct map_key *map, int mapx, int mapy) {
             }
             house_num = pokemart;
         }
+    }
+}
+
+
+void placeCharacter(struct map_key *map, struct character *character, int type) {
+    bool placed = false;
+    while (!placed) {
+        int x = (rand() % (ROW - 2) + 1);
+        int y = (rand() % (COL - 2) + 1);
+
+        if (type == player && map->terrain_type[x][y] == road) {
+            character->prev_terrain = map->terrain_type[x][y];
+            map->terrain_type[x][y] = type;
+            character->x = x;
+            character->y = y;
+            placed = true;
+        }
+        else if (type == hiker && map->terrain_type[x][y] != water && map->terrain_type[x][y] != road) {
+            character->prev_terrain = map->terrain_type[x][y];
+            map->terrain_type[x][y] = type;
+            character->x = x;
+            character->y = y;
+            placed = true;
+        }
+        else if (type == rival && map->terrain_type[x][y] != boulder && map->terrain_type[x][y] != tree && map->terrain_type[x][y] != water && map->terrain_type[x][y] != road) {
+            character->prev_terrain = map->terrain_type[x][y];
+            map->terrain_type[x][y] = type;
+            character->x = x;
+            character->y = y;
+            placed = true;
+        }
+        // TODO will break if there is not water (possible but unlikely, should be fixed regardless)
+        else if (type == swimmer && map->terrain_type[x][y] == water) {
+            character->prev_terrain = map->terrain_type[x][y];
+            map->terrain_type[x][y] = type;
+            character->x = x;
+            character->y = y;
+            placed = true;
+        }
+    }
+}
+
+
+void placeCharacters(struct map_key *map) {
+    placeCharacter(map, &PC, player);
+    for (int i = 0; i < sizeof(NPC)/sizeof(NPC[0]); i++) {
+        int type = (i % 3) + 8;
+        placeCharacter(map, &NPC[i], type);
     }
 }
 
@@ -333,10 +683,16 @@ void mapGen(struct map_key *map, int x, int y) {
     setGates(map, x, y);
     // Terrain
     terGen(map);
+    // Path cost map
+    setPathCost(map);
     // Paths
     setPaths(map);
     // Buildings
     placeBuildings(map, x, y);
+    // Character cost Maps
+    setCostMaps(map);
+    // PC and NPCs
+    placeCharacters(map);
 }
 
 
