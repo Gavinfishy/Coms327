@@ -8,7 +8,6 @@
 #include <string.h>
 #include <math.h>
 #include <limits.h>
-#include "heap.c"
 
 #define ROW 21
 #define COL 80
@@ -35,13 +34,21 @@
 
 struct map_key{
     int terrain_type[ROW][COL];
+    int character_type[ROW][COL];
+    int terrain_exists[5];
     int n,e,s,w;
-    int road_cost_map[ROW][COL];
-    int player_cost_map[ROW][COL];
-    int hiker_cost_map[ROW][COL];
-    int rival_cost_map[ROW][COL];
-    int swimmer_cost_map[ROW][COL];
 };
+
+typedef struct cost_map_key {
+    int map[ROW][COL];
+}cost_map_key_t;
+
+cost_map_key_t road_cost_map;
+cost_map_key_t player_cost_map;
+cost_map_key_t hiker_cost_map;
+cost_map_key_t rival_cost_map;
+cost_map_key_t swimmer_cost_map;
+
 
 struct map_key* world[world_size][world_size] = {NULL};
 
@@ -82,15 +89,15 @@ struct adjacencyListNode* newAdjacencyListNode(int dest, int weight) {
     return newNode;
 }
 
-struct graph* createGraph(int v) {
-    struct graph* graph = (struct graph*) malloc(sizeof(struct graph));
-    graph->v=v;
-    graph->array = (struct adjacencyList*) malloc(v * sizeof(struct adjacencyList));
-    for (int i = 0; i < v; i++) {
-        graph->array[i].head = NULL;
-    }
-    return graph;
-}
+//struct graph* createGraph(int v) {
+//    struct graph* graph = (struct graph*) malloc(sizeof(struct graph));
+//    graph->v=v;
+//    graph->array = (struct adjacencyList*) malloc(v * sizeof(struct adjacencyList));
+//    for (int i = 0; i < v; i++) {
+//        graph->array[i].head = NULL;
+//    }
+//    return graph;
+//}
 
 struct minHeap {
     int size;
@@ -139,46 +146,53 @@ struct queue {
 void printMap(struct map_key *map) {
     for (int i = 0; i < ROW; i++) {
         for (int j = 0; j < COL; j++ ) {
-            switch(map->terrain_type[i][j]) {
-                case player:
-                    printf("%c", '@');
-                    break;
-                case hiker:
-                    printf("%c", 'h');
-                    break;
-                case rival:
-                    printf("%c", 'r');
-                    break;
-                case swimmer:
-                    printf("%c", 's');
-                    break;
-                case boulder:
-                    printf("%c", '%');
-                    break;
-                case tree:
-                    printf("%c", '^');
-                    break;
-                case road:
-                    printf("%c", '#');
-                    break;
-                case grass:
-                    printf("%c", ':');
-                    break;
-                case clearing:
-                    printf("%c", '.');
-                    break;
-                case water:
-                    printf("%c", '~');
-                    break;
-                case center:
-                    printf("%c", 'C');
-                    break;
-                case pokemart:
-                    printf("%c", 'M');
-                    break;
-                default:
-                    printf("%c", '/');
-                    break;
+            if (map->character_type[i][j] != -1) {
+                switch(map->character_type[i][j]) {
+                    case player:
+                        printf("%c", '@');
+                        break;
+                    case hiker:
+                        printf("%c", 'h');
+                        break;
+                    case rival:
+                        printf("%c", 'r');
+                        break;
+                    case swimmer:
+                        printf("%c", 'm');
+                        break;
+                }
+            }
+            else {
+                switch (map->terrain_type[i][j]) {
+
+                    case boulder:
+                        printf("%c", '%');
+                        break;
+                    case tree:
+                        printf("%c", '^');
+                        break;
+                    case road:
+                        printf("%c", '#');
+                        break;
+                    case grass:
+                        printf("%c", ':');
+                        break;
+                    case clearing:
+                        printf("%c", '.');
+                        break;
+                    case water:
+                        printf("%c", '~');
+                        break;
+                    case center:
+                        printf("%c", 'C');
+                        break;
+                    case pokemart:
+                        printf("%c", 'M');
+                        break;
+                    default:
+                        printf("%c", '/');
+                        break;
+                }
             }
         }
         printf("\n");
@@ -316,7 +330,21 @@ void expand_with_queue(struct map_key *map, struct queue *q) {
         int x = rand() % (ROW - 2) + 1;
         int y = rand() % (COL - 2) + 1;
         struct point start_seed = {x,y};
-        map->terrain_type[start_seed.x][start_seed.y] = rand() % 5;
+        int spawnProbability = rand() % 100;
+        int terrain;
+        if (spawnProbability < 15) {
+            terrain = boulder; // 15% chance
+        } else if (spawnProbability < 35) {
+            terrain = tree; // 20% chance
+        } else if (spawnProbability < 50) {
+            terrain = water; // 15% chance
+        } else if (spawnProbability < 75) {
+            terrain = clearing; // 25% chance
+        } else {
+            terrain = grass; // 25% chance
+        }
+        map->terrain_type[start_seed.x][start_seed.y] = terrain;
+        map->terrain_exists[terrain] = 1;
         queue_enqueue(q,start_seed);
     }
 
@@ -342,14 +370,14 @@ void expand_with_queue(struct map_key *map, struct queue *q) {
 }
 
 
-void addEdge(struct graph* graph, int src, int dest, int weight) {
-    struct adjacencyListNode* newNode = newAdjacencyListNode(dest, weight);
-    newNode->next = graph->array[src].head;
-    graph->array[src].head = newNode;
-    newNode = newAdjacencyListNode(src, weight);
-    newNode->next = graph->array[dest].head;
-    graph->array[dest].head = newNode;
-}
+//void addEdge(struct graph* graph, int src, int dest, int weight) {
+//    struct adjacencyListNode* newNode = newAdjacencyListNode(dest, weight);
+//    newNode->next = graph->array[src].head;
+//    graph->array[src].head = newNode;
+//    newNode = newAdjacencyListNode(src, weight);
+//    newNode->next = graph->array[dest].head;
+//    graph->array[dest].head = newNode;
+//}
 
 
 void swapMinHeapNode(struct minHeapNode** a, struct minHeapNode** b) {
@@ -422,20 +450,23 @@ bool isInMinHeap(struct minHeap *minHeap, int v) {
 }
 
 
-void printArr(int dist[], int n) {
-    printf("Vertex Distance from Source\n");
-    for (int i = 0; i < n; ++i)
-        printf("%d \t\t %d\n", i, dist[i]);
-}
+//void printArr(int dist[], int n) {
+//    printf("Vertex Distance from Source\n");
+//    for (int i = 0; i < n; ++i)
+//        printf("%d \t\t %d\n", i, dist[i]);
+//}
 
 
-void printCostMap(struct map_key *map) {
+void printCostMap(cost_map_key_t* cost_map) {
     for (int i = 0; i < ROW; i++) {
         for (int j = 0; j < COL; j++) {
-            if (map->player_cost_map[i][j] == INT_MAX) {
+//            if (map->player_cost_map[i][j] == INT_MAX) {
+            if (cost_map->map[i][j] == INT_MAX) {
                 printf("   ");
-            } else {
-                printf(" %02d", map->player_cost_map[i][j] % 100);
+            }
+            else {
+                printf(" %02d", cost_map->map[i][j] % 100);
+//                printf(" %02d", map->player_cost_map[i][j] % 100);
             }
         }
         printf("\n");
@@ -443,7 +474,7 @@ void printCostMap(struct map_key *map) {
 }
 
 
-void dijkstra(struct map_key* map, int startX, int startY) {
+void dijkstra(cost_map_key_t* cost_map, int startX, int startY) {
     int V = ROW*COL;
     int distance[V];
     struct minHeap* minHeap = createMinHeap(V);
@@ -471,7 +502,9 @@ void dijkstra(struct map_key* map, int startX, int startY) {
                 if (vx >= 0 && vx < ROW && vy >= 0 && vy < COL) {
                     int v = vx * COL + vy;
                     if (isInMinHeap(minHeap, v) && distance[u] != INT_MAX) {
-                        int newDist = distance[u] + map->player_cost_map[vx][vy];
+                        int newDist = distance[u] + cost_map->map[vx][vy];
+//                        int newDist = distance[u] + map->player_cost_map[vx][vy];
+//                        int newDist = distance[u] + cost_map[vx][vy];
                         if (newDist < 0 || newDist > INT_MAX) {
                             newDist = INT_MAX;
                         }
@@ -488,7 +521,9 @@ void dijkstra(struct map_key* map, int startX, int startY) {
     for (int i = 0; i < ROW; i++) {
         for (int j = 0; j < COL; j++) {
             int index = i * COL + j;
-            map->player_cost_map[i][j] = distance[index];
+//            cost_map[i][j] = distance[index];
+//            map->player_cost_map[i][j] = distance[index];
+            cost_map->map[i][j] = distance[index];
         }
     }
 //    printArr(distance, V);
@@ -552,22 +587,28 @@ void setPathCost(struct map_key *map) {
         for (int j = 0; j < COL; j++) {
             switch(map->terrain_type[i][j]) {
                 case boulder:
-                    map->road_cost_map[i][j] = 100;
+                    road_cost_map.map[i][j] = 100;
+//                    map->road_cost_map[i][j] = 100;
                     break;
                 case tree:
-                    map->road_cost_map[i][j] = 50;
+                    road_cost_map.map[i][j] = 50;
+//                    map->road_cost_map[i][j] = 50;
                     break;
                 case grass:
-                    map->road_cost_map[i][j] = 20;
+                    road_cost_map.map[i][j] = 20;
+//                    map->road_cost_map[i][j] = 20;
                     break;
                 case clearing:
-                    map->road_cost_map[i][j] = 5;
+                    road_cost_map.map[i][j] = 5;
+//                    map->road_cost_map[i][j] = 5;
                     break;
                 case water:
-                    map->road_cost_map[i][j] = 80;
+                    road_cost_map.map[i][j] = 80;
+//                    map->road_cost_map[i][j] = 80;
                     break;
                 default:
-                    map->road_cost_map[i][j] = INT_MAX;
+                    road_cost_map.map[i][j] = INT_MAX;
+//                    map->road_cost_map[i][j] = INT_MAX;
                     break;
             }
         }
@@ -581,47 +622,77 @@ void setCostMaps(struct map_key *map) {
             switch(map->terrain_type[i][j]) {
                 case boulder:
                 case tree:
-                    map->player_cost_map[i][j] = INT_MAX;
-                    map->hiker_cost_map[i][j] = 15;
-                    map->rival_cost_map[i][j] = INT_MAX;
-                    map->swimmer_cost_map[i][j] = INT_MAX;
+                    if (i == 0 || j == 0 || i == ROW-1 || j == COL-1) {
+                        hiker_cost_map.map[i][j] = INT_MAX;
+                    }
+                    else{
+                        hiker_cost_map.map[i][j] = 15;
+                    }
+                    player_cost_map.map[i][j] = INT_MAX;
+                    rival_cost_map.map[i][j] = INT_MAX;
+                    swimmer_cost_map.map[i][j] = INT_MAX;
+//                    map->player_cost_map[i][j] = INT_MAX;
+//                    map->hiker_cost_map[i][j] = 15;
+//                    map->rival_cost_map[i][j] = INT_MAX;
+//                    map->swimmer_cost_map[i][j] = INT_MAX;
                     break;
                 case road:
-                    map->player_cost_map[i][j] = 10;
-                    map->hiker_cost_map[i][j] = 10;
-                    map->rival_cost_map[i][j] = 10;
-                    map->swimmer_cost_map[i][j] = INT_MAX;
+                case clearing:
+                    if (i == 0 || j == 0 || i == ROW-1 || j == COL-1) {
+                        hiker_cost_map.map[i][j] = INT_MAX;
+                        rival_cost_map.map[i][j] = INT_MAX;
+                    }
+                    else{
+                        hiker_cost_map.map[i][j] = 10;
+                        rival_cost_map.map[i][j] = 10;
+                    }
+                    player_cost_map.map[i][j] = 10;
+                    swimmer_cost_map.map[i][j] = INT_MAX;
+//                    map->player_cost_map[i][j] = 10;
+//                    map->hiker_cost_map[i][j] = 10;
+//                    map->rival_cost_map[i][j] = 10;
+//                    map->swimmer_cost_map[i][j] = INT_MAX;
                     break;
                 case center:
                 case pokemart:
-                    map->player_cost_map[i][j] = 10;
-                    map->hiker_cost_map[i][j] = 50;
-                    map->rival_cost_map[i][j] = 50;
-                    map->swimmer_cost_map[i][j] = INT_MAX;
+                    player_cost_map.map[i][j] = 10;
+                    hiker_cost_map.map[i][j] = 50;
+                    rival_cost_map.map[i][j] = 50;
+                    swimmer_cost_map.map[i][j] = INT_MAX;
+//                    map->player_cost_map[i][j] = 10;
+//                    map->hiker_cost_map[i][j] = 50;
+//                    map->rival_cost_map[i][j] = 50;
+//                    map->swimmer_cost_map[i][j] = INT_MAX;
                     break;
                 case grass:
-                    map->player_cost_map[i][j] = 20;
-                    map->hiker_cost_map[i][j] = 15;
-                    map->rival_cost_map[i][j] = 20;
-                    map->swimmer_cost_map[i][j] = INT_MAX;
-                    break;
-                case clearing:
-                    map->player_cost_map[i][j] = 10;
-                    map->hiker_cost_map[i][j] = 10;
-                    map->rival_cost_map[i][j] = 10;
-                    map->swimmer_cost_map[i][j] = INT_MAX;
+                    player_cost_map.map[i][j] = 20;
+                    hiker_cost_map.map[i][j] = 15;
+                    rival_cost_map.map[i][j] = 20;
+                    swimmer_cost_map.map[i][j] = INT_MAX;
+//                    map->player_cost_map[i][j] = 20;
+//                    map->hiker_cost_map[i][j] = 15;
+//                    map->rival_cost_map[i][j] = 20;
+//                    map->swimmer_cost_map[i][j] = INT_MAX;
                     break;
                 case water:
-                    map->player_cost_map[i][j] = INT_MAX;
-                    map->hiker_cost_map[i][j] = INT_MAX;
-                    map->rival_cost_map[i][j] = INT_MAX;
-                    map->swimmer_cost_map[i][j] = 7;
+                    player_cost_map.map[i][j] = INT_MAX;
+                    hiker_cost_map.map[i][j] = INT_MAX;
+                    rival_cost_map.map[i][j] = INT_MAX;
+                    swimmer_cost_map.map[i][j] = 7;
+//                    map->player_cost_map[i][j] = INT_MAX;
+//                    map->hiker_cost_map[i][j] = INT_MAX;
+//                    map->rival_cost_map[i][j] = INT_MAX;
+//                    map->swimmer_cost_map[i][j] = 7;
                     break;
                 default:
-                    map->player_cost_map[i][j] = INT_MAX;
-                    map->hiker_cost_map[i][j] = INT_MAX;
-                    map->rival_cost_map[i][j] = INT_MAX;
-                    map->swimmer_cost_map[i][j] = INT_MAX;
+                    player_cost_map.map[i][j] = INT_MAX;
+                    hiker_cost_map.map[i][j] = INT_MAX;
+                    rival_cost_map.map[i][j] = INT_MAX;
+                    swimmer_cost_map.map[i][j] = INT_MAX;
+//                    map->player_cost_map[i][j] = INT_MAX;
+//                    map->hiker_cost_map[i][j] = INT_MAX;
+//                    map->rival_cost_map[i][j] = INT_MAX;
+//                    map->swimmer_cost_map[i][j] = INT_MAX;
                     break;
             }
         }
@@ -660,33 +731,39 @@ void placeCharacter(struct map_key *map, struct character *character, int type) 
         int y = (rand() % (COL - 2) + 1);
 
         if (type == player && map->terrain_type[x][y] == road) {
-            character->prev_terrain = map->terrain_type[x][y];
-            map->terrain_type[x][y] = type;
+//            character->prev_terrain = map->terrain_type[x][y];
+            map->character_type[x][y] = type;
             character->x = x;
             character->y = y;
             placed = true;
         }
         else if (type == hiker && map->terrain_type[x][y] != water && map->terrain_type[x][y] != road) {
-            character->prev_terrain = map->terrain_type[x][y];
-            map->terrain_type[x][y] = type;
+//            character->prev_terrain = map->terrain_type[x][y];
+            map->character_type[x][y] = type;
             character->x = x;
             character->y = y;
             placed = true;
         }
         else if (type == rival && map->terrain_type[x][y] != boulder && map->terrain_type[x][y] != tree && map->terrain_type[x][y] != water && map->terrain_type[x][y] != road) {
-            character->prev_terrain = map->terrain_type[x][y];
-            map->terrain_type[x][y] = type;
+//            character->prev_terrain = map->terrain_type[x][y];
+            map->character_type[x][y] = type;
             character->x = x;
             character->y = y;
             placed = true;
         }
-        // TODO will break if there is not water (possible but unlikely, should be fixed regardless)
-        else if (type == swimmer && map->terrain_type[x][y] == water) {
-            character->prev_terrain = map->terrain_type[x][y];
-            map->terrain_type[x][y] = type;
-            character->x = x;
-            character->y = y;
-            placed = true;
+        else if (type == swimmer) {
+            if (map->terrain_exists[water] == 1) {
+                if (map->terrain_type[x][y] == water) {
+//                    character->prev_terrain = map->terrain_type[x][y];
+                    map->character_type[x][y] = type;
+                    character->x = x;
+                    character->y = y;
+                    placed = true;
+                }
+            }
+            else {
+                break;
+            }
         }
     }
 }
@@ -706,9 +783,11 @@ void mapGen(struct map_key *map, int x, int y) {
         for (int j = 0; j < COL; j++ ) {
             if (i == 0 || j == 0 || i == ROW-1 || j == COL-1) {
                 map->terrain_type[i][j] = boulder;
+                map->character_type[i][j] = empty;
             }
             else {
                 map->terrain_type[i][j] = empty;
+                map->character_type[i][j] = empty;
             }
         }
     }
@@ -727,7 +806,11 @@ void mapGen(struct map_key *map, int x, int y) {
     // PC and NPCs
     placeCharacters(map);
     // Dijkstra cost map
-    dijkstra(map, PC.x, PC.y);
+//    dijkstra(map, PC.x, PC.y);
+//    dijkstra(map, PC.x, PC.y, map->player_cost_map);
+    dijkstra(&hiker_cost_map, PC.x, PC.y);
+    dijkstra(&rival_cost_map, PC.x, PC.y);
+
 }
 
 
@@ -742,11 +825,18 @@ void move_maps(int dx, int dy) {
         world[newX + world_size_a][newY + world_size_a] = malloc(sizeof(struct map_key));
         mapGen(world[newX + world_size_a][newY + world_size_a], newX, newY);
     }
-
-    printMap(world[newX + world_size_a][newY + world_size_a]);
-    printf("Current coordinates: (%d, %d)\n", newX, newY);
+    else {
+        setCostMaps(world[newX + world_size_a][newY + world_size_a]);
+        dijkstra(&hiker_cost_map, PC.x, PC.y);
+        printCostMap(&rival_cost_map);
+        dijkstra(&rival_cost_map, PC.x, PC.y);
+    }
     currentX = newX;
     currentY = newY;
+    printMap(world[currentX + world_size_a][currentY + world_size_a]);
+    printf("Current coordinates: (%d, %d)\n", currentX, currentY);
+    printCostMap(&hiker_cost_map);
+    printCostMap(&rival_cost_map);
 }
 
 
@@ -758,11 +848,21 @@ void fly(int x, int y) {
     if (world[x + world_size_a][y + world_size_a] == NULL) {
         world[x + world_size_a][y + world_size_a] = malloc(sizeof(struct map_key));
         mapGen(world[x + world_size_a][y + world_size_a], x, y);
+//        dijkstra(world[currentX + world_size_a][currentY + world_size_a], PC.x, PC.y);
+//        dijkstra(world[currentX + world_size_a][currentY + world_size_a], PC.x, PC.y, world[currentX + world_size_a][currentY + world_size_a]->player_cost_map);
+    }
+    else {
+        setCostMaps(world[x + world_size_a][y + world_size_a]);
+        dijkstra(&rival_cost_map, PC.x, PC.y);
+        dijkstra(&hiker_cost_map, PC.x, PC.y);
     }
     currentX = x;
     currentY = y;
     printMap(world[currentX + world_size_a][currentY + world_size_a]);
     printf("Current coordinates: (%d, %d)\n", x, y);
+    printCostMap(&hiker_cost_map);
+    printCostMap(&rival_cost_map);
+
 }
 
 void gameLoop() {
@@ -774,7 +874,8 @@ void gameLoop() {
     }
     mapGen(world[currentX + world_size_a][currentY + world_size_a], currentX, currentY);
     printMap(world[currentX + world_size_a][currentY + world_size_a]);
-    printCostMap(world[currentX + world_size_a][currentY + world_size_a]);
+    printCostMap(&rival_cost_map);
+    printCostMap(&hiker_cost_map);
     while (1) {
         printf("Enter command:\n");
         scanf("%s", command);

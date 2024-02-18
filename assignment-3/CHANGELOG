@@ -16,4 +16,8 @@ Project 2
 Project 3
 02/11/2024 2pm-4pm Spawning PC and NPC without errors moving maps
 02/12/2024 9am-11am, 4pm-6pm, 8:30pm-10pm Weight maps for each character type, heaps and Dijkstra started
-02/13/2024 3pm-6pm Switching over to Scheaffers Dijkstras and heap cause mine is messy and not working :(
+02/13/2024 3pm-7pm, 8:30pm-10:15pm minHeap and Dijkstra work and print properly
+02/14/2024 9:30am-10:45am minor updates
+02/17/2024 6pm-11pm trying to make Dijkstra's take an argument for any weight map
+02/18/2024 1pm-4:30pm Dijkstra's takes any weight map, printing rival and hiker, removed enemy printing for this project,
+changing characters from being placed in terrain map to being placed in character map
