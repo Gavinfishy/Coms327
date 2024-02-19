@@ -19,5 +19,6 @@ Project 3
 02/13/2024 3pm-7pm, 8:30pm-10:15pm minHeap and Dijkstra work and print properly
 02/14/2024 9:30am-10:45am minor updates
 02/17/2024 6pm-11pm trying to make Dijkstra's take an argument for any weight map
-02/18/2024 1pm-4:30pm Dijkstra's takes any weight map, printing rival and hiker, removed enemy printing for this project,
+02/18/2024 1pm-5pm Dijkstra's takes any weight map, printing rival and hiker, removed enemy printing for this project,
 changing characters from being placed in terrain map to being placed in character map
+02/19/2024 9am-10:30am fixed error with previously generated maps sometimes printing all INT_MAX with PC in map struct

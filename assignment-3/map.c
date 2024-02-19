@@ -31,10 +31,16 @@
 #define world_size 401
 #define world_size_a (world_size/2)
 
+struct character {
+    int x;
+    int y;
+    int prev_terrain;
+};
 
 struct map_key{
     int terrain_type[ROW][COL];
     int character_type[ROW][COL];
+    struct character PC;
     int terrain_exists[5];
     int n,e,s,w;
 };
@@ -56,13 +62,8 @@ int currentX = 0;
 
 int currentY = 0;
 
-struct character {
-    int x;
-    int y;
-    int prev_terrain;
-};
 
-struct character PC;
+//struct character PC;
 
 struct character NPC[10];
 
@@ -310,9 +311,9 @@ int queue_dequeue(struct queue *q, struct point *pt) {
 }
 
 
-int queue_length(struct queue *q) {
-    return q->length;
-}
+//int queue_length(struct queue *q) {
+//    return q->length;
+//}
 
 
 int queue_is_empty(struct queue *q) {
@@ -631,10 +632,6 @@ void setCostMaps(struct map_key *map) {
                     player_cost_map.map[i][j] = INT_MAX;
                     rival_cost_map.map[i][j] = INT_MAX;
                     swimmer_cost_map.map[i][j] = INT_MAX;
-//                    map->player_cost_map[i][j] = INT_MAX;
-//                    map->hiker_cost_map[i][j] = 15;
-//                    map->rival_cost_map[i][j] = INT_MAX;
-//                    map->swimmer_cost_map[i][j] = INT_MAX;
                     break;
                 case road:
                 case clearing:
@@ -648,10 +645,6 @@ void setCostMaps(struct map_key *map) {
                     }
                     player_cost_map.map[i][j] = 10;
                     swimmer_cost_map.map[i][j] = INT_MAX;
-//                    map->player_cost_map[i][j] = 10;
-//                    map->hiker_cost_map[i][j] = 10;
-//                    map->rival_cost_map[i][j] = 10;
-//                    map->swimmer_cost_map[i][j] = INT_MAX;
                     break;
                 case center:
                 case pokemart:
@@ -659,40 +652,25 @@ void setCostMaps(struct map_key *map) {
                     hiker_cost_map.map[i][j] = 50;
                     rival_cost_map.map[i][j] = 50;
                     swimmer_cost_map.map[i][j] = INT_MAX;
-//                    map->player_cost_map[i][j] = 10;
-//                    map->hiker_cost_map[i][j] = 50;
-//                    map->rival_cost_map[i][j] = 50;
-//                    map->swimmer_cost_map[i][j] = INT_MAX;
                     break;
                 case grass:
                     player_cost_map.map[i][j] = 20;
                     hiker_cost_map.map[i][j] = 15;
                     rival_cost_map.map[i][j] = 20;
                     swimmer_cost_map.map[i][j] = INT_MAX;
-//                    map->player_cost_map[i][j] = 20;
-//                    map->hiker_cost_map[i][j] = 15;
-//                    map->rival_cost_map[i][j] = 20;
-//                    map->swimmer_cost_map[i][j] = INT_MAX;
                     break;
                 case water:
                     player_cost_map.map[i][j] = INT_MAX;
                     hiker_cost_map.map[i][j] = INT_MAX;
                     rival_cost_map.map[i][j] = INT_MAX;
                     swimmer_cost_map.map[i][j] = 7;
-//                    map->player_cost_map[i][j] = INT_MAX;
-//                    map->hiker_cost_map[i][j] = INT_MAX;
-//                    map->rival_cost_map[i][j] = INT_MAX;
-//                    map->swimmer_cost_map[i][j] = 7;
                     break;
                 default:
+                    printf("Something Not Working 1");
                     player_cost_map.map[i][j] = INT_MAX;
                     hiker_cost_map.map[i][j] = INT_MAX;
                     rival_cost_map.map[i][j] = INT_MAX;
                     swimmer_cost_map.map[i][j] = INT_MAX;
-//                    map->player_cost_map[i][j] = INT_MAX;
-//                    map->hiker_cost_map[i][j] = INT_MAX;
-//                    map->rival_cost_map[i][j] = INT_MAX;
-//                    map->swimmer_cost_map[i][j] = INT_MAX;
                     break;
             }
         }
@@ -731,21 +709,23 @@ void placeCharacter(struct map_key *map, struct character *character, int type) 
         int y = (rand() % (COL - 2) + 1);
 
         if (type == player && map->terrain_type[x][y] == road) {
-//            character->prev_terrain = map->terrain_type[x][y];
+//            map->character_type[x][y] = type;
+//            character->x = x;
+//            character->y = y;
+//            placed = true;
+            map->PC.prev_terrain = map->terrain_type[x][y];
             map->character_type[x][y] = type;
-            character->x = x;
-            character->y = y;
+            map->PC.x = x;
+            map->PC.y = y;
             placed = true;
         }
         else if (type == hiker && map->terrain_type[x][y] != water && map->terrain_type[x][y] != road) {
-//            character->prev_terrain = map->terrain_type[x][y];
             map->character_type[x][y] = type;
             character->x = x;
             character->y = y;
             placed = true;
         }
         else if (type == rival && map->terrain_type[x][y] != boulder && map->terrain_type[x][y] != tree && map->terrain_type[x][y] != water && map->terrain_type[x][y] != road) {
-//            character->prev_terrain = map->terrain_type[x][y];
             map->character_type[x][y] = type;
             character->x = x;
             character->y = y;
@@ -754,7 +734,6 @@ void placeCharacter(struct map_key *map, struct character *character, int type) 
         else if (type == swimmer) {
             if (map->terrain_exists[water] == 1) {
                 if (map->terrain_type[x][y] == water) {
-//                    character->prev_terrain = map->terrain_type[x][y];
                     map->character_type[x][y] = type;
                     character->x = x;
                     character->y = y;
@@ -770,11 +749,11 @@ void placeCharacter(struct map_key *map, struct character *character, int type) 
 
 
 void placeCharacters(struct map_key *map) {
-    placeCharacter(map, &PC, player);
-    for (int i = 0; i < sizeof(NPC)/sizeof(NPC[0]); i++) {
-        int type = (i % 3) + 8;
-        placeCharacter(map, &NPC[i], type);
-    }
+    placeCharacter(map, &map->PC, player);
+//    for (int i = 0; i < sizeof(NPC)/sizeof(NPC[0]); i++) {
+//        int type = (i % 3) + 8;
+//        placeCharacter(map, &NPC[i], type);
+//    }
 }
 
 
@@ -783,12 +762,11 @@ void mapGen(struct map_key *map, int x, int y) {
         for (int j = 0; j < COL; j++ ) {
             if (i == 0 || j == 0 || i == ROW-1 || j == COL-1) {
                 map->terrain_type[i][j] = boulder;
-                map->character_type[i][j] = empty;
             }
             else {
                 map->terrain_type[i][j] = empty;
-                map->character_type[i][j] = empty;
             }
+            map->character_type[i][j] = empty;
         }
     }
     // Gates
@@ -806,14 +784,12 @@ void mapGen(struct map_key *map, int x, int y) {
     // PC and NPCs
     placeCharacters(map);
     // Dijkstra cost map
-//    dijkstra(map, PC.x, PC.y);
-//    dijkstra(map, PC.x, PC.y, map->player_cost_map);
-    dijkstra(&hiker_cost_map, PC.x, PC.y);
-    dijkstra(&rival_cost_map, PC.x, PC.y);
-
+    dijkstra(&hiker_cost_map, map->PC.x, map->PC.y);
+    dijkstra(&rival_cost_map, map->PC.x, map->PC.y);
 }
 
-
+//TODO evaluate the if and else statement to find the difference.
+//mapGen call works, else statements does not always work
 void move_maps(int dx, int dy) {
     int newX = currentX + dx;
     int newY = currentY + dy;
@@ -827,9 +803,11 @@ void move_maps(int dx, int dy) {
     }
     else {
         setCostMaps(world[newX + world_size_a][newY + world_size_a]);
-        dijkstra(&hiker_cost_map, PC.x, PC.y);
-        printCostMap(&rival_cost_map);
-        dijkstra(&rival_cost_map, PC.x, PC.y);
+        dijkstra(&hiker_cost_map, world[newX + world_size_a][newY + world_size_a]->PC.x,
+                 world[newX + world_size_a][newY + world_size_a]->PC.y);
+        dijkstra(&rival_cost_map, world[newX + world_size_a][newY + world_size_a]->PC.x,
+                 world[newX + world_size_a][newY + world_size_a]->PC.y);
+
     }
     currentX = newX;
     currentY = newY;
@@ -848,13 +826,11 @@ void fly(int x, int y) {
     if (world[x + world_size_a][y + world_size_a] == NULL) {
         world[x + world_size_a][y + world_size_a] = malloc(sizeof(struct map_key));
         mapGen(world[x + world_size_a][y + world_size_a], x, y);
-//        dijkstra(world[currentX + world_size_a][currentY + world_size_a], PC.x, PC.y);
-//        dijkstra(world[currentX + world_size_a][currentY + world_size_a], PC.x, PC.y, world[currentX + world_size_a][currentY + world_size_a]->player_cost_map);
     }
     else {
         setCostMaps(world[x + world_size_a][y + world_size_a]);
-        dijkstra(&rival_cost_map, PC.x, PC.y);
-        dijkstra(&hiker_cost_map, PC.x, PC.y);
+//        dijkstra(&rival_cost_map, PC.x, PC.y);
+//        dijkstra(&hiker_cost_map, PC.x, PC.y);
     }
     currentX = x;
     currentY = y;
@@ -864,6 +840,7 @@ void fly(int x, int y) {
     printCostMap(&rival_cost_map);
 
 }
+
 
 void gameLoop() {
     char command[10];
