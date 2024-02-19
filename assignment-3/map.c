@@ -55,15 +55,11 @@ cost_map_key_t hiker_cost_map;
 cost_map_key_t rival_cost_map;
 cost_map_key_t swimmer_cost_map;
 
-
 struct map_key* world[world_size][world_size] = {NULL};
 
 int currentX = 0;
 
 int currentY = 0;
-
-
-//struct character PC;
 
 struct character NPC[10];
 
@@ -90,15 +86,15 @@ struct adjacencyListNode* newAdjacencyListNode(int dest, int weight) {
     return newNode;
 }
 
-//struct graph* createGraph(int v) {
-//    struct graph* graph = (struct graph*) malloc(sizeof(struct graph));
-//    graph->v=v;
-//    graph->array = (struct adjacencyList*) malloc(v * sizeof(struct adjacencyList));
-//    for (int i = 0; i < v; i++) {
-//        graph->array[i].head = NULL;
-//    }
-//    return graph;
-//}
+struct graph* createGraph(int v) {
+    struct graph* graph = (struct graph*) malloc(sizeof(struct graph));
+    graph->v=v;
+    graph->array = (struct adjacencyList*) malloc(v * sizeof(struct adjacencyList));
+    for (int i = 0; i < v; i++) {
+        graph->array[i].head = NULL;
+    }
+    return graph;
+}
 
 struct minHeap {
     int size;
@@ -461,13 +457,11 @@ bool isInMinHeap(struct minHeap *minHeap, int v) {
 void printCostMap(cost_map_key_t* cost_map) {
     for (int i = 0; i < ROW; i++) {
         for (int j = 0; j < COL; j++) {
-//            if (map->player_cost_map[i][j] == INT_MAX) {
             if (cost_map->map[i][j] == INT_MAX) {
                 printf("   ");
             }
             else {
                 printf(" %02d", cost_map->map[i][j] % 100);
-//                printf(" %02d", map->player_cost_map[i][j] % 100);
             }
         }
         printf("\n");
@@ -504,8 +498,6 @@ void dijkstra(cost_map_key_t* cost_map, int startX, int startY) {
                     int v = vx * COL + vy;
                     if (isInMinHeap(minHeap, v) && distance[u] != INT_MAX) {
                         int newDist = distance[u] + cost_map->map[vx][vy];
-//                        int newDist = distance[u] + map->player_cost_map[vx][vy];
-//                        int newDist = distance[u] + cost_map[vx][vy];
                         if (newDist < 0 || newDist > INT_MAX) {
                             newDist = INT_MAX;
                         }
@@ -522,8 +514,6 @@ void dijkstra(cost_map_key_t* cost_map, int startX, int startY) {
     for (int i = 0; i < ROW; i++) {
         for (int j = 0; j < COL; j++) {
             int index = i * COL + j;
-//            cost_map[i][j] = distance[index];
-//            map->player_cost_map[i][j] = distance[index];
             cost_map->map[i][j] = distance[index];
         }
     }
@@ -709,10 +699,6 @@ void placeCharacter(struct map_key *map, struct character *character, int type) 
         int y = (rand() % (COL - 2) + 1);
 
         if (type == player && map->terrain_type[x][y] == road) {
-//            map->character_type[x][y] = type;
-//            character->x = x;
-//            character->y = y;
-//            placed = true;
             map->PC.prev_terrain = map->terrain_type[x][y];
             map->character_type[x][y] = type;
             map->PC.x = x;
@@ -788,8 +774,7 @@ void mapGen(struct map_key *map, int x, int y) {
     dijkstra(&rival_cost_map, map->PC.x, map->PC.y);
 }
 
-//TODO evaluate the if and else statement to find the difference.
-//mapGen call works, else statements does not always work
+
 void move_maps(int dx, int dy) {
     int newX = currentX + dx;
     int newY = currentY + dy;
@@ -829,8 +814,10 @@ void fly(int x, int y) {
     }
     else {
         setCostMaps(world[x + world_size_a][y + world_size_a]);
-//        dijkstra(&rival_cost_map, PC.x, PC.y);
-//        dijkstra(&hiker_cost_map, PC.x, PC.y);
+        dijkstra(&rival_cost_map, world[x + world_size_a][y + world_size_a]->PC.x,
+                 world[x + world_size_a][y + world_size_a]->PC.y);
+        dijkstra(&hiker_cost_map, world[x + world_size_a][y + world_size_a]->PC.x,
+                 world[x + world_size_a][y + world_size_a]->PC.y);
     }
     currentX = x;
     currentY = y;
