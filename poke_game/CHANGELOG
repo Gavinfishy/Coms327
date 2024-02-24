@@ -1,0 +1,24 @@
+Project 1
+01/26/2024 9pm-11pm Began project
+01/27/2024 2pm-5pm Set up basics of printing the map
+01/28/2024 6pm-11pm Gates randomly placed, roads randomly placed and connected to each other and gate, perimeter rocks
+01/29/2024 7pm-11pm Attempted to generate background (could randomly place types but could not get it to expand)
+01/30/2024 5pm-7pm Randomly place buildings next to roads, changing background generation to use queues
+01/30/2024 8:30pm-11pm can choose a starting location and the rest of the map will be filled using queues
+01/31/2024 8am-10:30am Random seed generation works!
+
+Project 2
+02/03/2024 3pm-6pm Began project
+02/04/2024 1pm-2:15pm, 4:15pm-6pm, 7:15pm-10:40pm The roads connect
+02/05/2024 5pm-10pm gates on farthest walls do not appear
+02/07/2024 2-4pm; 8:45-10pm probability on houses finished
+
+Project 3
+02/11/2024 2pm-4pm Spawning PC and NPC without errors moving maps
+02/12/2024 9am-11am, 4pm-6pm, 8:30pm-10pm Weight maps for each character type, heaps and Dijkstra started
+02/13/2024 3pm-7pm, 8:30pm-10:15pm minHeap and Dijkstra work and print properly
+02/14/2024 9:30am-10:45am minor updates
+02/17/2024 6pm-11pm trying to make Dijkstra's take an argument for any weight map
+02/18/2024 1pm-5pm Dijkstra's takes any weight map, printing rival and hiker, removed enemy printing for this project,
+changing characters from being placed in terrain map to being placed in character map
+02/19/2024 9am-11am fixed error with previously generated maps sometimes printing all INT_MAX with PC in map struct
