@@ -155,7 +155,7 @@ void printMap(struct map_key *map) {
                         printf("%c", 'r');
                         break;
                     case swimmer:
-                        printf("%c", 'w');
+                        printf("%c", 'm');
                         break;
                 }
             }

@@ -87,8 +87,7 @@ static int32_t edge_penalty(int8_t x, int8_t y)
   return (x == 1 || y == 1 || x == MAP_X - 2 || y == MAP_Y - 2) ? 2 : 1;
 }
 
-static void dijkstra_path(map_t *m, pair_t from, pair_t to)
-{
+static void dijkstra_path(map_t *m, pair_t from, pair_t to) {
   static path_t path[MAP_Y][MAP_X], *p;
   static uint32_t initialized = 0;
   heap_t h;
