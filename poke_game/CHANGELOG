@@ -22,3 +22,14 @@ Project 3
 02/18/2024 1pm-5pm Dijkstra's takes any weight map, printing rival and hiker, removed enemy printing for this project,
 changing characters from being placed in terrain map to being placed in character map
 02/19/2024 9am-11am fixed error with previously generated maps sometimes printing all INT_MAX with PC in map struct
+
+Project 4
+02/24/2024 8:30am-10am, 9:30pm-11pm cleaned up repository so that all future code will be built with branches
+Started to add other NPC's
+02/25/2024 12pm-1pm, 2pm-4:30pm Commented code, made player movable, started to work on NPC movement
+02/26/2024 10:30am-
+
+
+
+
+

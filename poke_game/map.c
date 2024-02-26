@@ -8,6 +8,7 @@
 #include <string.h>
 #include <math.h>
 #include <limits.h>
+#include "character_queue.h"
 
 #define ROW 21
 #define COL 80
@@ -31,12 +32,20 @@
 #define world_size 401
 #define world_size_a (world_size/2)
 
+
+/*
+ * This struct keeps track of a character with their x and y coordinates in the character map
+ */
 struct character {
     int x;
     int y;
-    int prev_terrain;
 };
 
+
+/*
+ * This struct keeps track of the terrain map, character map, whether a terrain was created and gate locations
+ * terrain_exists more specifically helps decide which npcs to spawn for example
+ */
 struct map_key{
     int terrain_type[ROW][COL];
     int character_type[ROW][COL];
@@ -45,6 +54,10 @@ struct map_key{
     int n,e,s,w;
 };
 
+
+/*
+ * keeps track of the dijkstras cost map for each character type
+ */
 typedef struct cost_map_key {
     int map[ROW][COL];
 }cost_map_key_t;
@@ -55,6 +68,10 @@ cost_map_key_t hiker_cost_map;
 cost_map_key_t rival_cost_map;
 cost_map_key_t swimmer_cost_map;
 
+
+/*
+ * world struct which holds all maps
+ */
 struct map_key* world[world_size][world_size] = {NULL};
 
 int currentX = 0;
@@ -140,6 +157,9 @@ struct queue {
 };
 
 
+/*
+ * prints the terrain map and character map
+ */
 void printMap(struct map_key *map) {
     for (int i = 0; i < ROW; i++) {
         for (int j = 0; j < COL; j++ ) {
@@ -154,8 +174,20 @@ void printMap(struct map_key *map) {
                     case rival:
                         printf("%c", 'r');
                         break;
-                    case swimmer:
+                    case pacers:
+                        printf("%c", 'p');
+                        break;
+                    case wanderers:
                         printf("%c", 'w');
+                        break;
+                    case sentries:
+                        printf("%c", 's');
+                        break;
+                    case explorers:
+                        printf("%c", 'e');
+                        break;
+                    case swimmer:
+                        printf("%c", 'm');
                         break;
                 }
             }
@@ -197,6 +229,9 @@ void printMap(struct map_key *map) {
 }
 
 
+/*
+ * Sets gates to same as nearby maps, if the map is against an edge no gate is set, else pick a random gate location
+ */
 void setGates(struct map_key *map, int x, int y) {
     if (y > -world_size_a && world[x + world_size_a][y-1 + world_size_a] != NULL) {
         map->n = world[x + world_size_a][y-1 + world_size_a]->s;
@@ -307,9 +342,9 @@ int queue_dequeue(struct queue *q, struct point *pt) {
 }
 
 
-//int queue_length(struct queue *q) {
-//    return q->length;
-//}
+int queue_length(struct queue *q) {
+    return q->length;
+}
 
 
 int queue_is_empty(struct queue *q) {
@@ -317,6 +352,11 @@ int queue_is_empty(struct queue *q) {
 }
 
 
+/*
+ * Picks random seed locations between 15 and 35 in the 2d map array and expands them through a queue
+ * 15-35 was chosen to add enough variety but not seem like random placements
+ * Seed location is expanded with a queue until all spots are filled
+ */
 void expand_with_queue(struct map_key *map, struct queue *q) {
     int dx[] = {-1, 0, 1, 0};
     int dy[] = {0, 1, 0, -1};
@@ -531,6 +571,9 @@ void terGen(struct map_key *map) {
 }
 
 
+/*
+ * Connects a road between gate locations. Parallel gates go to a random location inbetween then connect on that point
+ */
 void setPaths(struct map_key *map) {
     int horz = (rand() % 76 + 1);
     int vert = (rand() % 17 + 1);
@@ -579,27 +622,21 @@ void setPathCost(struct map_key *map) {
             switch(map->terrain_type[i][j]) {
                 case boulder:
                     road_cost_map.map[i][j] = 100;
-//                    map->road_cost_map[i][j] = 100;
                     break;
                 case tree:
                     road_cost_map.map[i][j] = 50;
-//                    map->road_cost_map[i][j] = 50;
                     break;
                 case grass:
                     road_cost_map.map[i][j] = 20;
-//                    map->road_cost_map[i][j] = 20;
                     break;
                 case clearing:
                     road_cost_map.map[i][j] = 5;
-//                    map->road_cost_map[i][j] = 5;
                     break;
                 case water:
                     road_cost_map.map[i][j] = 80;
-//                    map->road_cost_map[i][j] = 80;
                     break;
                 default:
                     road_cost_map.map[i][j] = INT_MAX;
-//                    map->road_cost_map[i][j] = INT_MAX;
                     break;
             }
         }
@@ -656,7 +693,6 @@ void setCostMaps(struct map_key *map) {
                     swimmer_cost_map.map[i][j] = 7;
                     break;
                 default:
-                    printf("Something Not Working 1");
                     player_cost_map.map[i][j] = INT_MAX;
                     hiker_cost_map.map[i][j] = INT_MAX;
                     rival_cost_map.map[i][j] = INT_MAX;
@@ -668,6 +704,9 @@ void setCostMaps(struct map_key *map) {
 }
 
 
+/*
+ * Chooses a random location near road to place each building. Chance of buildings not spawning
+ */
 void placeBuildings(struct map_key *map, int mapx, int mapy) {
     int house_num = center;
     bool placed = false;
@@ -675,7 +714,9 @@ void placeBuildings(struct map_key *map, int mapx, int mapy) {
         int y = (rand() % 76 + 1);
         int x = (rand() % 17 + 1);
 
-        if (map->terrain_type[x][y] != road && ((x > 1 && map->terrain_type[x-1][y] == road) || (y > 1 && map->terrain_type[x][y-1] == road) || (x < COL - 2 && map->terrain_type[x+1][y] == road) || (y < ROW - 2 && map->terrain_type[x][y+1] == road))) {
+        if (map->terrain_type[x][y] != road && ((x > 1 && map->terrain_type[x-1][y] == road) ||
+        (y > 1 && map->terrain_type[x][y-1] == road) || (x < COL - 2 && map->terrain_type[x+1][y] == road) ||
+        (y < ROW - 2 && map->terrain_type[x][y+1] == road))) {
             int manhattan = (int) (abs(mapx) + abs(mapy));
             int spawnChance = -45*manhattan;
             spawnChance = ceil(fmax(5, ((spawnChance/200) + 50)));
@@ -692,6 +733,9 @@ void placeBuildings(struct map_key *map, int mapx, int mapy) {
 }
 
 
+/*
+ * Randomly places each character type in their respective environment
+ */
 void placeCharacter(struct map_key *map, struct character *character, int type) {
     bool placed = false;
     while (!placed) {
@@ -699,7 +743,6 @@ void placeCharacter(struct map_key *map, struct character *character, int type) 
         int y = (rand() % (COL - 2) + 1);
 
         if (type == player && map->terrain_type[x][y] == road) {
-            map->PC.prev_terrain = map->terrain_type[x][y];
             map->character_type[x][y] = type;
             map->PC.x = x;
             map->PC.y = y;
@@ -736,10 +779,33 @@ void placeCharacter(struct map_key *map, struct character *character, int type) 
 
 void placeCharacters(struct map_key *map) {
     placeCharacter(map, &map->PC, player);
-//    for (int i = 0; i < sizeof(NPC)/sizeof(NPC[0]); i++) {
-//        int type = (i % 3) + 8;
-//        placeCharacter(map, &NPC[i], type);
-//    }
+    for (int i = 0; i < sizeof(NPC)/sizeof(NPC[0]); i++) {
+        int type = (i % 3) + 8;
+        placeCharacter(map, &NPC[i], type);
+    }
+}
+
+
+/*
+ * Responsible for moving the characters everytime the player moves.
+ */
+void moveCharacter(struct map_key *map, struct character *character, int dx, int dy) {
+    int newX = character->x + dx;
+    int newY = character->y +dy;
+    if (newX < 1 || newX > ROW - 2 || newY < 1 || newY > COL - 2) {
+        printf("Cannot go out of bounds\n");
+        return;
+    }
+    if (player_cost_map.map[newX][newY] == INT_MAX || map->character_type[newX][newY] != -1) {
+        printf("Cannot move onto that terrain\n");
+        return;
+    }
+    character->move_cost = player_cost_map.map[newX][newY];
+    map->character_type[character->x][character->y] = -1;
+    character->x += dx;
+    character->y += dy;
+    map->character_type[character->x][character->y] = player;
+    printMap(world[currentX + world_size_a][currentY + world_size_a]);
 }
 
 
@@ -798,8 +864,8 @@ void move_maps(int dx, int dy) {
     currentY = newY;
     printMap(world[currentX + world_size_a][currentY + world_size_a]);
     printf("Current coordinates: (%d, %d)\n", currentX, currentY);
-    printCostMap(&hiker_cost_map);
-    printCostMap(&rival_cost_map);
+//    printCostMap(&hiker_cost_map);
+//    printCostMap(&rival_cost_map);
 }
 
 
@@ -823,27 +889,52 @@ void fly(int x, int y) {
     currentY = y;
     printMap(world[currentX + world_size_a][currentY + world_size_a]);
     printf("Current coordinates: (%d, %d)\n", x, y);
-    printCostMap(&hiker_cost_map);
-    printCostMap(&rival_cost_map);
+//    printCostMap(&hiker_cost_map);
+//    printCostMap(&rival_cost_map);
 
 }
 
 
+/*
+ *
+ */
 void gameLoop() {
     char command[10];
     int x;
     int y;
+    struct queue_node_character* characterQueue = NULL;
     if (world[currentX + world_size_a][currentY + world_size_a] == NULL) {
         world[currentX + world_size_a][currentY + world_size_a] = malloc(sizeof(struct map_key));
     }
     mapGen(world[currentX + world_size_a][currentY + world_size_a], currentX, currentY);
     printMap(world[currentX + world_size_a][currentY + world_size_a]);
-    printCostMap(&rival_cost_map);
-    printCostMap(&hiker_cost_map);
+//    printCostMap(&rival_cost_map);
+//    printCostMap(&hiker_cost_map);
     while (1) {
         printf("Enter command:\n");
         scanf("%s", command);
-        if (strcmp(command, "n") == 0) {
+        if (strcmp(command, "k") == 0) {
+            //move one up
+            moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
+                          &world[currentX + world_size_a][currentY + world_size_a]->PC,-1,0);
+            enqueueCharacter(&characterQueue, world[currentX + world_size_a][currentY + world_size_a]->PC);
+        }
+        else if(strcmp(command, "l") == 0) {
+            //move one right
+            moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
+                          &world[currentX + world_size_a][currentY + world_size_a]->PC,0,1);
+        }
+        else if(strcmp(command, "j") == 0) {
+            //move down one
+            moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
+                          &world[currentX + world_size_a][currentY + world_size_a]->PC,1,0);
+        }
+        else if(strcmp(command, "h") == 0) {
+            //move left one
+            moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
+                          &world[currentX + world_size_a][currentY + world_size_a]->PC,0,-1);
+        }
+        else if (strcmp(command, "n") == 0) {
             move_maps(0,-1);
         }
         else if (strcmp(command, "s") == 0) {
