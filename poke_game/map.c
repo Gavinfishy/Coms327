@@ -8,7 +8,6 @@
 #include <string.h>
 #include <math.h>
 #include <limits.h>
-#include "character_queue.h"
 
 #define ROW 21
 #define COL 80
@@ -36,11 +35,18 @@
 /*
  * This struct keeps track of a character with their x and y coordinates in the character map
  */
-struct character {
+//struct character {
+//    int x;
+//    int y;
+//};
+
+struct gameCharacter {
+    int id;
     int x;
     int y;
+    int type;
+    int movementCost;
 };
-
 
 /*
  * This struct keeps track of the terrain map, character map, whether a terrain was created and gate locations
@@ -49,7 +55,7 @@ struct character {
 struct map_key{
     int terrain_type[ROW][COL];
     int character_type[ROW][COL];
-    struct character PC;
+    struct gameCharacter PC;
     int terrain_exists[5];
     int n,e,s,w;
 };
@@ -78,7 +84,18 @@ int currentX = 0;
 
 int currentY = 0;
 
-struct character NPC[10];
+struct gameCharacter* newGameCharacter(int id, int x, int y, int type, int movementCost) {
+    struct gameCharacter* character = (struct gameCharacter*) malloc(sizeof(struct gameCharacter));
+    character->id = id;
+    character->x = x;
+    character->y = y;
+    character->type = type;
+    character->movementCost = movementCost;
+    return character;
+}
+
+//struct character NPC[10];
+struct gameCharacter NPC[1];
 
 struct adjacencyListNode {
     int dest;
@@ -131,6 +148,15 @@ struct minHeapNode* newMinHeapNode(int v, int distance) {
     minHeapNode->distance=distance;
     return minHeapNode;
 }
+
+
+struct minHeapNode* newCharacterNode(int characterId, int movementCost) {
+    struct minHeapNode* node = (struct minHeapNode*) malloc(sizeof(struct minHeapNode));
+    node->v = characterId;
+    node->distance = movementCost;
+    return node;
+}
+
 
 struct minHeap* createMinHeap(int capacity) {
     struct minHeap* minHeap = (struct minHeap*) malloc(sizeof(struct minHeap));
@@ -494,6 +520,23 @@ bool isInMinHeap(struct minHeap *minHeap, int v) {
 //}
 
 
+void addCharacterToHeap(struct minHeap* minHeap, int characterId, int movementCost) {
+    struct minHeapNode* node = newCharacterNode(characterId, movementCost);
+    minHeap->array[minHeap->size] = node;
+    minHeap->position[characterId] = minHeap->size;
+    minHeap->size++;
+    decreaseKey(minHeap, characterId, movementCost);
+}
+
+
+void printHeap(struct minHeap* minHeap) {
+    printf("Heap:\n");
+    for (int i = 0; i < minHeap->size; i++) {
+        printf("Character ID: %d, Movement Cost: %d\n", minHeap->array[i]->v, minHeap->array[i]->distance);
+    }
+}
+
+
 void printCostMap(cost_map_key_t* cost_map) {
     for (int i = 0; i < ROW; i++) {
         for (int j = 0; j < COL; j++) {
@@ -736,7 +779,7 @@ void placeBuildings(struct map_key *map, int mapx, int mapy) {
 /*
  * Randomly places each character type in their respective environment
  */
-void placeCharacter(struct map_key *map, struct character *character, int type) {
+void placeCharacter(struct map_key *map, struct gameCharacter *character, int type) {
     bool placed = false;
     while (!placed) {
         int x = (rand() % (ROW - 2) + 1);
@@ -781,32 +824,67 @@ void placeCharacters(struct map_key *map) {
     placeCharacter(map, &map->PC, player);
     for (int i = 0; i < sizeof(NPC)/sizeof(NPC[0]); i++) {
         int type = (i % 3) + 8;
+        printf("type: %d\n", type);
+        NPC[i].type = hiker;
         placeCharacter(map, &NPC[i], type);
     }
+
 }
 
 
 /*
  * Responsible for moving the characters everytime the player moves.
  */
-void moveCharacter(struct map_key *map, struct character *character, int dx, int dy) {
+int moveCharacter(struct map_key *map, struct gameCharacter *character, int dx, int dy) {
     int newX = character->x + dx;
     int newY = character->y +dy;
     if (newX < 1 || newX > ROW - 2 || newY < 1 || newY > COL - 2) {
         printf("Cannot go out of bounds\n");
-        return;
+        return -1;
     }
     if (player_cost_map.map[newX][newY] == INT_MAX || map->character_type[newX][newY] != -1) {
         printf("Cannot move onto that terrain\n");
-        return;
+        return -1;
     }
-    character->move_cost = player_cost_map.map[newX][newY];
     map->character_type[character->x][character->y] = -1;
     character->x += dx;
     character->y += dy;
     map->character_type[character->x][character->y] = player;
     printMap(world[currentX + world_size_a][currentY + world_size_a]);
+    return player_cost_map.map[newX][newY];
 }
+
+
+int moveNPC(struct gameCharacter* npc, cost_map_key_t* cost_map, struct map_key *map, int npcType) {
+    int minCost = INT_MAX;
+    int minDx = 0;
+    int minDy = 0;
+    for (int dx = -1; dx <= 1; dx++) {
+        for (int dy = -1; dy <= 1; dy++) {
+            if (dx == 0 && dy == 0) {
+                continue;
+            }
+            int newX = npc->x + dx;
+            int newY = npc->y + dy;
+            if (newX >= 1 && newX < ROW - 1 && newY >= 1 && newY < COL - 1 &&
+            cost_map->map[newX][newY] < minCost && map->character_type[newX][newY] == -1) {
+                printf("cost map: %d\n mincost: %d\n chartype: %d\n", cost_map->map[newX][newY], minCost, map->character_type[newX][newY]);
+                minCost = cost_map->map[newX][newY];
+                minDx = dx;
+                minDy = dy;
+                printf("minCost, dx, dy: %d %d %d\n", minCost, minDx, minDy);
+            }
+        }
+    }
+    printf("%d",minCost);
+    map->character_type[npc->x][npc->y] = -1;
+    npc->x += minDx;
+    npc->y += minDy;
+    map->character_type[npc->x][npc->y] = npcType;
+    return minCost;
+}
+
+
 
 
 void mapGen(struct map_key *map, int x, int y) {
@@ -838,6 +916,8 @@ void mapGen(struct map_key *map, int x, int y) {
     // Dijkstra cost map
     dijkstra(&hiker_cost_map, map->PC.x, map->PC.y);
     dijkstra(&rival_cost_map, map->PC.x, map->PC.y);
+    dijkstra(&swimmer_cost_map, map->PC.x, map->PC.y);
+
 }
 
 
@@ -857,6 +937,8 @@ void move_maps(int dx, int dy) {
         dijkstra(&hiker_cost_map, world[newX + world_size_a][newY + world_size_a]->PC.x,
                  world[newX + world_size_a][newY + world_size_a]->PC.y);
         dijkstra(&rival_cost_map, world[newX + world_size_a][newY + world_size_a]->PC.x,
+                 world[newX + world_size_a][newY + world_size_a]->PC.y);
+        dijkstra(&swimmer_cost_map, world[newX + world_size_a][newY + world_size_a]->PC.x,
                  world[newX + world_size_a][newY + world_size_a]->PC.y);
 
     }
@@ -884,6 +966,8 @@ void fly(int x, int y) {
                  world[x + world_size_a][y + world_size_a]->PC.y);
         dijkstra(&hiker_cost_map, world[x + world_size_a][y + world_size_a]->PC.x,
                  world[x + world_size_a][y + world_size_a]->PC.y);
+        dijkstra(&swimmer_cost_map, world[x + world_size_a][y + world_size_a]->PC.x,
+                 world[x + world_size_a][y + world_size_a]->PC.y);
     }
     currentX = x;
     currentY = y;
@@ -902,7 +986,6 @@ void gameLoop() {
     char command[10];
     int x;
     int y;
-    struct queue_node_character* characterQueue = NULL;
     if (world[currentX + world_size_a][currentY + world_size_a] == NULL) {
         world[currentX + world_size_a][currentY + world_size_a] = malloc(sizeof(struct map_key));
     }
@@ -910,51 +993,101 @@ void gameLoop() {
     printMap(world[currentX + world_size_a][currentY + world_size_a]);
 //    printCostMap(&rival_cost_map);
 //    printCostMap(&hiker_cost_map);
+    struct minHeap* turnHeap = createMinHeap(2);
+    struct gameCharacter* pc = newGameCharacter(-1, world[currentX + world_size_a][currentY + world_size_a]->PC.x,
+            world[currentX + world_size_a][currentY + world_size_a]->PC.y, 0, 0);
+    addCharacterToHeap(turnHeap, pc->id, 0);
+    for (int i = 0; i < 1; i++) {
+        struct gameCharacter* npc = newGameCharacter(i, NPC[i].x, NPC[i].y, 1, 0);
+        addCharacterToHeap(turnHeap, npc->id, 0);
+    }
     while (1) {
-        printf("Enter command:\n");
-        scanf("%s", command);
-        if (strcmp(command, "k") == 0) {
-            //move one up
-            moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
-                          &world[currentX + world_size_a][currentY + world_size_a]->PC,-1,0);
-            enqueueCharacter(&characterQueue, world[currentX + world_size_a][currentY + world_size_a]->PC);
-        }
-        else if(strcmp(command, "l") == 0) {
-            //move one right
-            moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
-                          &world[currentX + world_size_a][currentY + world_size_a]->PC,0,1);
-        }
-        else if(strcmp(command, "j") == 0) {
-            //move down one
-            moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
-                          &world[currentX + world_size_a][currentY + world_size_a]->PC,1,0);
-        }
-        else if(strcmp(command, "h") == 0) {
-            //move left one
-            moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
-                          &world[currentX + world_size_a][currentY + world_size_a]->PC,0,-1);
-        }
-        else if (strcmp(command, "n") == 0) {
-            move_maps(0,-1);
-        }
-        else if (strcmp(command, "s") == 0) {
-            move_maps(0,1);
-        }
-        else if (strcmp(command, "e") == 0) {
-            move_maps(1,0);
-        }
-        else if (strcmp(command, "w") == 0) {
-            move_maps(-1,0);
-        }
-        else if (strcmp(command, "f") == 0) {
-            scanf("%d %d", &x, &y);
-            fly(x, y);
-        }
-        else if (strcmp(command, "q") == 0) {
-            break;
+        struct minHeapNode* minHeapNode = extractMin(turnHeap);
+        int characterId = minHeapNode->v;
+        if (characterId == -1) {
+            printf("entered PC loop\n");
+            printf("Enter command:\n");
+            scanf("%s", command);
+            if (strcmp(command, "k") == 0) {
+                //move one up
+                int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
+                                         &world[currentX + world_size_a][currentY + world_size_a]->PC, -1, 0);
+                if (cost != -1) {
+                    minHeapNode->distance += cost;
+                    addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                }
+                printHeap(turnHeap);
+            } else if (strcmp(command, "l") == 0) {
+                //move one right
+                int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
+                                         &world[currentX + world_size_a][currentY + world_size_a]->PC, 0, 1);
+                if (cost != -1) {
+                    minHeapNode->distance += cost;
+                    addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                }
+                printHeap(turnHeap);
+            } else if (strcmp(command, "j") == 0) {
+                //move down one
+                int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
+                                         &world[currentX + world_size_a][currentY + world_size_a]->PC, 1, 0);
+                if (cost != -1) {
+                    minHeapNode->distance += cost;
+                    addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                }
+                printHeap(turnHeap);
+            } else if (strcmp(command, "h") == 0) {
+                //move left one
+                int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
+                                         &world[currentX + world_size_a][currentY + world_size_a]->PC, 0, -1);
+                if (cost != -1) {
+                    minHeapNode->distance += cost;
+                    addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                }
+                printHeap(turnHeap);
+            } else if (strcmp(command, "n") == 0) {
+                move_maps(0, -1);
+            } else if (strcmp(command, "s") == 0) {
+                move_maps(0, 1);
+            } else if (strcmp(command, "e") == 0) {
+                move_maps(1, 0);
+            } else if (strcmp(command, "w") == 0) {
+                move_maps(-1, 0);
+            } else if (strcmp(command, "f") == 0) {
+                scanf("%d %d", &x, &y);
+                fly(x, y);
+            } else if (strcmp(command, "q") == 0) {
+                break;
+            } else {
+                printf("Invalid command.\n");
+            }
         }
         else {
-            printf("Invalid command.\n");
+            printf("entered NPC loop\n");
+            struct gameCharacter* npc = &NPC[characterId];
+            cost_map_key_t* cost_map;
+            int npcType;
+            switch (npc->type) {
+                case hiker:
+                    printf("hiker set\n");
+                    cost_map = &hiker_cost_map;
+                    npcType = hiker;
+//                    printCostMap(cost_map);
+                    break;
+                case rival:
+                    cost_map = &rival_cost_map;
+                    npcType = rival;
+                    break;
+                case swimmer:
+                    cost_map = &swimmer_cost_map;
+                    npcType = swimmer;
+                    break;
+            }
+            int cost = moveNPC(npc, cost_map, world[currentX + world_size_a][currentY + world_size_a], npcType);
+            if (cost != -1) {
+                minHeapNode->distance += cost;
+                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+            }
+            printHeap(turnHeap);
         }
     }
 }
