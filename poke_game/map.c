@@ -20,16 +20,18 @@
 #define road 5
 #define center 6
 #define pokemart 7
-#define hiker 8
-#define rival 9
-#define swimmer 10
-#define player 11
+#define player 8
+#define hiker 9
+#define rival 10
+#define swimmer 11
 #define pacers 12
 #define wanderers 13
 #define sentries 14
 #define explorers 15
 #define world_size 401
 #define world_size_a (world_size/2)
+#define NUM_CHARACTER_TYPES 8
+#define NUM_TERRAIN_TYPES 8
 
 
 /*
@@ -94,8 +96,7 @@ struct gameCharacter* newGameCharacter(int id, int x, int y, int type, int movem
     return character;
 }
 
-//struct character NPC[10];
-struct gameCharacter NPC[1];
+struct gameCharacter NPC[3];
 
 struct adjacencyListNode {
     int dest;
@@ -530,7 +531,6 @@ void addCharacterToHeap(struct minHeap* minHeap, int characterId, int movementCo
 
 
 void printHeap(struct minHeap* minHeap) {
-    printf("Heap:\n");
     for (int i = 0; i < minHeap->size; i++) {
         printf("Character ID: %d, Movement Cost: %d\n", minHeap->array[i]->v, minHeap->array[i]->distance);
     }
@@ -686,6 +686,41 @@ void setPathCost(struct map_key *map) {
     }
 }
 
+int movementCostLookup[NUM_CHARACTER_TYPES][NUM_TERRAIN_TYPES] = {
+        // player, hiker, rival, swimmer, pacers, wanderers, sentries, explorers
+        // boulder, tree, grass, clearing, water, road, center, pokemart
+        {INT_MAX, INT_MAX, 20, 10, INT_MAX, 10, 10, 10},
+        {15, 15, 15, 10, INT_MAX, 10, 50, 50},
+        {INT_MAX, INT_MAX, 20, 10, INT_MAX, 10, 50, 50},
+        {INT_MAX, INT_MAX, INT_MAX, INT_MAX, 7, INT_MAX, INT_MAX},
+        {},
+        {},
+        {},
+        {}
+};
+
+
+int getMovementCostLookupIndex(int npcType) {
+    switch(npcType) {
+        case player:
+            return 0;
+        case hiker:
+            return 1;
+        case rival:
+            return 2;
+        case swimmer:
+            return 3;
+        case pacers:
+            return 4;
+        case wanderers:
+            return 5;
+        case sentries:
+            return 6;
+        case explorers:
+            return 7;
+    }
+}
+
 
 void setCostMaps(struct map_key *map) {
     for (int i = 0; i < ROW; i++) {
@@ -823,8 +858,7 @@ void placeCharacter(struct map_key *map, struct gameCharacter *character, int ty
 void placeCharacters(struct map_key *map) {
     placeCharacter(map, &map->PC, player);
     for (int i = 0; i < sizeof(NPC)/sizeof(NPC[0]); i++) {
-        int type = (i % 3) + 8;
-        printf("type: %d\n", type);
+        int type = (i % 3) + 9;
         NPC[i].type = hiker;
         placeCharacter(map, &NPC[i], type);
     }
@@ -868,20 +902,22 @@ int moveNPC(struct gameCharacter* npc, cost_map_key_t* cost_map, struct map_key 
             int newY = npc->y + dy;
             if (newX >= 1 && newX < ROW - 1 && newY >= 1 && newY < COL - 1 &&
             cost_map->map[newX][newY] < minCost && map->character_type[newX][newY] == -1) {
-                printf("cost map: %d\n mincost: %d\n chartype: %d\n", cost_map->map[newX][newY], minCost, map->character_type[newX][newY]);
                 minCost = cost_map->map[newX][newY];
                 minDx = dx;
                 minDy = dy;
-                printf("minCost, dx, dy: %d %d %d\n", minCost, minDx, minDy);
+//                printf("minCost, dx, dy: %d %d %d\n", minCost, minDx, minDy);
             }
         }
     }
-    printf("%d",minCost);
+    int terrainType = map->terrain_type[npc->x + minDx][npc->y + minDy];
+    printf("npcType %d terrainType %d\n", npcType, terrainType);
+    int cost = movementCostLookup[getMovementCostLookupIndex(npcType)][terrainType];
+    printf("cost %d\n", cost);
     map->character_type[npc->x][npc->y] = -1;
     npc->x += minDx;
     npc->y += minDy;
     map->character_type[npc->x][npc->y] = npcType;
-    return minCost;
+    return cost;
 }
 
 
@@ -1004,8 +1040,8 @@ void gameLoop() {
     while (1) {
         struct minHeapNode* minHeapNode = extractMin(turnHeap);
         int characterId = minHeapNode->v;
+//        printCostMap(&hiker_cost_map);
         if (characterId == -1) {
-            printf("entered PC loop\n");
             printf("Enter command:\n");
             scanf("%s", command);
             if (strcmp(command, "k") == 0) {
@@ -1060,15 +1096,18 @@ void gameLoop() {
             } else {
                 printf("Invalid command.\n");
             }
+            setCostMaps(world[currentX + world_size_a][currentY + world_size_a]);
+            dijkstra(&hiker_cost_map, world[currentX + world_size_a][currentY + world_size_a]->PC.x, world[currentX + world_size_a][currentY + world_size_a]->PC.y);
+            dijkstra(&rival_cost_map, world[currentX + world_size_a][currentY + world_size_a]->PC.x, world[currentX + world_size_a][currentY + world_size_a]->PC.y);
+            dijkstra(&swimmer_cost_map, world[currentX + world_size_a][currentY + world_size_a]->PC.x, world[currentX + world_size_a][currentY + world_size_a]->PC.y);
+
         }
         else {
-            printf("entered NPC loop\n");
             struct gameCharacter* npc = &NPC[characterId];
             cost_map_key_t* cost_map;
             int npcType;
             switch (npc->type) {
                 case hiker:
-                    printf("hiker set\n");
                     cost_map = &hiker_cost_map;
                     npcType = hiker;
 //                    printCostMap(cost_map);
