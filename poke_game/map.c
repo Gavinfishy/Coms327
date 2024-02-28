@@ -69,7 +69,6 @@ struct map_key{
 typedef struct cost_map_key {
     int map[ROW][COL];
 }cost_map_key_t;
-
 cost_map_key_t road_cost_map;
 cost_map_key_t player_cost_map;
 cost_map_key_t hiker_cost_map;
@@ -534,6 +533,7 @@ void printHeap(struct minHeap* minHeap) {
     for (int i = 0; i < minHeap->size; i++) {
         printf("Character ID: %d, Movement Cost: %d\n", minHeap->array[i]->v, minHeap->array[i]->distance);
     }
+    printf("\n");
 }
 
 
@@ -859,7 +859,7 @@ void placeCharacters(struct map_key *map) {
     placeCharacter(map, &map->PC, player);
     for (int i = 0; i < sizeof(NPC)/sizeof(NPC[0]); i++) {
         int type = (i % 3) + 9;
-        NPC[i].type = hiker;
+        NPC[i].type = type;
         placeCharacter(map, &NPC[i], type);
     }
 
@@ -910,9 +910,9 @@ int moveNPC(struct gameCharacter* npc, cost_map_key_t* cost_map, struct map_key 
         }
     }
     int terrainType = map->terrain_type[npc->x + minDx][npc->y + minDy];
-    printf("npcType %d terrainType %d\n", npcType, terrainType);
+//    printf("npcType %d terrainType %d\n", npcType, terrainType);
     int cost = movementCostLookup[getMovementCostLookupIndex(npcType)][terrainType];
-    printf("cost %d\n", cost);
+//    printf("cost %d\n", cost);
     map->character_type[npc->x][npc->y] = -1;
     npc->x += minDx;
     npc->y += minDy;
@@ -1027,13 +1027,13 @@ void gameLoop() {
     }
     mapGen(world[currentX + world_size_a][currentY + world_size_a], currentX, currentY);
     printMap(world[currentX + world_size_a][currentY + world_size_a]);
-//    printCostMap(&rival_cost_map);
-//    printCostMap(&hiker_cost_map);
-    struct minHeap* turnHeap = createMinHeap(2);
+    //TODO decide how many NPC's are needed
+    struct minHeap* turnHeap = createMinHeap(NUM_CHARACTER_TYPES + 1);
     struct gameCharacter* pc = newGameCharacter(-1, world[currentX + world_size_a][currentY + world_size_a]->PC.x,
             world[currentX + world_size_a][currentY + world_size_a]->PC.y, 0, 0);
     addCharacterToHeap(turnHeap, pc->id, 0);
-    for (int i = 0; i < 1; i++) {
+    //TODO decide num npc
+    for (int i = 0; i < 3; i++) {
         struct gameCharacter* npc = newGameCharacter(i, NPC[i].x, NPC[i].y, 1, 0);
         addCharacterToHeap(turnHeap, npc->id, 0);
     }
@@ -1052,6 +1052,10 @@ void gameLoop() {
                     minHeapNode->distance += cost;
                     addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
                 }
+                else {
+                    addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+
+                }
                 printHeap(turnHeap);
             } else if (strcmp(command, "l") == 0) {
                 //move one right
@@ -1060,6 +1064,10 @@ void gameLoop() {
                 if (cost != -1) {
                     minHeapNode->distance += cost;
                     addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                }
+                else {
+                    addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+
                 }
                 printHeap(turnHeap);
             } else if (strcmp(command, "j") == 0) {
@@ -1070,6 +1078,10 @@ void gameLoop() {
                     minHeapNode->distance += cost;
                     addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
                 }
+                else {
+                    addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+
+                }
                 printHeap(turnHeap);
             } else if (strcmp(command, "h") == 0) {
                 //move left one
@@ -1078,6 +1090,10 @@ void gameLoop() {
                 if (cost != -1) {
                     minHeapNode->distance += cost;
                     addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                }
+                else {
+                    addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+
                 }
                 printHeap(turnHeap);
             } else if (strcmp(command, "n") == 0) {
