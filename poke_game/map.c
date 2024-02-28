@@ -48,6 +48,8 @@ struct gameCharacter {
     int y;
     int type;
     int movementCost;
+    int direction[2];
+    int initialTerrain;
 };
 
 /*
@@ -74,6 +76,10 @@ cost_map_key_t player_cost_map;
 cost_map_key_t hiker_cost_map;
 cost_map_key_t rival_cost_map;
 cost_map_key_t swimmer_cost_map;
+cost_map_key_t pacer_cost_map;
+cost_map_key_t wanderer_cost_map;
+cost_map_key_t sentry_cost_map;
+cost_map_key_t explorer_cost_map;
 
 
 /*
@@ -95,7 +101,7 @@ struct gameCharacter* newGameCharacter(int id, int x, int y, int type, int movem
     return character;
 }
 
-struct gameCharacter NPC[3];
+struct gameCharacter NPC[10];
 
 struct adjacencyListNode {
     int dest;
@@ -687,16 +693,16 @@ void setPathCost(struct map_key *map) {
 }
 
 int movementCostLookup[NUM_CHARACTER_TYPES][NUM_TERRAIN_TYPES] = {
-        // player, hiker, rival, swimmer, pacers, wanderers, sentries, explorers
-        // boulder, tree, grass, clearing, water, road, center, pokemart
+        // 0-player, 1-hiker, 2-rival, 3-swimmer, 4-pacers, 5-wanderers, 6-sentries, 7-explorers
+        // 0-boulder, 1-tree, 2-grass, 3-clearing, 4-water, 5-road, 6-center, 7-pokemart
         {INT_MAX, INT_MAX, 20, 10, INT_MAX, 10, 10, 10},
         {15, 15, 15, 10, INT_MAX, 10, 50, 50},
         {INT_MAX, INT_MAX, 20, 10, INT_MAX, 10, 50, 50},
         {INT_MAX, INT_MAX, INT_MAX, INT_MAX, 7, INT_MAX, INT_MAX},
-        {},
-        {},
-        {},
-        {}
+        {INT_MAX, INT_MAX, 15, 10, INT_MAX, 10, 50, 50},
+        {20, 20, 20, 15, INT_MAX, 15, 55, 55},
+        {INT_MAX, INT_MAX, INT_MAX, INT_MAX, INT_MAX, INT_MAX, INT_MAX, INT_MAX},
+        {15, 15, 15, 10, INT_MAX, 10, 50, 50}
 };
 
 
@@ -721,65 +727,94 @@ int getMovementCostLookupIndex(int npcType) {
     }
 }
 
-
 void setCostMaps(struct map_key *map) {
     for (int i = 0; i < ROW; i++) {
         for (int j = 0; j < COL; j++) {
-            switch(map->terrain_type[i][j]) {
-                case boulder:
-                case tree:
-                    if (i == 0 || j == 0 || i == ROW-1 || j == COL-1) {
-                        hiker_cost_map.map[i][j] = INT_MAX;
-                    }
-                    else{
-                        hiker_cost_map.map[i][j] = 15;
-                    }
-                    player_cost_map.map[i][j] = INT_MAX;
-                    rival_cost_map.map[i][j] = INT_MAX;
-                    swimmer_cost_map.map[i][j] = INT_MAX;
-                    break;
-                case road:
-                case clearing:
-                    if (i == 0 || j == 0 || i == ROW-1 || j == COL-1) {
-                        hiker_cost_map.map[i][j] = INT_MAX;
-                        rival_cost_map.map[i][j] = INT_MAX;
-                    }
-                    else{
-                        hiker_cost_map.map[i][j] = 10;
-                        rival_cost_map.map[i][j] = 10;
-                    }
-                    player_cost_map.map[i][j] = 10;
-                    swimmer_cost_map.map[i][j] = INT_MAX;
-                    break;
-                case center:
-                case pokemart:
-                    player_cost_map.map[i][j] = 10;
-                    hiker_cost_map.map[i][j] = 50;
-                    rival_cost_map.map[i][j] = 50;
-                    swimmer_cost_map.map[i][j] = INT_MAX;
-                    break;
-                case grass:
-                    player_cost_map.map[i][j] = 20;
-                    hiker_cost_map.map[i][j] = 15;
-                    rival_cost_map.map[i][j] = 20;
-                    swimmer_cost_map.map[i][j] = INT_MAX;
-                    break;
-                case water:
-                    player_cost_map.map[i][j] = INT_MAX;
-                    hiker_cost_map.map[i][j] = INT_MAX;
-                    rival_cost_map.map[i][j] = INT_MAX;
-                    swimmer_cost_map.map[i][j] = 7;
-                    break;
-                default:
-                    player_cost_map.map[i][j] = INT_MAX;
-                    hiker_cost_map.map[i][j] = INT_MAX;
-                    rival_cost_map.map[i][j] = INT_MAX;
-                    swimmer_cost_map.map[i][j] = INT_MAX;
-                    break;
+            int terrainType = map->terrain_type[i][j];
+            if (i == 0 || j == 0 || i == ROW-1 || j == COL-1) {
+                player_cost_map.map[i][j] = INT_MAX;
+                hiker_cost_map.map[i][j] = INT_MAX;
+                rival_cost_map.map[i][j] = INT_MAX;
+                swimmer_cost_map.map[i][j] = INT_MAX;
+                pacer_cost_map.map[i][j] = INT_MAX;
+                wanderer_cost_map.map[i][j] = INT_MAX;
+                sentry_cost_map.map[i][j] = INT_MAX;
+                explorer_cost_map.map[i][j] = INT_MAX;
+
+            }
+            else {
+                player_cost_map.map[i][j] = movementCostLookup[getMovementCostLookupIndex(player)][terrainType];
+                hiker_cost_map.map[i][j] = movementCostLookup[getMovementCostLookupIndex(hiker)][terrainType];
+                rival_cost_map.map[i][j] = movementCostLookup[getMovementCostLookupIndex(rival)][terrainType];
+                swimmer_cost_map.map[i][j] = movementCostLookup[getMovementCostLookupIndex(swimmer)][terrainType];
+                pacer_cost_map.map[i][j] = movementCostLookup[getMovementCostLookupIndex(pacers)][terrainType];
+                wanderer_cost_map.map[i][j] = movementCostLookup[getMovementCostLookupIndex(wanderers)][terrainType];
+                sentry_cost_map.map[i][j] = movementCostLookup[getMovementCostLookupIndex(sentries)][terrainType];
+                explorer_cost_map.map[i][j] = movementCostLookup[getMovementCostLookupIndex(explorers)][terrainType];
             }
         }
     }
 }
+
+
+//void setCostMaps(struct map_key *map) {
+//    for (int i = 0; i < ROW; i++) {
+//        for (int j = 0; j < COL; j++) {
+//            switch(map->terrain_type[i][j]) {
+//                case boulder:
+//                case tree:
+//                    if (i == 0 || j == 0 || i == ROW-1 || j == COL-1) {
+//                        hiker_cost_map.map[i][j] = INT_MAX;
+//                    }
+//                    else{
+//                        hiker_cost_map.map[i][j] = 15;
+//                    }
+//                    player_cost_map.map[i][j] = INT_MAX;
+//                    rival_cost_map.map[i][j] = INT_MAX;
+//                    swimmer_cost_map.map[i][j] = INT_MAX;
+//                    break;
+//                case road:
+//                case clearing:
+//                    if (i == 0 || j == 0 || i == ROW-1 || j == COL-1) {
+//                        hiker_cost_map.map[i][j] = INT_MAX;
+//                        rival_cost_map.map[i][j] = INT_MAX;
+//                    }
+//                    else{
+//                        hiker_cost_map.map[i][j] = 10;
+//                        rival_cost_map.map[i][j] = 10;
+//                    }
+//                    player_cost_map.map[i][j] = 10;
+//                    swimmer_cost_map.map[i][j] = INT_MAX;
+//                    break;
+//                case center:
+//                case pokemart:
+//                    player_cost_map.map[i][j] = 10;
+//                    hiker_cost_map.map[i][j] = 50;
+//                    rival_cost_map.map[i][j] = 50;
+//                    swimmer_cost_map.map[i][j] = INT_MAX;
+//                    break;
+//                case grass:
+//                    player_cost_map.map[i][j] = 20;
+//                    hiker_cost_map.map[i][j] = 15;
+//                    rival_cost_map.map[i][j] = 20;
+//                    swimmer_cost_map.map[i][j] = INT_MAX;
+//                    break;
+//                case water:
+//                    player_cost_map.map[i][j] = INT_MAX;
+//                    hiker_cost_map.map[i][j] = INT_MAX;
+//                    rival_cost_map.map[i][j] = INT_MAX;
+//                    swimmer_cost_map.map[i][j] = 7;
+//                    break;
+//                default:
+//                    player_cost_map.map[i][j] = INT_MAX;
+//                    hiker_cost_map.map[i][j] = INT_MAX;
+//                    rival_cost_map.map[i][j] = INT_MAX;
+//                    swimmer_cost_map.map[i][j] = INT_MAX;
+//                    break;
+//            }
+//        }
+//    }
+//}
 
 
 /*
@@ -826,13 +861,13 @@ void placeCharacter(struct map_key *map, struct gameCharacter *character, int ty
             map->PC.y = y;
             placed = true;
         }
-        else if (type == hiker && map->terrain_type[x][y] != water && map->terrain_type[x][y] != road) {
+        else if ((type == hiker || type == wanderers || type == explorers) && map->terrain_type[x][y] != water && map->terrain_type[x][y] != road) {
             map->character_type[x][y] = type;
             character->x = x;
             character->y = y;
             placed = true;
         }
-        else if (type == rival && map->terrain_type[x][y] != boulder && map->terrain_type[x][y] != tree && map->terrain_type[x][y] != water && map->terrain_type[x][y] != road) {
+        else if ((type == rival || type == pacers || type == sentries) && map->terrain_type[x][y] != boulder && map->terrain_type[x][y] != tree && map->terrain_type[x][y] != water && map->terrain_type[x][y] != road) {
             map->character_type[x][y] = type;
             character->x = x;
             character->y = y;
@@ -858,11 +893,10 @@ void placeCharacter(struct map_key *map, struct gameCharacter *character, int ty
 void placeCharacters(struct map_key *map) {
     placeCharacter(map, &map->PC, player);
     for (int i = 0; i < sizeof(NPC)/sizeof(NPC[0]); i++) {
-        int type = (i % 3) + 9;
+        int type = (i % 7) + 9;
         NPC[i].type = type;
         placeCharacter(map, &NPC[i], type);
     }
-
 }
 
 
@@ -889,38 +923,85 @@ int moveCharacter(struct map_key *map, struct gameCharacter *character, int dx, 
 }
 
 
+//int moveNPC(struct gameCharacter* npc, cost_map_key_t* cost_map, struct map_key *map, int npcType) {
+//    int minCost = INT_MAX;
+//    int minDx = 0;
+//    int minDy = 0;
+//    for (int dx = -1; dx <= 1; dx++) {
+//        for (int dy = -1; dy <= 1; dy++) {
+//            if (dx == 0 && dy == 0) {
+//                continue;
+//            }
+//            int newX = npc->x + dx;
+//            int newY = npc->y + dy;
+//            if (newX >= 1 && newX < ROW - 1 && newY >= 1 && newY < COL - 1 &&
+//            cost_map->map[newX][newY] < minCost && map->character_type[newX][newY] == -1) {
+//                minCost = cost_map->map[newX][newY];
+//                minDx = dx;
+//                minDy = dy;
+////                printf("minCost, dx, dy: %d %d %d\n", minCost, minDx, minDy);
+//            }
+//        }
+//    }
+//    int terrainType = map->terrain_type[npc->x + minDx][npc->y + minDy];
+////    printf("npcType %d terrainType %d\n", npcType, terrainType);
+//    int cost = movementCostLookup[getMovementCostLookupIndex(npcType)][terrainType];
+////    printf("cost %d\n", cost);
+//    map->character_type[npc->x][npc->y] = -1;
+//    npc->x += minDx;
+//    npc->y += minDy;
+//    map->character_type[npc->x][npc->y] = npcType;
+//    return cost;
+//}
+
+
 int moveNPC(struct gameCharacter* npc, cost_map_key_t* cost_map, struct map_key *map, int npcType) {
     int minCost = INT_MAX;
     int minDx = 0;
     int minDy = 0;
-    for (int dx = -1; dx <= 1; dx++) {
-        for (int dy = -1; dy <= 1; dy++) {
-            if (dx == 0 && dy == 0) {
-                continue;
-            }
-            int newX = npc->x + dx;
-            int newY = npc->y + dy;
-            if (newX >= 1 && newX < ROW - 1 && newY >= 1 && newY < COL - 1 &&
+    int directions[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+    for (int i = 0; i < 4; i++) {
+        int dx = directions[i][0];
+        int dy = directions[i][1];
+        switch(npcType) {
+            case pacers:
+                dx = npc->direction[0];
+                dy = npc->direction[1];
+                break;
+            case wanderers:
+                if (map->terrain_type[npc->x + dx][npc->y + dy] != npc->initialTerrain) {
+                    continue;
+                }
+                break;
+            case explorers:
+                dx = npc->direction[0];
+                dy = npc->direction[1];
+                break;
+            case sentries:
+                return INT_MAX;
+        }
+        int newX = npc->x + dx;
+        int newY = npc->y + dy;
+        if (newX >= 1 && newX < ROW - 1 && newY >= 1 && newY < COL - 1 &&
             cost_map->map[newX][newY] < minCost && map->character_type[newX][newY] == -1) {
-                minCost = cost_map->map[newX][newY];
-                minDx = dx;
-                minDy = dy;
-//                printf("minCost, dx, dy: %d %d %d\n", minCost, minDx, minDy);
-            }
+            minCost = cost_map->map[newX][newY];
+            minDx = dx;
+            minDy = dy;
         }
     }
+    if (minCost == INT_MAX && (npcType == pacers || npcType == explorers)) {
+        int newDirectionIndex = rand() % 4;
+        npc->direction[0] = directions[newDirectionIndex][0];
+        npc->direction[1] = directions[newDirectionIndex][1];
+    }
     int terrainType = map->terrain_type[npc->x + minDx][npc->y + minDy];
-//    printf("npcType %d terrainType %d\n", npcType, terrainType);
     int cost = movementCostLookup[getMovementCostLookupIndex(npcType)][terrainType];
-//    printf("cost %d\n", cost);
     map->character_type[npc->x][npc->y] = -1;
     npc->x += minDx;
     npc->y += minDy;
     map->character_type[npc->x][npc->y] = npcType;
     return cost;
 }
-
-
 
 
 void mapGen(struct map_key *map, int x, int y) {
@@ -1028,12 +1109,12 @@ void gameLoop() {
     mapGen(world[currentX + world_size_a][currentY + world_size_a], currentX, currentY);
     printMap(world[currentX + world_size_a][currentY + world_size_a]);
     //TODO decide how many NPC's are needed
-    struct minHeap* turnHeap = createMinHeap(NUM_CHARACTER_TYPES + 1);
+    struct minHeap* turnHeap = createMinHeap(sizeof(NPC) + 1);
     struct gameCharacter* pc = newGameCharacter(-1, world[currentX + world_size_a][currentY + world_size_a]->PC.x,
             world[currentX + world_size_a][currentY + world_size_a]->PC.y, 0, 0);
     addCharacterToHeap(turnHeap, pc->id, 0);
     //TODO decide num npc
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 10; i++) {
         struct gameCharacter* npc = newGameCharacter(i, NPC[i].x, NPC[i].y, 1, 0);
         addCharacterToHeap(turnHeap, npc->id, 0);
     }
@@ -1056,7 +1137,7 @@ void gameLoop() {
                     addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
 
                 }
-                printHeap(turnHeap);
+//                printHeap(turnHeap);
             } else if (strcmp(command, "l") == 0) {
                 //move one right
                 int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
@@ -1069,7 +1150,7 @@ void gameLoop() {
                     addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
 
                 }
-                printHeap(turnHeap);
+//                printHeap(turnHeap);
             } else if (strcmp(command, "j") == 0) {
                 //move down one
                 int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
@@ -1082,7 +1163,7 @@ void gameLoop() {
                     addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
 
                 }
-                printHeap(turnHeap);
+//                printHeap(turnHeap);
             } else if (strcmp(command, "h") == 0) {
                 //move left one
                 int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
@@ -1095,7 +1176,7 @@ void gameLoop() {
                     addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
 
                 }
-                printHeap(turnHeap);
+//                printHeap(turnHeap);
             } else if (strcmp(command, "n") == 0) {
                 move_maps(0, -1);
             } else if (strcmp(command, "s") == 0) {
@@ -1116,6 +1197,10 @@ void gameLoop() {
             dijkstra(&hiker_cost_map, world[currentX + world_size_a][currentY + world_size_a]->PC.x, world[currentX + world_size_a][currentY + world_size_a]->PC.y);
             dijkstra(&rival_cost_map, world[currentX + world_size_a][currentY + world_size_a]->PC.x, world[currentX + world_size_a][currentY + world_size_a]->PC.y);
             dijkstra(&swimmer_cost_map, world[currentX + world_size_a][currentY + world_size_a]->PC.x, world[currentX + world_size_a][currentY + world_size_a]->PC.y);
+            dijkstra(&pacer_cost_map, world[currentX + world_size_a][currentY + world_size_a]->PC.x, world[currentX + world_size_a][currentY + world_size_a]->PC.y);
+            dijkstra(&wanderer_cost_map, world[currentX + world_size_a][currentY + world_size_a]->PC.x, world[currentX + world_size_a][currentY + world_size_a]->PC.y);
+            dijkstra(&sentry_cost_map, world[currentX + world_size_a][currentY + world_size_a]->PC.x, world[currentX + world_size_a][currentY + world_size_a]->PC.y);
+            dijkstra(&explorer_cost_map, world[currentX + world_size_a][currentY + world_size_a]->PC.x, world[currentX + world_size_a][currentY + world_size_a]->PC.y);
 
         }
         else {
@@ -1126,7 +1211,6 @@ void gameLoop() {
                 case hiker:
                     cost_map = &hiker_cost_map;
                     npcType = hiker;
-//                    printCostMap(cost_map);
                     break;
                 case rival:
                     cost_map = &rival_cost_map;
@@ -1136,13 +1220,29 @@ void gameLoop() {
                     cost_map = &swimmer_cost_map;
                     npcType = swimmer;
                     break;
+                case pacers:
+                    cost_map = &pacer_cost_map;
+                    npcType = pacers;
+                    break;
+                case wanderers:
+                    cost_map = &wanderer_cost_map;
+                    npcType = wanderers;
+                    break;
+                case sentries:
+                    cost_map = &sentry_cost_map;
+                    npcType = sentries;
+                    break;
+                case explorers:
+                    cost_map = &explorer_cost_map;
+                    npcType = explorers;
+                    break;
             }
             int cost = moveNPC(npc, cost_map, world[currentX + world_size_a][currentY + world_size_a], npcType);
             if (cost != -1) {
                 minHeapNode->distance += cost;
                 addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
             }
-            printHeap(turnHeap);
+//            printHeap(turnHeap);
         }
     }
 }
