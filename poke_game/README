@@ -1,6 +1,13 @@
 This project is the implementation of a pokemon type game made in C.
 Currently, a map is generated with a random background, borders, roads, buildings, and npc's
 You can traverse the world with n,e,s,w commands along with f x y where (x,y) is a coordinate in the map you would like to visit
+(^^^ This feature temporarily has been taken out for 1.04)
 Once a new portion of the map is generated you should always be able to go back to it
-in 1.03, the weight map of dijkstra's is printed below the map to give a visual idea of how npc's will move
-
+CONTROLS:
+h left
+j down
+k up
+l right
+Cannot go diagonal yet. When pc moves on legal terrain r and h will aim for PC while w e p wander and s stands still
+Also note: sleep function is present but sort of useless in my opinion.
+I recommend commenting the usage out and testing without it.
