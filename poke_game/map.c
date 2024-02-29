@@ -760,66 +760,6 @@ void setCostMaps(struct map_key *map) {
 }
 
 
-//void setCostMaps(struct map_key *map) {
-//    for (int i = 0; i < ROW; i++) {
-//        for (int j = 0; j < COL; j++) {
-//            switch(map->terrain_type[i][j]) {
-//                case boulder:
-//                case tree:
-//                    if (i == 0 || j == 0 || i == ROW-1 || j == COL-1) {
-//                        hiker_cost_map.map[i][j] = INT_MAX;
-//                    }
-//                    else{
-//                        hiker_cost_map.map[i][j] = 15;
-//                    }
-//                    player_cost_map.map[i][j] = INT_MAX;
-//                    rival_cost_map.map[i][j] = INT_MAX;
-//                    swimmer_cost_map.map[i][j] = INT_MAX;
-//                    break;
-//                case road:
-//                case clearing:
-//                    if (i == 0 || j == 0 || i == ROW-1 || j == COL-1) {
-//                        hiker_cost_map.map[i][j] = INT_MAX;
-//                        rival_cost_map.map[i][j] = INT_MAX;
-//                    }
-//                    else{
-//                        hiker_cost_map.map[i][j] = 10;
-//                        rival_cost_map.map[i][j] = 10;
-//                    }
-//                    player_cost_map.map[i][j] = 10;
-//                    swimmer_cost_map.map[i][j] = INT_MAX;
-//                    break;
-//                case center:
-//                case pokemart:
-//                    player_cost_map.map[i][j] = 10;
-//                    hiker_cost_map.map[i][j] = 50;
-//                    rival_cost_map.map[i][j] = 50;
-//                    swimmer_cost_map.map[i][j] = INT_MAX;
-//                    break;
-//                case grass:
-//                    player_cost_map.map[i][j] = 20;
-//                    hiker_cost_map.map[i][j] = 15;
-//                    rival_cost_map.map[i][j] = 20;
-//                    swimmer_cost_map.map[i][j] = INT_MAX;
-//                    break;
-//                case water:
-//                    player_cost_map.map[i][j] = INT_MAX;
-//                    hiker_cost_map.map[i][j] = INT_MAX;
-//                    rival_cost_map.map[i][j] = INT_MAX;
-//                    swimmer_cost_map.map[i][j] = 7;
-//                    break;
-//                default:
-//                    player_cost_map.map[i][j] = INT_MAX;
-//                    hiker_cost_map.map[i][j] = INT_MAX;
-//                    rival_cost_map.map[i][j] = INT_MAX;
-//                    swimmer_cost_map.map[i][j] = INT_MAX;
-//                    break;
-//            }
-//        }
-//    }
-//}
-
-
 /*
  * Chooses a random location near road to place each building. Chance of buildings not spawning
  */
@@ -834,7 +774,7 @@ void placeBuildings(struct map_key *map, int mapx, int mapy) {
         (y > 1 && map->terrain_type[x][y-1] == road) || (x < COL - 2 && map->terrain_type[x+1][y] == road) ||
         (y < ROW - 2 && map->terrain_type[x][y+1] == road))) {
             int manhattan = (int) (abs(mapx) + abs(mapy));
-            int spawnChance = -45*manhattan;
+            double spawnChance = -45*manhattan;
             spawnChance = ceil(fmax(5, ((spawnChance/200) + 50)));
             int c = rand() % 100 + 1;
             if (c <= spawnChance || (mapx == 0 && mapy == 0)) {
@@ -930,38 +870,6 @@ int moveCharacter(struct map_key *map, struct gameCharacter *character, int dx, 
 //    printMap(world[currentX + world_size_a][currentY + world_size_a]);
     return player_cost_map.map[newX][newY];
 }
-
-
-//int moveNPC(struct gameCharacter* npc, cost_map_key_t* cost_map, struct map_key *map, int npcType) {
-//    int minCost = INT_MAX;
-//    int minDx = 0;
-//    int minDy = 0;
-//    for (int dx = -1; dx <= 1; dx++) {
-//        for (int dy = -1; dy <= 1; dy++) {
-//            if (dx == 0 && dy == 0) {
-//                continue;
-//            }
-//            int newX = npc->x + dx;
-//            int newY = npc->y + dy;
-//            if (newX >= 1 && newX < ROW - 1 && newY >= 1 && newY < COL - 1 &&
-//            cost_map->map[newX][newY] < minCost && map->character_type[newX][newY] == -1) {
-//                minCost = cost_map->map[newX][newY];
-//                minDx = dx;
-//                minDy = dy;
-////                printf("minCost, dx, dy: %d %d %d\n", minCost, minDx, minDy);
-//            }
-//        }
-//    }
-//    int terrainType = map->terrain_type[npc->x + minDx][npc->y + minDy];
-////    printf("npcType %d terrainType %d\n", npcType, terrainType);
-//    int cost = movementCostLookup[getMovementCostLookupIndex(npcType)][terrainType];
-////    printf("cost %d\n", cost);
-//    map->character_type[npc->x][npc->y] = -1;
-//    npc->x += minDx;
-//    npc->y += minDy;
-//    map->character_type[npc->x][npc->y] = npcType;
-//    return cost;
-//}
 
 
 int moveNPC(struct gameCharacter* npc, cost_map_key_t* cost_map, struct map_key *map, int npcType) {
@@ -1159,66 +1067,108 @@ void gameLoop() {
                                          &world[currentX + world_size_a][currentY + world_size_a]->PC, -1, 0);
                 if (cost != -1) {
                     minHeapNode->distance += cost;
-                    addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
                 }
-                else {
-                    addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
-
-                }
+                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
 //                printHeap(turnHeap);
-            } else if (strcmp(command, "l") == 0) {
+            }
+            else if (strcmp(command, "l") == 0) {
                 //move one right
                 int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
                                          &world[currentX + world_size_a][currentY + world_size_a]->PC, 0, 1);
                 if (cost != -1) {
                     minHeapNode->distance += cost;
-                    addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
                 }
-                else {
-                    addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
-
-                }
+                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
 //                printHeap(turnHeap);
-            } else if (strcmp(command, "j") == 0) {
+            }
+            else if (strcmp(command, "j") == 0) {
                 //move down one
                 int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
                                          &world[currentX + world_size_a][currentY + world_size_a]->PC, 1, 0);
                 if (cost != -1) {
                     minHeapNode->distance += cost;
-                    addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
                 }
-                else {
-                    addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
-
-                }
+                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
 //                printHeap(turnHeap);
-            } else if (strcmp(command, "h") == 0) {
+            }
+            else if (strcmp(command, "h") == 0) {
                 //move left one
                 int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
                                          &world[currentX + world_size_a][currentY + world_size_a]->PC, 0, -1);
                 if (cost != -1) {
                     minHeapNode->distance += cost;
-                    addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
                 }
-                else {
-                    addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
-
-                }
+                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
 //                printHeap(turnHeap);
-            } else if (strcmp(command, "n") == 0) {
+            }
+            else if (strcmp(command, "y") == 0) {
+                //move up left
+                int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
+                                         &world[currentX + world_size_a][currentY + world_size_a]->PC, -1, -1);
+                if (cost != -1) {
+                    minHeapNode->distance += cost;
+                }
+                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+            }
+            else if (strcmp(command, "u") == 0) {
+                //move up right
+                int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
+                                         &world[currentX + world_size_a][currentY + world_size_a]->PC, -1, 1);
+                if (cost != -1) {
+                    minHeapNode->distance += cost;
+                }
+                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+            }
+            else if (strcmp(command, "n") == 0) {
+                //move down right
+                int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
+                                         &world[currentX + world_size_a][currentY + world_size_a]->PC, 1, 1);
+                if (cost != -1) {
+                    minHeapNode->distance += cost;
+                }
+                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+            }
+            else if (strcmp(command, "b") == 0) {
+                //move down left
+                int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
+                                         &world[currentX + world_size_a][currentY + world_size_a]->PC, 1, -1);
+                if (cost != -1) {
+                    minHeapNode->distance += cost;
+                }
+                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+            }
+            else if (strcmp(command, ">") == 0) {
+                printf("Invalid command.\n");
+                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+            }
+            else if (strcmp(command, "5") == 0 || strcmp(command, " ") == 0 || strcmp(command, ".") == 0 ) {
+                printf("Invalid command.\n");
+                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+            }
+            else if (strcmp(command, "t") == 0) {
+                printf("Invalid command.\n");
+                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+            }
+            else if (strcmp(command, "0") == 0) {
                 move_maps(0, -1);
-            } else if (strcmp(command, "s") == 0) {
+            }
+            else if (strcmp(command, "9") == 0) {
                 move_maps(0, 1);
-            } else if (strcmp(command, "e") == 0) {
+            }
+            else if (strcmp(command, "8") == 0) {
                 move_maps(1, 0);
-            } else if (strcmp(command, "w") == 0) {
+            }
+            else if (strcmp(command, "7") == 0) {
                 move_maps(-1, 0);
-            } else if (strcmp(command, "f") == 0) {
+            }
+            else if (strcmp(command, "f") == 0) {
                 scanf("%d %d", &x, &y);
                 fly(x, y);
-            } else if (strcmp(command, "q") == 0) {
+            }
+            else if (strcmp(command, "q") == 0) {
                 break;
-            } else {
+            }
+            else {
                 printf("Invalid command.\n");
                 addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
             }
