@@ -983,9 +983,9 @@ int moveNPC(struct gameCharacter* npc, cost_map_key_t* cost_map, struct map_key 
                 }
                 break;
             case wanderers:
-                if (map->terrain_type[npc->x + dx][npc->y + dy] != npc->initialTerrain) {
-                    continue;
-                }
+//                if (map->terrain_type[npc->x + dx][npc->y + dy] != npc->initialTerrain) {
+//                    continue;
+//                }
                 dx = npc->direction[0];
                 dy = npc->direction[1];
                 break;
@@ -995,8 +995,16 @@ int moveNPC(struct gameCharacter* npc, cost_map_key_t* cost_map, struct map_key 
                 break;
             case sentries:
                 return INT_MAX;
+            default:
+                dx = directions[i][0];
+                dy = directions[i][1];
+                break;
+
         }
         if (dx == 0 && dy == 0) {
+            continue;
+        }
+        if ((map->terrain_type[npc->x + dx][npc->y + dy] != npc->initialTerrain) && (npcType == wanderers)) {
             continue;
         }
         int newX = npc->x + dx;
@@ -1265,7 +1273,7 @@ void gameLoop() {
             }
 //            printHeap(turnHeap);
             printMap(world[currentX + world_size_a][currentY + world_size_a]);
-            usleep(300000);
+//            usleep(250000);
         }
     }
 }

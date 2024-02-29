@@ -8,4 +8,6 @@ h left
 j down
 k up
 l right
-cannot go diagonal yet. When pc moves on legal terrain r and h will aim for PC while w e p wander and s stands still
+Cannot go diagonal yet. When pc moves on legal terrain r and h will aim for PC while w e p wander and s stands still
+Also note: sleep function is present but sort of useless in my opinion.
+I recommend commenting the usage out and testing without it.
