@@ -1061,7 +1061,7 @@ void gameLoop() {
             printMap(world[currentX + world_size_a][currentY + world_size_a]);
             printf("Enter command:\n");
             scanf("%s", command);
-            if (strcmp(command, "k") == 0) {
+            if (strcmp(command, "k") == 0 || strcmp(command, "8") == 0) {
                 //move one up
                 int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
                                          &world[currentX + world_size_a][currentY + world_size_a]->PC, -1, 0);
@@ -1071,7 +1071,7 @@ void gameLoop() {
                 addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
 //                printHeap(turnHeap);
             }
-            else if (strcmp(command, "l") == 0) {
+            else if (strcmp(command, "l") == 0 || strcmp(command, "6") == 0) {
                 //move one right
                 int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
                                          &world[currentX + world_size_a][currentY + world_size_a]->PC, 0, 1);
@@ -1081,7 +1081,7 @@ void gameLoop() {
                 addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
 //                printHeap(turnHeap);
             }
-            else if (strcmp(command, "j") == 0) {
+            else if (strcmp(command, "j") == 0 || strcmp(command, "2") == 0) {
                 //move down one
                 int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
                                          &world[currentX + world_size_a][currentY + world_size_a]->PC, 1, 0);
@@ -1091,7 +1091,7 @@ void gameLoop() {
                 addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
 //                printHeap(turnHeap);
             }
-            else if (strcmp(command, "h") == 0) {
+            else if (strcmp(command, "h") == 0 || strcmp(command, "4") == 0) {
                 //move left one
                 int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
                                          &world[currentX + world_size_a][currentY + world_size_a]->PC, 0, -1);
@@ -1101,7 +1101,7 @@ void gameLoop() {
                 addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
 //                printHeap(turnHeap);
             }
-            else if (strcmp(command, "y") == 0) {
+            else if (strcmp(command, "y") == 0 || strcmp(command, "7") == 0) {
                 //move up left
                 int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
                                          &world[currentX + world_size_a][currentY + world_size_a]->PC, -1, -1);
@@ -1110,7 +1110,7 @@ void gameLoop() {
                 }
                 addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
             }
-            else if (strcmp(command, "u") == 0) {
+            else if (strcmp(command, "u") == 0 || strcmp(command, "9") == 0) {
                 //move up right
                 int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
                                          &world[currentX + world_size_a][currentY + world_size_a]->PC, -1, 1);
@@ -1119,7 +1119,7 @@ void gameLoop() {
                 }
                 addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
             }
-            else if (strcmp(command, "n") == 0) {
+            else if (strcmp(command, "n") == 0 || strcmp(command, "3") == 0) {
                 //move down right
                 int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
                                          &world[currentX + world_size_a][currentY + world_size_a]->PC, 1, 1);
@@ -1128,7 +1128,7 @@ void gameLoop() {
                 }
                 addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
             }
-            else if (strcmp(command, "b") == 0) {
+            else if (strcmp(command, "b") == 0 || strcmp(command, "1") == 0) {
                 //move down left
                 int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
                                          &world[currentX + world_size_a][currentY + world_size_a]->PC, 1, -1);
@@ -1142,30 +1142,30 @@ void gameLoop() {
                 addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
             }
             else if (strcmp(command, "5") == 0 || strcmp(command, " ") == 0 || strcmp(command, ".") == 0 ) {
-                printf("Invalid command.\n");
+                minHeapNode->distance += 10;
                 addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
             }
             else if (strcmp(command, "t") == 0) {
                 printf("Invalid command.\n");
                 addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
             }
-            else if (strcmp(command, "0") == 0) {
-                move_maps(0, -1);
-            }
-            else if (strcmp(command, "9") == 0) {
-                move_maps(0, 1);
-            }
-            else if (strcmp(command, "8") == 0) {
-                move_maps(1, 0);
-            }
-            else if (strcmp(command, "7") == 0) {
-                move_maps(-1, 0);
-            }
+//            else if (strcmp(command, "0") == 0) {
+//                move_maps(0, -1);
+//            }
+//            else if (strcmp(command, "9") == 0) {
+//                move_maps(0, 1);
+//            }
+//            else if (strcmp(command, "8") == 0) {
+//                move_maps(1, 0);
+//            }
+//            else if (strcmp(command, "7") == 0) {
+//                move_maps(-1, 0);
+//            }
             else if (strcmp(command, "f") == 0) {
                 scanf("%d %d", &x, &y);
                 fly(x, y);
             }
-            else if (strcmp(command, "q") == 0) {
+            else if (strcmp(command, "q") == 0 || strcmp(command, "Q") == 0) {
                 break;
             }
             else {
