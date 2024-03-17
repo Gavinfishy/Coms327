@@ -38,11 +38,6 @@
 /*
  * This struct keeps track of a character with their x and y coordinates in the character map
  */
-//struct character {
-//    int x;
-//    int y;
-//};
-
 struct gameCharacter {
     int id;
     int x;
@@ -891,9 +886,6 @@ int moveNPC(struct gameCharacter* npc, cost_map_key_t* cost_map, struct map_key 
                 }
                 break;
             case wanderers:
-//                if (map->terrain_type[npc->x + dx][npc->y + dy] != npc->initialTerrain) {
-//                    continue;
-//                }
                 dx = npc->direction[0];
                 dy = npc->direction[1];
                 break;
@@ -1223,7 +1215,6 @@ void gameLoop() {
             }
 //            printHeap(turnHeap);
             printMap(world[currentX + world_size_a][currentY + world_size_a]);
-//            usleep(250000);
         }
     }
 }
