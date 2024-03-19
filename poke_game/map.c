@@ -8,6 +8,7 @@
 #include <string.h>
 #include <math.h>
 #include <limits.h>
+#include <ncurses.h>
 #include <unistd.h>
 
 #define ROW 21
@@ -189,73 +190,143 @@ struct queue {
 /*
  * prints the terrain map and character map
  */
+//void printMap(struct map_key *map) {
+//    for (int i = 0; i < ROW; i++) {
+//        for (int j = 0; j < COL; j++ ) {
+//            if (map->character_type[i][j] != -1) {
+//                switch(map->character_type[i][j]) {
+//                    case player:
+//                        printf("%c", '@');
+//                        break;
+//                    case hiker:
+//                        printf("%c", 'h');
+//                        break;
+//                    case rival:
+//                        printf("%c", 'r');
+//                        break;
+//                    case pacers:
+//                        printf("%c", 'p');
+//                        break;
+//                    case wanderers:
+//                        printf("%c", 'w');
+//                        break;
+//                    case sentries:
+//                        printf("%c", 's');
+//                        break;
+//                    case explorers:
+//                        printf("%c", 'e');
+//                        break;
+//                    case swimmer:
+//                        printf("%c", 'm');
+//                        break;
+//                }
+//            }
+//            else {
+//                switch (map->terrain_type[i][j]) {
+//                    case boulder:
+//                        printf("%c", '%');
+//                        break;
+//                    case tree:
+//                        printf("%c", '^');
+//                        break;
+//                    case road:
+//                        printf("%c", '#');
+//                        break;
+//                    case grass:
+//                        printf("%c", ':');
+//                        break;
+//                    case clearing:
+//                        printf("%c", '.');
+//                        //mvaddch(i,j, '.');
+//                        break;
+//                    case water:
+//                        printf("%c", '~');
+//                        break;
+//                    case center:
+//                        printf("%c", 'C');
+//                        break;
+//                    case pokemart:
+//                        printf("%c", 'M');
+//                        break;
+//                    default:
+//                        printf("%c", '/');
+//                        break;
+//                }
+//            }
+//        }
+//        printf("\n");
+//    }
+//    printf("\n");
+//}
+
+
+/*
+ * prints the terrain map and character map
+ */
 void printMap(struct map_key *map) {
     for (int i = 0; i < ROW; i++) {
         for (int j = 0; j < COL; j++ ) {
             if (map->character_type[i][j] != -1) {
                 switch(map->character_type[i][j]) {
                     case player:
-                        printf("%c", '@');
+                        mvaddch(i,j, '@');
                         break;
                     case hiker:
-                        printf("%c", 'h');
+                        mvaddch(i,j, 'h');
                         break;
                     case rival:
-                        printf("%c", 'r');
+                        mvaddch(i,j, 'r');
                         break;
                     case pacers:
-                        printf("%c", 'p');
+                        mvaddch(i,j, 'p');
                         break;
                     case wanderers:
-                        printf("%c", 'w');
+                        mvaddch(i,j, 'w');
                         break;
                     case sentries:
-                        printf("%c", 's');
+                        mvaddch(i,j, 's');
                         break;
                     case explorers:
-                        printf("%c", 'e');
+                        mvaddch(i,j, 'e');
                         break;
                     case swimmer:
-                        printf("%c", 'm');
+                        mvaddch(i,j, 'm');
                         break;
                 }
             }
             else {
                 switch (map->terrain_type[i][j]) {
-
                     case boulder:
-                        printf("%c", '%');
+                        mvaddch(i,j, '%');
                         break;
                     case tree:
-                        printf("%c", '^');
+                        mvaddch(i,j, '^');
                         break;
                     case road:
-                        printf("%c", '#');
+                        mvaddch(i,j, '#');
                         break;
                     case grass:
-                        printf("%c", ':');
+                        mvaddch(i,j, ':');
                         break;
                     case clearing:
-                        printf("%c", '.');
+                        mvaddch(i,j, '.');
                         break;
                     case water:
-                        printf("%c", '~');
+                        mvaddch(i,j, '~');
                         break;
                     case center:
-                        printf("%c", 'C');
+                        mvaddch(i,j, 'C');
                         break;
                     case pokemart:
-                        printf("%c", 'M');
+                        mvaddch(i,j, 'M');
                         break;
                     default:
-                        printf("%c", '/');
+                        mvaddch(i,j, '/');
                         break;
                 }
             }
         }
-        printf("\n");
     }
-    printf("\n");
 }
 
 
@@ -1138,7 +1209,8 @@ void gameLoop() {
                 addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
             }
             else if (strcmp(command, "t") == 0) {
-                printf("Invalid command.\n");
+//                printf("Invalid command.\n");
+                mvprintw(0, 0, "Invalid command.\n");
                 addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
             }
 //            else if (strcmp(command, "0") == 0) {
@@ -1221,7 +1293,12 @@ void gameLoop() {
 
 
 int main() {
+    initscr();
+    raw();
+    keypad(stdscr, TRUE);
+    noecho();
     srand(time(NULL));
     gameLoop();
+    endwin();
     return 0;
 }

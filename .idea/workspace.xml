@@ -1,23 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="03d1148e-9ca0-4432-81a4-0a5a316b4805" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/fisher_gavin.assignment-0/assignment0.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fisher_gavin.assignment-0/.idea/fisher_gavin.assignment-0.iml" beforeDir="false" afterPath="$PROJECT_DIR$/fisher_gavin.assignment-0/.idea/fisher_gavin.assignment-0.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fisher_gavin.assignment-0/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/fisher_gavin.assignment-0/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fisher_gavin.assignment-0/assignment0.c" beforeDir="false" afterPath="$PROJECT_DIR$/fisher_gavin.assignment-0/assignment0.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/poke_game/CHANGELOG" beforeDir="false" afterPath="$PROJECT_DIR$/poke_game/CHANGELOG" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/poke_game/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/poke_game/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/poke_game/map.c" beforeDir="false" afterPath="$PROJECT_DIR$/poke_game/map.c" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 6
-}]]></component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
   <component name="ProjectId" id="2bHjjRXPJXwZIqQo0mou3geyYaG" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -25,15 +40,26 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "C/C++ File.map.c.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
     "WebServerToolWindowFactoryState": "false",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
     "git-widget-placeholder": "main",
-    "last_opened_file_path": "U:/327/Coms327/fisher_gavin.assignment-0",
+    "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "U:/327/Coms327",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager">
+  <component name="RunManager" selected="C/C++ File.map.c">
     <configuration name="assignment0" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="assignment0" />
       <module name="Coms327" />
@@ -41,11 +67,15 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Application.assignment0" />
-      </list>
-    </recent_temporary>
+    <configuration name="map.c" type="CppFileRunConfiguration" factoryName="CppFileRunConfiguration" PROGRAM_PARAMS="-lm -lncurses" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Coms327" TARGET_NAME="map.c" CONFIG_NAME="map.c">
+      <option name="sourceFile" value="poke_game\map.c" />
+      <method v="2">
+        <option name="com.jetbrains.cidr.cpp.runfile.CppFileBuildBeforeRunTaskProvider$BasicBuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="C/C++ File.map.c" />
+    </list>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -56,6 +86,8 @@
       <option name="presentableId" value="Default" />
       <updated>1705879032270</updated>
       <workItem from="1705879033271" duration="144000" />
+      <workItem from="1710794627077" duration="5030000" />
+      <workItem from="1710819589195" duration="506000" />
     </task>
     <servers />
   </component>
