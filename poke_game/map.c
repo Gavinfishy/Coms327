@@ -1106,12 +1106,10 @@ void gameLoop() {
     }
     mapGen(world[currentX + world_size_a][currentY + world_size_a], currentX, currentY);
 //    printMap(world[currentX + world_size_a][currentY + world_size_a]);
-    //TODO decide how many NPC's are needed
     struct minHeap* turnHeap = createMinHeap(sizeof(NPC) + 1);
     struct gameCharacter* pc = newGameCharacter(-1, world[currentX + world_size_a][currentY + world_size_a]->PC.x,
             world[currentX + world_size_a][currentY + world_size_a]->PC.y, 0, 0);
     addCharacterToHeap(turnHeap, pc->id, 0);
-    //TODO decide num npc
     for (int i = 0; i < 10; i++) {
         struct gameCharacter* npc = newGameCharacter(i, NPC[i].x, NPC[i].y, 1, 0);
         addCharacterToHeap(turnHeap, npc->id, 0);
