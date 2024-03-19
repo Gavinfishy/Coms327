@@ -884,7 +884,6 @@ void placeCharacter(struct map_key *map, struct gameCharacter *character, int ty
                 if (type == pacers) {
                     character->pacerAxis = (rand() % 2 == 0) ? 'x' : 'y';
                 }
-                //TODO
                 if (type == wanderers) {
                     character->initialTerrain = map->terrain_type[character->x][character->y];
                 }
