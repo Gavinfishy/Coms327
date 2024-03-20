@@ -37,4 +37,5 @@ Project 5
 02/29/2024 9:45am-t 10:45am Adding directionals to PC movement (diagonals)
 03/12/2024 10pm-11pm added commands
 03/18/2024 10am-11am, 3pm-5pm started to implement ncurses
-
+03/19/2024 4pm-5pm, 9:30pm-11:30 ncurses printing working
+03/20/2024 9am-11am ncurses window started, will not print on first iteration
