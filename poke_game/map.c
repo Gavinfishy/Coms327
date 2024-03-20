@@ -919,19 +919,19 @@ void placeCharacters(struct map_key *map) {
 /*
  * Responsible for moving the characters everytime the player moves.
  */
-int moveCharacter(struct map_key *map, struct gameCharacter *character, int dx, int dy, WINDOW *action_win) {
+int moveCharacter(struct map_key *map, struct gameCharacter *character, int dx, int dy, WINDOW *comment_win) {
     int newX = character->x + dx;
     int newY = character->y +dy;
     if (newX < 1 || newX > ROW - 2 || newY < 1 || newY > COL - 2) {
 //        printf("Cannot go out of bounds\n");
-        mvwprintw(action_win, 0, 0, "Cannot go out of bounds\n");
-        wrefresh(action_win);
+        mvwprintw(comment_win, 0, 0, "Cannot go out of bounds\n");
+        wrefresh(comment_win);
         return -1;
     }
     if (player_cost_map.map[newX][newY] == INT_MAX || map->character_type[newX][newY] != -1) {
 //        printf("Cannot move onto that terrain\n");
-        mvwprintw(action_win, 0, 0, "Cannot move onto that terrain \n");
-        wrefresh(action_win);
+        mvwprintw(comment_win, 0, 0, "Cannot move onto that terrain \n");
+        wrefresh(comment_win);
         return -1;
     }
     map->character_type[character->x][character->y] = -1;
@@ -1103,10 +1103,11 @@ void mapGen(struct map_key *map, int x, int y) {
  *
  */
 void gameLoop() {
-    WINDOW *comment_win = newwin(1, 80, 0, 0);
+    WINDOW *comment_win = newwin(1, COL, 0, 0);
     WINDOW *map_win = newwin(ROW, COL, 1, 0);
-    WINDOW *status_win = newwin(2, 80, 22, 0);
+    WINDOW *status_win = newwin(2, COL, 22, 0);
     WINDOW *action_win;
+    WINDOW *input_win = newwin(1, COL, ROW+1, 0);
     char command[10];
     int x;
     int y;
@@ -1115,6 +1116,7 @@ void gameLoop() {
     }
     mapGen(world[currentX + world_size_a][currentY + world_size_a], currentX, currentY);
 //    mvaddch(0,0, 'h');
+    //TODO
     printMap(world[currentX + world_size_a][currentY + world_size_a], map_win);
 //    mvaddch(0,1, 'w');
     wrefresh(map_win);
@@ -1126,19 +1128,37 @@ void gameLoop() {
         struct gameCharacter* npc = newGameCharacter(i, NPC[i].x, NPC[i].y, 1, 0);
         addCharacterToHeap(turnHeap, npc->id, 0);
     }
+    printMap(world[currentX + world_size_a][currentY + world_size_a], map_win);
+//    int i = 0;
+    bool initialize_win = FALSE;
     while (1) {
         struct minHeapNode* minHeapNode = extractMin(turnHeap);
         int characterId = minHeapNode->v;
 //        printCostMap(&hiker_cost_map);
+        printMap(world[currentX + world_size_a][currentY + world_size_a], map_win);
         if (characterId == -1) {
-            printMap(world[currentX + world_size_a][currentY + world_size_a], map_win);
+
+            //TODO
+//            printMap(world[currentX + world_size_a][currentY + world_size_a], map_win);
 //            printf("Enter command:\n");
 //            scanf("%s", command);
-//            printw("\nEnter command:\n");
             mvwprintw(status_win, 0, 0, "Enter command");
             wrefresh(status_win);
-            getstr(command);
+            wmove(input_win, 0, 0);
+            wrefresh(input_win);
+//            getstr(command);
+            wgetstr(input_win, command);
+//            if (initialize_win == TRUE) {
+//                getstr(command);
+//            }
+//            else {
+//                initialize_win = TRUE;
+//                strcpy(command, "h");
+////                mvprintw(0, 0, "%d", i);
+////                i++;
+//            }
             if (strcmp(command, "k") == 0 || strcmp(command, "8") == 0) {
+//                mvaddch(0,0, 'w');
                 //move one up
                 int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
                                          &world[currentX + world_size_a][currentY + world_size_a]->PC, -1, 0, comment_win);
@@ -1255,6 +1275,7 @@ void gameLoop() {
                 wrefresh(comment_win);
                 addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
             }
+            printMap(world[currentX + world_size_a][currentY + world_size_a], map_win);
             setCostMaps(world[currentX + world_size_a][currentY + world_size_a]);
             dijkstra(&hiker_cost_map, world[currentX + world_size_a][currentY + world_size_a]->PC.x, world[currentX + world_size_a][currentY + world_size_a]->PC.y);
             dijkstra(&rival_cost_map, world[currentX + world_size_a][currentY + world_size_a]->PC.x, world[currentX + world_size_a][currentY + world_size_a]->PC.y);
@@ -1263,9 +1284,12 @@ void gameLoop() {
             dijkstra(&wanderer_cost_map, world[currentX + world_size_a][currentY + world_size_a]->PC.x, world[currentX + world_size_a][currentY + world_size_a]->PC.y);
             dijkstra(&sentry_cost_map, world[currentX + world_size_a][currentY + world_size_a]->PC.x, world[currentX + world_size_a][currentY + world_size_a]->PC.y);
             dijkstra(&explorer_cost_map, world[currentX + world_size_a][currentY + world_size_a]->PC.x, world[currentX + world_size_a][currentY + world_size_a]->PC.y);
-
         }
         else {
+
+//            printf("break");
+//            getstr(command);
+//            break;
             struct gameCharacter* npc = &NPC[characterId];
             cost_map_key_t* cost_map;
             int npcType;
@@ -1305,15 +1329,15 @@ void gameLoop() {
                 addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
             }
 //            printHeap(turnHeap);
-            printMap(world[currentX + world_size_a][currentY + world_size_a], map_win);
+//            printMap(world[currentX + world_size_a][currentY + world_size_a], map_win);
         }
-        printMap(world[currentX + world_size_a][currentY + world_size_a], map_win);
     }
 }
 
 
 int main() {
     initscr();
+    cbreak();
     raw();
     keypad(stdscr, TRUE);
     noecho();
