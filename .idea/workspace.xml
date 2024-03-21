@@ -11,7 +11,7 @@
   <component name="ChangeListManager">
     <list default="true" id="03d1148e-9ca0-4432-81a4-0a5a316b4805" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/poke_game/README" beforeDir="false" afterPath="$PROJECT_DIR$/poke_game/README" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/poke_game/CHANGELOG" beforeDir="false" afterPath="$PROJECT_DIR$/poke_game/CHANGELOG" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/poke_game/map.c" beforeDir="false" afterPath="$PROJECT_DIR$/poke_game/map.c" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -85,7 +85,7 @@
       <updated>1705879032270</updated>
       <workItem from="1705879033271" duration="144000" />
       <workItem from="1710794627077" duration="5030000" />
-      <workItem from="1710819589195" duration="35749000" />
+      <workItem from="1710819589195" duration="42861000" />
     </task>
     <servers />
   </component>
