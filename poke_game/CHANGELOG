@@ -38,5 +38,6 @@ Project 5
 03/12/2024 10pm-11pm added commands
 03/18/2024 10am-11am, 3pm-5pm started to implement ncurses
 03/19/2024 4pm-5pm, 9:30pm-11:30 ncurses printing working
-03/20/2024 9am-11am, 12pm-1pm, 2:30pm-5pm ncurses window started, will not print on first iteration.
+03/20/2024 9am-11am, 12pm-1pm, 2:30pm-7pm ncurses window started, will not print on first iteration.
 8 and a half hours later the map prints on the first iteration.
+trainer window open and close, store window open and close
