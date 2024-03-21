@@ -1186,7 +1186,6 @@ void gameLoop() {
                     minHeapNode->distance += cost;
                 }
                 addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
-//                printHeap(turnHeap);
             }
             else if (strcmp(command, "h") == 0 || strcmp(command, "4") == 0) {
                 //move left one
@@ -1235,11 +1234,20 @@ void gameLoop() {
                 addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
             }
             else if (strcmp(command, ">") == 0) {
-                in_store = TRUE;
-                action_win = newwin(15, 62, 4, 9);
-                box(action_win, 0, 0);
-                wrefresh(action_win);
-                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                struct gameCharacter *PC = &world[currentX + world_size_a][currentY + world_size_a]->PC;
+                int terrain = world[currentX + world_size_a][currentY + world_size_a]->terrain_type[PC->x][PC->y];
+                if (terrain == center || terrain == pokemart){
+                    in_store = TRUE;
+                    action_win = newwin(15, 62, 4, 9);
+                    box(action_win, 0, 0);
+                    wrefresh(action_win);
+                    addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                }
+                else {
+                    mvwprintw(comment_win, 0, 0, "Not near a building");
+                    wrefresh(comment_win);
+                    addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                }
             }
             else if (strcmp(command, "5") == 0 || strcmp(command, " ") == 0 || strcmp(command, ".") == 0 ) {
                 minHeapNode->distance += 10;
