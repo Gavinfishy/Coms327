@@ -16,3 +16,19 @@
   ],
   "version": 4
 }
+// {
+//   "configurations": [
+//       {
+//           "name": "WSL",
+//           "includePath": [
+//               "${workspaceFolder}/**",
+//               "/wsl.localhost/Ubuntu/usr/include"
+//           ],
+//           "compilerPath": "/wsl.localhost/Ubuntu/usr/bin/gcc",
+//           "cStandard": "c11",
+//           "cppStandard": "c++17",
+//           "intelliSenseMode": "gcc-x64"
+//       }
+//   ],
+//   "version": 4
+// }

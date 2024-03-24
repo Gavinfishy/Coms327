@@ -50,7 +50,7 @@ struct gameCharacter {
     int direction[2];
     int initialTerrain;
     char pacerAxis;
-    int battleReady;
+    bool battleReady;
 };
 
 /*
@@ -99,7 +99,7 @@ struct gameCharacter* newGameCharacter(int id, int x, int y, int type, int movem
     character->y = y;
     character->type = type;
     character->movementCost = movementCost;
-    character->battleReady = 1;
+    character->battleReady = true;
     return character;
 }
 
@@ -940,19 +940,14 @@ int moveCharacter(struct map_key *map, struct gameCharacter *character, int dx, 
     }
 
     if (map->character_type[newX][newY] != -1) {
-//        mvwprintw(comment_win, 0, 0, "Print test\n");
-//        wrefresh(comment_win);
         struct gameCharacter *npc = &NPC[map->character_type[newX][newY]];
-//        printf("%d", !npc->battleReady);
+
         if (!npc->battleReady) {
-//            mvwprintw(comment_win, 0, 0, "Print test 16\n");
-//            wrefresh(comment_win);
             in_battle = TRUE;
-            //TODO
             action_win = newwin(15, 62, 4, 9);
             box(action_win, 0, 0);
             wrefresh(action_win);
-            npc->battleReady = 1;
+            npc->battleReady = true;
         }
         return -1;
     }
@@ -989,6 +984,17 @@ int moveNPC(struct gameCharacter* npc, cost_map_key_t* cost_map, struct map_key 
                 break;
             case sentries:
                 return INT_MAX;
+            case rival:
+            case hiker:
+                if (!npc->battleReady) {
+                    dx = directions[i][0];
+                    dy = directions[i][1];
+                }
+                else {
+                    dx = npc->direction[0];
+                    dy = npc->direction[1];
+                }
+                break;
             default:
                 dx = directions[i][0];
                 dy = directions[i][1];
@@ -1009,7 +1015,8 @@ int moveNPC(struct gameCharacter* npc, cost_map_key_t* cost_map, struct map_key 
             minDy = dy;
         }
     }
-    if (minCost == INT_MAX && (npcType == pacers || npcType == explorers || npcType == wanderers)) {
+    if (minCost == INT_MAX && ((npcType == pacers || npcType == explorers || npcType == wanderers)
+    || ((npcType == rival && !npc->battleReady) || (npcType == hiker && !npc->battleReady)))) {
         int newDirectionIndex = rand() % 4;
         npc->direction[0] = directions[newDirectionIndex][0];
         npc->direction[1] = directions[newDirectionIndex][1];
@@ -1138,11 +1145,10 @@ void gameLoop() {
     addCharacterToHeap(turnHeap, pc->id, 0);
     for (int i = 0; i < 10; i++) {
         struct gameCharacter* npc = newGameCharacter(i, NPC[i].x, NPC[i].y, 1, 0);
+        npc->battleReady = true;
         addCharacterToHeap(turnHeap, npc->id, 0);
     }
-//    bool in_store = FALSE;
-//    bool in_battle = FALSE;
-//    bool in_lot = FALSE; //list of trainers
+//    nodelay(input_win, TRUE);
     while (1) {
         struct minHeapNode* minHeapNode = extractMin(turnHeap);
         int characterId = minHeapNode->v;
@@ -1173,15 +1179,11 @@ void gameLoop() {
                 }
                 else if (in_battle) {
                     if (strlen(command) == 1 && command[0] == 27) {
-//                        mvwprintw(comment_win, 0, 0, "Print test 3\n");
-//                        wrefresh(comment_win);
                         in_battle = FALSE;
                         addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
                         continue;
                     }
                     else {
-                        mvwprintw(comment_win, 0, 0, "Print test 2\n");
-                        wrefresh(comment_win);
                         action_win = newwin(15, 62, 4, 9);
                         box(action_win, 0, 0);
                         wrefresh(action_win);

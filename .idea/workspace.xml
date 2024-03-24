@@ -10,8 +10,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="03d1148e-9ca0-4432-81a4-0a5a316b4805" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/poke_game/map2.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/poke_game/.vscode/c_cpp_properties.json" beforeDir="false" afterPath="$PROJECT_DIR$/poke_game/.vscode/c_cpp_properties.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/poke_game/CHANGELOG" beforeDir="false" afterPath="$PROJECT_DIR$/poke_game/CHANGELOG" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/poke_game/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/poke_game/Makefile" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/poke_game/map.c" beforeDir="false" afterPath="$PROJECT_DIR$/poke_game/map.c" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -32,6 +35,9 @@
   &quot;associatedIndex&quot;: 6
 }</component>
   <component name="ProjectId" id="2bHjjRXPJXwZIqQo0mou3geyYaG" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -85,7 +91,11 @@
       <updated>1705879032270</updated>
       <workItem from="1705879033271" duration="144000" />
       <workItem from="1710794627077" duration="5030000" />
-      <workItem from="1710819589195" duration="42861000" />
+      <workItem from="1710819589195" duration="52590000" />
+      <workItem from="1711031031339" duration="534000" />
+      <workItem from="1711031587063" duration="281000" />
+      <workItem from="1711135315406" duration="1008000" />
+      <workItem from="1711314432657" duration="4508000" />
     </task>
     <servers />
   </component>
