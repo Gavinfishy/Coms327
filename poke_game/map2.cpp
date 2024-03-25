@@ -1,15 +1,16 @@
 //Author: Gavin D Fisher gdf73278
 
 #include <cstdio>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
 #include <time.h>
-#include <stdint.h>
-#include <string.h>
+#include <cstdint>
 #include <math.h>
 #include <limits.h>
 #include <ncurses.h>
 #include <unistd.h>
+#include <string>
 
 #define ROW 21
 #define COL 80
@@ -41,17 +42,17 @@ bool in_lot = false; //list of trainers
 /*
  * This struct keeps track of a character with their x and y coordinates in the character map
  */
-//struct gameCharacter {
-//    int id;
-//    int x;
-//    int y;
-//    int type;
-//    int movementCost;
-//    int direction[2];
-//    int initialTerrain;
-//    char pacerAxis;
-//    bool battleReady;
-//};
+struct gameCharacter {
+   int id;
+   int x;
+   int y;
+   int type;
+   int movementCost;
+   int direction[2];
+   int initialTerrain;
+   char pacerAxis;
+   bool battleReady;
+};
 
 /*
  * This struct keeps track of the terrain map, character map, whether a terrain was created and gate locations
@@ -60,7 +61,7 @@ bool in_lot = false; //list of trainers
 struct map_key{
     int terrain_type[ROW][COL];
     int character_type[ROW][COL];
-//    struct gameCharacter PC;
+    struct gameCharacter PC;
     int terrain_exists[5];
     int n,e,s,w;
 };
@@ -69,41 +70,41 @@ struct map_key{
 /*
  * keeps track of the dijkstras cost map for each character type
  */
-//typedef struct cost_map_key {
-//    int map[ROW][COL];
-//}cost_map_key_t;
-//cost_map_key_t road_cost_map;
-//cost_map_key_t player_cost_map;
-//cost_map_key_t hiker_cost_map;
-//cost_map_key_t rival_cost_map;
-//cost_map_key_t swimmer_cost_map;
-//cost_map_key_t pacer_cost_map;
-//cost_map_key_t wanderer_cost_map;
-//cost_map_key_t sentry_cost_map;
-//cost_map_key_t explorer_cost_map;
+typedef struct cost_map_key {
+   int map[ROW][COL];
+}cost_map_key_t;
+cost_map_key_t road_cost_map;
+cost_map_key_t player_cost_map;
+cost_map_key_t hiker_cost_map;
+cost_map_key_t rival_cost_map;
+cost_map_key_t swimmer_cost_map;
+cost_map_key_t pacer_cost_map;
+cost_map_key_t wanderer_cost_map;
+cost_map_key_t sentry_cost_map;
+cost_map_key_t explorer_cost_map;
 
 
 /*
  * world struct which holds all maps
  */
-//struct map_key* world[world_size][world_size] = {NULL};
+struct map_key* world[world_size][world_size] = {NULL};
 
 int currentX = 0;
 
 int currentY = 0;
 
-//struct gameCharacter* newGameCharacter(int id, int x, int y, int type, int movementCost) {
-//    struct gameCharacter* character = (struct gameCharacter*) malloc(sizeof(struct gameCharacter));
-//    character->id = id;
-//    character->x = x;
-//    character->y = y;
-//    character->type = type;
-//    character->movementCost = movementCost;
-//    character->battleReady = true;
-//    return character;
-//}
+struct gameCharacter* newGameCharacter(int id, int x, int y, int type, int movementCost) {
+   struct gameCharacter* character = (struct gameCharacter*) malloc(sizeof(struct gameCharacter));
+   character->id = id;
+   character->x = x;
+   character->y = y;
+   character->type = type;
+   character->movementCost = movementCost;
+   character->battleReady = true;
+   return character;
+}
 
-//struct gameCharacter NPC[10];
+struct gameCharacter NPC[10];
 
 struct adjacencyListNode {
     int dest;
@@ -340,7 +341,7 @@ int queue_init(struct queue *q){
 
 int queue_enqueue(struct queue *q, struct point pt) {
     struct queue_node *tmp;
-    if (!(tmp = malloc(sizeof (*tmp)))) {
+    if (!(tmp = (struct queue_node*) malloc(sizeof (*tmp)))) {
         return 1;
     }
     tmp->pt = pt;
@@ -726,6 +727,8 @@ int getMovementCostLookupIndex(int npcType) {
             return 6;
         case explorers:
             return 7;
+        default:
+            return -1;
     }
 }
 
@@ -1063,7 +1066,7 @@ void gameLoop() {
     int x;
     int y;
     if (world[currentX + world_size_a][currentY + world_size_a] == NULL) {
-        world[currentX + world_size_a][currentY + world_size_a] = malloc(sizeof(struct map_key));
+        world[currentX + world_size_a][currentY + world_size_a] = (struct map_key*) malloc(sizeof(struct map_key));
     }
     mapGen(world[currentX + world_size_a][currentY + world_size_a], currentX, currentY);
     struct minHeap* turnHeap = createMinHeap(sizeof(NPC) + 1);
@@ -1223,8 +1226,10 @@ void gameLoop() {
                 for (int i = 0; i < sizeof(NPC)/sizeof(NPC[0]); i++) {
                     int dx = NPC[i].x - pc_x;
                     int dy = NPC[i].y - pc_y;
-                    char *direction_x = dx > 0 ? "south" : "north";
-                    char *direction_y = dy > 0 ? "east" : "west";
+                    // char *direction_x = dx > 0 ? "south" : "north";
+                    // char *direction_y = dy > 0 ? "east" : "west";
+                    std::string direction_x = dx > 0 ? "south" : "north";
+                    std::string direction_y = dy > 0 ? "east" : "west";
                     char npc_type;
                     switch (NPC[i].type) {
                         case hiker: npc_type = 'h'; break;
@@ -1236,7 +1241,7 @@ void gameLoop() {
                         case sentries: npc_type = 's'; break;
                         default: npc_type = '?'; break;
                     }
-                    mvwprintw(action_win, i + 1, 1, "%c, %d %s and %d %s", npc_type, abs(dx), direction_x, abs(dy), direction_y);
+                    mvwprintw(action_win, i + 1, 1, "%c, %d %s and %d %s", npc_type, abs(dx), direction_x.c_str(), abs(dy), direction_y.c_str());
                 }
                 wrefresh(action_win);
                 addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
