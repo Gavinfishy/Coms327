@@ -35,9 +35,14 @@
 #define world_size_a (world_size/2)
 #define NUM_CHARACTER_TYPES 8
 #define NUM_TERRAIN_TYPES 8
+#define NORTH 0
+#define EAST 1
+#define SOUTH 2
+#define WEST 3
 bool in_store = false;
 bool in_battle = false;
 bool in_lot = false; //list of trainers
+int gate_entered = -1;
 
 /*
  * This struct keeps track of a character with their x and y coordinates in the character map
@@ -253,7 +258,7 @@ struct queue {
 };
 
 
-void move_maps(int dx, int dy, WINDOW *comment_win, WINDOW *map_win, WINDOW *status_win);
+void move_maps(int dx, int dy, WINDOW *comment_win, WINDOW *map_win, WINDOW *status_win, WINDOW *action_win);
 void fly(int x, int y, WINDOW *comment_win, WINDOW *map_win, WINDOW *status_win);
 
 
@@ -859,23 +864,49 @@ void placeBuildings(struct map_key *map, int mapx, int mapy) {
 /*
  * Randomly places each character type in their respective environment
  */
-void placeCharacter(struct map_key *map, struct gameCharacter *character, int type) {
+void placeCharacter(struct map_key *map, struct gameCharacter *character, int type, bool new_map) {
     bool placed = false;
     while (!placed) {
         int x = (rand() % (ROW - 2) + 1);
         int y = (rand() % (COL - 2) + 1);
         if (x > 0 && x < ROW - 1 && y > 0 && y < COL - 1) {
-            if (type == player && map->terrain_type[x][y] == road) {
-                map->character_type[x][y] = type;
-                map->PC.x = x;
-                map->PC.y = y;
-                placed = true;
-            } else if ((type == hiker) && map->terrain_type[x][y] != water && map->terrain_type[x][y] != road) {
+            if (type == player) {
+                if (new_map && map->terrain_type[x][y] == road) {
+                    map->character_type[x][y] = type;
+                    map->PC.x = x;
+                    map->PC.y = y;
+                    placed = true;
+                }
+                else if (!new_map) {
+                    if (gate_entered == NORTH) {
+                        x = ROW - 2;
+                        y = map->s;
+                    }
+                    else if (gate_entered == EAST) {
+                        x = map->w;
+                        y = 1;
+                    }
+                    else if (gate_entered == SOUTH) {
+                        x = 1;
+                        y = map->n;
+                    }
+                    else if (gate_entered == WEST) {
+                        x = map->e;
+                        y = COL - 2;
+                    }
+                    map->character_type[x][y] = type;
+                    map->PC.x = x;
+                    map->PC.y = y;
+                    placed = true;                    
+                }
+            }
+            else if ((type == hiker) && map->terrain_type[x][y] != water && map->terrain_type[x][y] != road) {
                 map->character_type[x][y] = type;
                 character->x = x;
                 character->y = y;
                 placed = true;
-            } else if ((type == rival || type == pacers || type == sentries || type == wanderers || type == explorers)
+            } 
+            else if ((type == rival || type == pacers || type == sentries || type == wanderers || type == explorers)
                        && map->terrain_type[x][y] != boulder && map->terrain_type[x][y] != tree
                        && map->terrain_type[x][y] != water && map->terrain_type[x][y] != road) {
                 map->character_type[x][y] = type;
@@ -888,7 +919,8 @@ void placeCharacter(struct map_key *map, struct gameCharacter *character, int ty
                 if (type == wanderers) {
                     character->initialTerrain = map->terrain_type[character->x][character->y];
                 }
-            } else if (type == swimmer) {
+            } 
+            else if (type == swimmer) {
                 if (map->terrain_exists[water] == 1) {
                     if (map->terrain_type[x][y] == water) {
                         map->character_type[x][y] = type;
@@ -896,7 +928,8 @@ void placeCharacter(struct map_key *map, struct gameCharacter *character, int ty
                         character->y = y;
                         placed = true;
                     }
-                } else {
+                } 
+                else {
                     break;
                 }
             }
@@ -905,49 +938,33 @@ void placeCharacter(struct map_key *map, struct gameCharacter *character, int ty
 }
 
 
-void placeCharacters(struct map_key *map) {
-    placeCharacter(map, &map->PC, player);
+void placeCharacters(struct map_key *map, bool new_map) {
+    placeCharacter(map, &map->PC, player, new_map);
     for (int i = 0; i < sizeof(NPC)/sizeof(NPC[0]); i++) {
         int type = (i % 7) + 9;
         NPC[i].type = type;
-        placeCharacter(map, &NPC[i], type);
+        placeCharacter(map, &NPC[i], type, new_map);
     }
 }
 
 
-// North
-// else if (strcmp(command, "0") == 0) {
-//                move_maps(0, -1, comment_win, map_win, status_win);
-//                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
-//            }
-//
-//            south
-//            else if (strcmp(command, "=") == 0) {
-//                move_maps(0, 1, comment_win, map_win, status_win);
-//                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
-//            }
-//
-//            east
-//            else if (strcmp(command, "]") == 0) {
-//                move_maps(1, 0, comment_win, map_win, status_win);
-//                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
-//            }
-//
-//            west
-//            else if (strcmp(command, "[") == 0) {
-//                move_maps(-1, 0, comment_win, map_win, status_win);
-//                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
-//            }
 /*
  * Responsible for moving the characters everytime the player moves.
  */
-//TODO
-int moveCharacter(struct map_key *map, struct gameCharacter *character, int dx, int dy, WINDOW *comment_win, WINDOW *action_win, WINDOW *map_win, WINDOW *status_win) {
+int moveCharacter(struct map_key *map, struct gameCharacter *character, int dx, int dy, 
+WINDOW *comment_win, WINDOW *action_win, WINDOW *map_win, WINDOW *status_win, bool visited) {
     int newX = character->x + dx;
     int newY = character->y +dy;
     int row_lim = ROW - 2;
     int col_lim = COL - 2;
     werase(comment_win);
+    if (visited) {
+        map->character_type[character->x][character->y] = -1;
+        character->x = dx;
+        character->y = dy;
+        map->character_type[character->x][character->y] = player;
+        return player_cost_map.map[newX][newY];
+    }
     if (newX < 1 || newX > row_lim || newY < 1 || newY > col_lim) {
         int terrain = world[currentX + world_size_a][currentY + world_size_a]->terrain_type[newX][newY];
         if (terrain == road) {
@@ -956,19 +973,23 @@ int moveCharacter(struct map_key *map, struct gameCharacter *character, int dx, 
             wrefresh(comment_win);
             if (newX < 1) {
                 //North
-                move_maps(0, -1, comment_win, map_win, status_win);
+                gate_entered = NORTH;
+                move_maps(0, -1, comment_win, map_win, status_win, action_win);
             }
             else if (newY < 1) {
                 //West
-                move_maps(-1, 0, comment_win, map_win, status_win);
+                gate_entered = WEST;
+                move_maps(-1, 0, comment_win, map_win, status_win, action_win);
             }
             else if (newX > row_lim) {
                 //South
-                move_maps(0, 1, comment_win, map_win, status_win);
+                gate_entered = SOUTH;
+                move_maps(0, 1, comment_win, map_win, status_win, action_win);
             }
             else if (newY > col_lim) {
                 //East
-                move_maps(1, 0, comment_win, map_win, status_win);
+                gate_entered = EAST;
+                move_maps(1, 0, comment_win, map_win, status_win, action_win);
             }
             return -1;
         }
@@ -979,13 +1000,11 @@ int moveCharacter(struct map_key *map, struct gameCharacter *character, int dx, 
             return -1;
         }
     }
-//    if (player_cost_map.map[newX][newY] == INT_MAX || map->character_type[newX][newY] != -1) {
     if (player_cost_map.map[newX][newY] == INT_MAX) {
         mvwprintw(comment_win, 0, 0, "Cannot move onto that terrain \n");
         wrefresh(comment_win);
         return -1;
     }
-
     if (map->character_type[newX][newY] != -1) {
         struct gameCharacter *npc = &NPC[map->character_type[newX][newY]];
         
@@ -1078,7 +1097,7 @@ int moveNPC(struct gameCharacter* npc, cost_map_key* cost_map, struct map_key *m
 }
 
 
-void mapGen(struct map_key *map, int x, int y) {
+void mapGen(struct map_key *map, int x, int y, bool new_map) {
     for (int i = 0; i < ROW; i++) {
         for (int j = 0; j < COL; j++ ) {
             if (i == 0 || j == 0 || i == ROW-1 || j == COL-1) {
@@ -1103,7 +1122,7 @@ void mapGen(struct map_key *map, int x, int y) {
     // Character cost Maps
     setCostMaps(map);
     // PC and NPCs
-    placeCharacters(map);
+    placeCharacters(map, new_map);
     // Dijkstra cost map
     dijkstra(&hiker_cost_map, map->PC.x, map->PC.y);
     dijkstra(&rival_cost_map, map->PC.x, map->PC.y);
@@ -1112,18 +1131,44 @@ void mapGen(struct map_key *map, int x, int y) {
 }
 
 
-void move_maps(int dx, int dy, WINDOW *comment_win, WINDOW *map_win, WINDOW *status_win) {
+void move_maps(int dx, int dy, WINDOW *comment_win, WINDOW *map_win, WINDOW *status_win, WINDOW *action_win) {
     int newX = currentX + dx;
     int newY = currentY + dy;
+    int moveCharX;
+    int moveCharY;
     if (newX < -world_size_a || newX > world_size_a || newY < -world_size_a || newY > world_size_a) {
         mvwprintw(comment_win, 0, 0, "Cannot go out of bounds\n");
         return;
     }
     if (world[newX + world_size_a][newY + world_size_a] == NULL) {
         world[newX + world_size_a][newY + world_size_a] = new map_key;
-        mapGen(world[newX + world_size_a][newY + world_size_a], newX, newY);
+        mapGen(world[newX + world_size_a][newY + world_size_a], newX, newY, false);
     }
     else {
+        //TODO
+        if (gate_entered == NORTH) {
+            moveCharX = ROW - 2;
+            moveCharY = world[newX + world_size_a][newY + world_size_a]->s;
+        }
+        else if (gate_entered == EAST) {
+            moveCharX = world[newX + world_size_a][newY + world_size_a]->w;
+            moveCharY = 1;
+        }
+        else if (gate_entered == SOUTH) {
+            moveCharX = 1;
+            moveCharY = world[newX + world_size_a][newY + world_size_a]->n;
+        }
+        else if (gate_entered == WEST) {
+            moveCharX = world[newX + world_size_a][newY + world_size_a]->e;
+            moveCharY = COL - 2;
+        }
+        //             map->character_type[x][y] = type;
+        //             map->PC.x = x;
+        //             map->PC.y = y;
+        //             placed = true;
+        moveCharacter(world[newX + world_size_a][newY + world_size_a], &world[newX + world_size_a][newY + world_size_a]->PC, moveCharX, moveCharY, comment_win, action_win, map_win, status_win, true);
+        // placeCharacter(world[newX + world_size_a][newY + world_size_a], &world[newX + world_size_a][newY + world_size_a]->PC, player, false);
+        // world[newX + world_size_a][newY + world_size_a]->character_type[world[newX + world_size_a][newY + world_size_a]->PC.x][world[newX + world_size_a][newY + world_size_a]->PC.y] = -1;
         setCostMaps(world[newX + world_size_a][newY + world_size_a]);
         dijkstra(&hiker_cost_map, world[newX + world_size_a][newY + world_size_a]->PC.x,
             world[newX + world_size_a][newY + world_size_a]->PC.y);
@@ -1147,7 +1192,7 @@ void fly(int x, int y, WINDOW *comment_win, WINDOW *map_win, WINDOW *status_win)
     }
     if (world[x + world_size_a][y + world_size_a] == NULL) {
         world[x + world_size_a][y + world_size_a] = new map_key;
-        mapGen(world[x + world_size_a][y + world_size_a], x, y);
+        mapGen(world[x + world_size_a][y + world_size_a], x, y, true);
     }
     else {
         setCostMaps(world[x + world_size_a][y + world_size_a]);
@@ -1180,7 +1225,7 @@ void gameLoop() {
     if (world[currentX + world_size_a][currentY + world_size_a] == NULL) {
         world[currentX + world_size_a][currentY + world_size_a] = (struct map_key*) malloc(sizeof(struct map_key));
     }
-    mapGen(world[currentX + world_size_a][currentY + world_size_a], currentX, currentY);
+    mapGen(world[currentX + world_size_a][currentY + world_size_a], currentX, currentY, true);
     struct minHeap* turnHeap = createMinHeap(sizeof(NPC) + 1);
     struct gameCharacter* pc = newGameCharacter(-1, world[currentX + world_size_a][currentY + world_size_a]->PC.x,
                                                 world[currentX + world_size_a][currentY + world_size_a]->PC.y, 0, 0);
@@ -1254,7 +1299,7 @@ void gameLoop() {
             if (strcmp(command, "k") == 0 || strcmp(command, "8") == 0) {
                 //move one up
                 int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
-                                         &world[currentX + world_size_a][currentY + world_size_a]->PC, -1, 0, comment_win, action_win, map_win, status_win);
+                                         &world[currentX + world_size_a][currentY + world_size_a]->PC, -1, 0, comment_win, action_win, map_win, status_win, false);
                 if (cost != -1) {
                     minHeapNode->distance += cost;
                 }
@@ -1263,7 +1308,7 @@ void gameLoop() {
             else if (strcmp(command, "l") == 0 || strcmp(command, "6") == 0) {
                 //move one right
                 int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
-                                         &world[currentX + world_size_a][currentY + world_size_a]->PC, 0, 1, comment_win, action_win, map_win, status_win);
+                                         &world[currentX + world_size_a][currentY + world_size_a]->PC, 0, 1, comment_win, action_win, map_win, status_win, false);
                 if (cost != -1) {
                     minHeapNode->distance += cost;
                 }
@@ -1273,7 +1318,7 @@ void gameLoop() {
             else if (strcmp(command, "j") == 0 || strcmp(command, "2") == 0) {
                 //move down one
                 int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
-                                         &world[currentX + world_size_a][currentY + world_size_a]->PC, 1, 0, comment_win, action_win, map_win, status_win);
+                                         &world[currentX + world_size_a][currentY + world_size_a]->PC, 1, 0, comment_win, action_win, map_win, status_win, false);
                 if (cost != -1) {
                     minHeapNode->distance += cost;
                 }
@@ -1282,7 +1327,7 @@ void gameLoop() {
             else if (strcmp(command, "h") == 0 || strcmp(command, "4") == 0) {
                 //move left one
                 int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
-                                         &world[currentX + world_size_a][currentY + world_size_a]->PC, 0, -1, comment_win, action_win, map_win, status_win);
+                                         &world[currentX + world_size_a][currentY + world_size_a]->PC, 0, -1, comment_win, action_win, map_win, status_win, false);
                 if (cost != -1) {
                     minHeapNode->distance += cost;
                 }
@@ -1292,7 +1337,7 @@ void gameLoop() {
             else if (strcmp(command, "y") == 0 || strcmp(command, "7") == 0) {
                 //move up left
                 int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
-                                         &world[currentX + world_size_a][currentY + world_size_a]->PC, -1, -1, comment_win, action_win, map_win, status_win);
+                                         &world[currentX + world_size_a][currentY + world_size_a]->PC, -1, -1, comment_win, action_win, map_win, status_win, false);
                 if (cost != -1) {
                     minHeapNode->distance += cost;
                 }
@@ -1301,7 +1346,7 @@ void gameLoop() {
             else if (strcmp(command, "u") == 0 || strcmp(command, "9") == 0) {
                 //move up right
                 int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
-                                         &world[currentX + world_size_a][currentY + world_size_a]->PC, -1, 1, comment_win, action_win, map_win, status_win);
+                                         &world[currentX + world_size_a][currentY + world_size_a]->PC, -1, 1, comment_win, action_win, map_win, status_win, false);
                 if (cost != -1) {
                     minHeapNode->distance += cost;
                 }
@@ -1310,7 +1355,7 @@ void gameLoop() {
             else if (strcmp(command, "n") == 0 || strcmp(command, "3") == 0) {
                 //move down right
                 int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
-                                         &world[currentX + world_size_a][currentY + world_size_a]->PC, 1, 1, comment_win, action_win, map_win, status_win);
+                                         &world[currentX + world_size_a][currentY + world_size_a]->PC, 1, 1, comment_win, action_win, map_win, status_win, false);
                 if (cost != -1) {
                     minHeapNode->distance += cost;
                 }
@@ -1319,7 +1364,7 @@ void gameLoop() {
             else if (strcmp(command, "b") == 0 || strcmp(command, "1") == 0) {
                 //move down left
                 int cost = moveCharacter(world[currentX + world_size_a][currentY + world_size_a],
-                                         &world[currentX + world_size_a][currentY + world_size_a]->PC, 1, -1, comment_win, action_win, map_win, status_win);
+                                         &world[currentX + world_size_a][currentY + world_size_a]->PC, 1, -1, comment_win, action_win, map_win, status_win, false);
                 if (cost != -1) {
                     minHeapNode->distance += cost;
                 }
