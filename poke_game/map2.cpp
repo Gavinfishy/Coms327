@@ -1113,58 +1113,55 @@ void mapGen(struct map_key *map, int x, int y) {
 
 
 void move_maps(int dx, int dy, WINDOW *comment_win, WINDOW *map_win, WINDOW *status_win) {
-   int newX = currentX + dx;
-   int newY = currentY + dy;
-   if (newX < -world_size_a || newX > world_size_a || newY < -world_size_a || newY > world_size_a) {
+    int newX = currentX + dx;
+    int newY = currentY + dy;
+    if (newX < -world_size_a || newX > world_size_a || newY < -world_size_a || newY > world_size_a) {
         mvwprintw(comment_win, 0, 0, "Cannot go out of bounds\n");
         return;
-   }
-   if (world[newX + world_size_a][newY + world_size_a] == NULL) {
-    //    world[newX + world_size_a][newY + world_size_a] = malloc(sizeof(struct map_key));
+    }
+    if (world[newX + world_size_a][newY + world_size_a] == NULL) {
         world[newX + world_size_a][newY + world_size_a] = new map_key;
         mapGen(world[newX + world_size_a][newY + world_size_a], newX, newY);
-   }
-   else {
-       setCostMaps(world[newX + world_size_a][newY + world_size_a]);
-       dijkstra(&hiker_cost_map, world[newX + world_size_a][newY + world_size_a]->PC.x,
-                world[newX + world_size_a][newY + world_size_a]->PC.y);
-       dijkstra(&rival_cost_map, world[newX + world_size_a][newY + world_size_a]->PC.x,
-                world[newX + world_size_a][newY + world_size_a]->PC.y);
-       dijkstra(&swimmer_cost_map, world[newX + world_size_a][newY + world_size_a]->PC.x,
-                world[newX + world_size_a][newY + world_size_a]->PC.y);
+    }
+    else {
+        setCostMaps(world[newX + world_size_a][newY + world_size_a]);
+        dijkstra(&hiker_cost_map, world[newX + world_size_a][newY + world_size_a]->PC.x,
+            world[newX + world_size_a][newY + world_size_a]->PC.y);
+        dijkstra(&rival_cost_map, world[newX + world_size_a][newY + world_size_a]->PC.x,
+            world[newX + world_size_a][newY + world_size_a]->PC.y);
+        dijkstra(&swimmer_cost_map, world[newX + world_size_a][newY + world_size_a]->PC.x,
+            world[newX + world_size_a][newY + world_size_a]->PC.y);
 
-   }
-   currentX = newX;
-   currentY = newY;
-   printMap(world[currentX + world_size_a][currentY + world_size_a], map_win);
-//    printf("Current coordinates: (%d, %d)\n", currentX, currentY);
-   mvwprintw(status_win, 0, 0, "Current coordinates: (%d, %d)\n", currentX, currentY);
+    }
+    currentX = newX;
+    currentY = newY;
+    printMap(world[currentX + world_size_a][currentY + world_size_a], map_win);
+    mvwprintw(status_win, 0, 0, "Current coordinates: (%d, %d)\n", currentX, currentY);
 }
 
 
 void fly(int x, int y, WINDOW *comment_win, WINDOW *map_win, WINDOW *status_win) {
-   if (x < -world_size_a || x > world_size_a || y < -world_size_a || y > world_size_a) {
-       mvwprintw(comment_win, 0, 0, "Cannot go out of bounds\n");
-       return;
-   }
-   if (world[x + world_size_a][y + world_size_a] == NULL) {
-    //    world[x + world_size_a][y + world_size_a] = malloc(sizeof(struct map_key));
+    if (x < -world_size_a || x > world_size_a || y < -world_size_a || y > world_size_a) {
+        mvwprintw(comment_win, 0, 0, "Cannot go out of bounds\n");
+        return;
+    }
+    if (world[x + world_size_a][y + world_size_a] == NULL) {
         world[x + world_size_a][y + world_size_a] = new map_key;
         mapGen(world[x + world_size_a][y + world_size_a], x, y);
-   }
-   else {
-       setCostMaps(world[x + world_size_a][y + world_size_a]);
-       dijkstra(&rival_cost_map, world[x + world_size_a][y + world_size_a]->PC.x,
-                world[x + world_size_a][y + world_size_a]->PC.y);
-       dijkstra(&hiker_cost_map, world[x + world_size_a][y + world_size_a]->PC.x,
-                world[x + world_size_a][y + world_size_a]->PC.y);
-       dijkstra(&swimmer_cost_map, world[x + world_size_a][y + world_size_a]->PC.x,
-                world[x + world_size_a][y + world_size_a]->PC.y);
-   }
-   currentX = x;
-   currentY = y;
-   printMap(world[currentX + world_size_a][currentY + world_size_a], map_win);
-   mvwprintw(status_win, 0, 0, "Current coordinates: (%d, %d)\n", x, y);
+    }
+    else {
+        setCostMaps(world[x + world_size_a][y + world_size_a]);
+        dijkstra(&rival_cost_map, world[x + world_size_a][y + world_size_a]->PC.x,
+            world[x + world_size_a][y + world_size_a]->PC.y);
+        dijkstra(&hiker_cost_map, world[x + world_size_a][y + world_size_a]->PC.x,
+            world[x + world_size_a][y + world_size_a]->PC.y);
+        dijkstra(&swimmer_cost_map, world[x + world_size_a][y + world_size_a]->PC.x,
+            world[x + world_size_a][y + world_size_a]->PC.y);
+    }
+    currentX = x;
+    currentY = y;
+    printMap(world[currentX + world_size_a][currentY + world_size_a], map_win);
+    mvwprintw(status_win, 0, 0, "Current coordinates: (%d, %d)\n", x, y);
 }
 
 
@@ -1174,9 +1171,9 @@ void fly(int x, int y, WINDOW *comment_win, WINDOW *map_win, WINDOW *status_win)
 void gameLoop() {
     WINDOW *comment_win = newwin(1, COL, 0, 0);
     WINDOW *map_win = newwin(ROW, COL, 1, 0);
-    WINDOW *status_win = newwin(2, COL, 22, 0);
+    WINDOW *status_win = newwin(2, COL, ROW + 1, 0);
     WINDOW *action_win;
-    WINDOW *input_win = newwin(1, COL, ROW+2, 0);
+    WINDOW *input_win = newwin(1, COL, ROW + 2, 0);
     char command[10];
     int x;
     int y;
@@ -1193,17 +1190,21 @@ void gameLoop() {
         npc->battleReady = true;
         addCharacterToHeap(turnHeap, npc->id, 0);
     }
-   nodelay(input_win, true);
+    nodelay(input_win, true);
+    fly(0, 0, comment_win, map_win, status_win);
     while (1) {
         struct minHeapNode* minHeapNode = extractMin(turnHeap);
         int characterId = minHeapNode->v;
         if (characterId == -1) {
             wmove(input_win, 0, 0);
             wrefresh(input_win);
+            wclrtoeol(status_win);
             mvwprintw(status_win, 1, 0, "Enter command");
             wrefresh(status_win);
             if (!in_store && !in_battle && !in_lot) {
                 printMap(world[currentX + world_size_a][currentY + world_size_a], map_win);
+                mvwprintw(status_win, 1, 0, "Enter command");
+                wrefresh(status_win);
                 int ch = wgetch(input_win);
                 while (ch == ERR) {
                     ch = wgetch(input_win);
@@ -1215,6 +1216,8 @@ void gameLoop() {
             }
             else {
                 int ch = wgetch(input_win);
+                wmove(input_win, 0, 0);
+                wrefresh(input_win);
                 while (ch == ERR) {
                     ch = wgetch(input_win);
                 }
@@ -1351,8 +1354,6 @@ void gameLoop() {
                 for (int i = 0; i < sizeof(NPC)/sizeof(NPC[0]); i++) {
                     int dx = NPC[i].x - pc_x;
                     int dy = NPC[i].y - pc_y;
-                    // char *direction_x = dx > 0 ? "south" : "north";
-                    // char *direction_y = dy > 0 ? "east" : "west";
                     std::string direction_x = dx > 0 ? "south" : "north";
                     std::string direction_y = dy > 0 ? "east" : "west";
                     char npc_type;
@@ -1371,11 +1372,19 @@ void gameLoop() {
                 wrefresh(action_win);
                 addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
             }
-//            else if (strcmp(command, "f") == 0) {
-////                scanf("%d %d", &x, &y);
-//                scanw("%d %d", &x, &y);
-////                fly(x, y);
-//            }
+           else if (strcmp(command, "f") == 0) {
+                wmove(input_win, 0, 0);
+                wrefresh(input_win);
+                mvwprintw(status_win, 1, 0, "Enter coordinates x y");
+                wrefresh(status_win);
+                nodelay(input_win, false);
+                wscanw(input_win, "%d %d", &x, &y);
+                nodelay(input_win, true);
+                wmove(input_win, 0, 0);
+                wrefresh(input_win);
+                fly(x, y, comment_win, map_win, status_win);
+                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+           }
             else if (strcmp(command, "q") == 0 || strcmp(command, "Q") == 0) {
                 break;
             }
