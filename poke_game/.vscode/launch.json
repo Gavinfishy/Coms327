@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "u:/327/Coms327/assignment-1",
-      "program": "u:/327/Coms327/assignment-1/build/Debug/outDebug",
+      "cwd": "c:/Users/BlueD/git_repos/327_poke/Coms327/poke_game",
+      "program": "c:/Users/BlueD/git_repos/327_poke/Coms327/poke_game/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
