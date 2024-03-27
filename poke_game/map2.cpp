@@ -911,17 +911,51 @@ void placeCharacters(struct map_key *map) {
 }
 
 
+// North
+// else if (strcmp(command, "0") == 0) {
+//                move_maps(0, -1, comment_win, map_win, status_win);
+//                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+//            }
+//
+//            south
+//            else if (strcmp(command, "=") == 0) {
+//                move_maps(0, 1, comment_win, map_win, status_win);
+//                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+//            }
+//
+//            east
+//            else if (strcmp(command, "]") == 0) {
+//                move_maps(1, 0, comment_win, map_win, status_win);
+//                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+//            }
+//
+//            west
+//            else if (strcmp(command, "[") == 0) {
+//                move_maps(-1, 0, comment_win, map_win, status_win);
+//                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+//            }
 /*
  * Responsible for moving the characters everytime the player moves.
  */
+//TODO
 int moveCharacter(struct map_key *map, struct gameCharacter *character, int dx, int dy, WINDOW *comment_win, WINDOW *action_win) {
     int newX = character->x + dx;
     int newY = character->y +dy;
     werase(comment_win);
     if (newX < 1 || newX > ROW - 2 || newY < 1 || newY > COL - 2) {
-        mvwprintw(comment_win, 0, 0, "Cannot go out of bounds\n");
-        wrefresh(comment_win);
-        return -1;
+        int terrain = world[currentX + world_size_a][currentY + world_size_a]->terrain_type[newX][newY];
+        if (terrain == road) {
+            werase(comment_win);
+            mvwprintw(comment_win, 0, 0, "Changing Maps\n");
+            wrefresh(comment_win);
+            return -1;
+        }
+        else {
+            werase(comment_win);
+            mvwprintw(comment_win, 0, 0, "Cannot go out of bounds\n");
+            wrefresh(comment_win);
+            return -1;
+        }
     }
 //    if (player_cost_map.map[newX][newY] == INT_MAX || map->character_type[newX][newY] != -1) {
     if (player_cost_map.map[newX][newY] == INT_MAX) {
@@ -1148,14 +1182,32 @@ void gameLoop() {
                 wrefresh(status_win);
                 wmove(input_win, 0, 0);
                 wrefresh(input_win);
-                wgetstr(input_win, command);
+                timeout(1000); 
+                int ch = wgetch(input_win);
+                if (ch != ERR) {
+                    command[0] = ch;
+                    command[1] = '\0';
+                }
+                else {
+                    addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                    continue;
+                }
+                
             }
             else {
                 mvwprintw(status_win, 1, 0, "Enter command");
                 wrefresh(status_win);
                 wmove(input_win, 0, 0);
                 wrefresh(input_win);
-                wgetstr(input_win, command);
+                int ch = wgetch(input_win);
+                if (ch != ERR) {
+                    command[0] = ch;
+                    command[1] = '\0';
+                }
+                else {
+                    addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                    continue;
+                }0
                 if (in_store && strcmp(command, "<") == 0) {
                     in_store = false;
                     addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
@@ -1305,18 +1357,22 @@ void gameLoop() {
                 wrefresh(action_win);
                 addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
             }
-//            else if (strcmp(command, "0") == 0) {
-//                move_maps(0, -1);
-//            }
-//            else if (strcmp(command, "9") == 0) {
-//                move_maps(0, 1);
-//            }
-//            else if (strcmp(command, "8") == 0) {
-//                move_maps(1, 0);
-//            }
-//            else if (strcmp(command, "7") == 0) {
-//                move_maps(-1, 0);
-//            }
+           else if (strcmp(command, "0") == 0) {
+               move_maps(0, -1, comment_win, map_win, status_win);
+               addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+           }
+           else if (strcmp(command, "=") == 0) {
+               move_maps(0, 1, comment_win, map_win, status_win);
+               addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+           }
+           else if (strcmp(command, "]") == 0) {
+               move_maps(1, 0, comment_win, map_win, status_win);
+               addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+           }
+           else if (strcmp(command, "[") == 0) {
+               move_maps(-1, 0, comment_win, map_win, status_win);
+               addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+           }
 //            else if (strcmp(command, "f") == 0) {
 ////                scanf("%d %d", &x, &y);
 //                scanw("%d %d", &x, &y);
