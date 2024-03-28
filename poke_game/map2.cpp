@@ -47,17 +47,6 @@ int gate_entered = -1;
 /*
  * This struct keeps track of a character with their x and y coordinates in the character map
  */
-// struct gameCharacter {
-//    int id;
-//    int x;
-//    int y;
-//    int type;
-//    int movementCost;
-//    int direction[2];
-//    int initialTerrain;
-//    char pacerAxis;
-//    bool battleReady;
-// };
 class gameCharacter {
     public:
         int id;
@@ -75,18 +64,12 @@ class gameCharacter {
  * This struct keeps track of the terrain map, character map, whether a terrain was created and gate locations
  * terrain_exists more specifically helps decide which npcs to spawn for example
  */
-// struct map_key{
-//     int terrain_type[ROW][COL];
-//     int character_type[ROW][COL];
-//     struct gameCharacter PC;
-//     int terrain_exists[5];
-//     int n,e,s,w;
-// };
 class map_key{
     public:
         int terrain_type[ROW][COL];
         int character_type[ROW][COL];
         gameCharacter PC;
+        gameCharacter local_NPC[10];
         int terrain_exists[5];
         int n,e,s,w;
 };
@@ -95,18 +78,6 @@ class map_key{
 /*
  * keeps track of the dijkstras cost map for each character type
  */
-// typedef struct cost_map_key {
-//    int map[ROW][COL];
-// }cost_map_key_t;
-// cost_map_key_t road_cost_map;
-// cost_map_key_t player_cost_map;
-// cost_map_key_t hiker_cost_map;
-// cost_map_key_t rival_cost_map;
-// cost_map_key_t swimmer_cost_map;
-// cost_map_key_t pacer_cost_map;
-// cost_map_key_t wanderer_cost_map;
-// cost_map_key_t sentry_cost_map;
-// cost_map_key_t explorer_cost_map;
 class cost_map_key {
     public:
         int map[ROW][COL];
@@ -132,7 +103,6 @@ int currentX = 0;
 int currentY = 0;
 
 gameCharacter* newGameCharacter(int id, int x, int y, int type, int movementCost) {
-//    gameCharacter* character = (struct gameCharacter*) malloc(sizeof(struct gameCharacter));
     gameCharacter* character = new gameCharacter;
     character->id = id;
     character->x = x;
@@ -144,7 +114,7 @@ gameCharacter* newGameCharacter(int id, int x, int y, int type, int movementCost
 }
 
 //TODO array of pointers
-struct gameCharacter NPC[10];
+gameCharacter NPC[10];
 
 class adjacencyListNode {
     public:
@@ -165,11 +135,6 @@ class adjacencyList {
         }
 };
 
-// class graph {
-//     public:
-//         int v;
-//         adjacencyList* array;
-// };
 
 adjacencyListNode* newAdjacencyListNode(int dest, int weight) {
     // adjacencyListNode* newNode = (struct adjacencyListNode*) malloc(sizeof (struct adjacencyListNode));
@@ -180,15 +145,7 @@ adjacencyListNode* newAdjacencyListNode(int dest, int weight) {
     return newNode;
 }
 
-// struct graph* createGraph(int v) {
-//     struct graph* graph = (struct graph*) malloc(sizeof(struct graph));
-//     graph->v=v;
-//     graph->array = (struct adjacencyList*) malloc(v * sizeof(struct adjacencyList));
-//     for (int i = 0; i < v; i++) {
-//         graph->array[i].head = NULL;
-//     }
-//     return graph;
-// }
+
 class Graph {
     public:
         int v;
@@ -1145,7 +1102,6 @@ void move_maps(int dx, int dy, WINDOW *comment_win, WINDOW *map_win, WINDOW *sta
         mapGen(world[newX + world_size_a][newY + world_size_a], newX, newY, false);
     }
     else {
-        //TODO
         if (gate_entered == NORTH) {
             moveCharX = ROW - 2;
             moveCharY = world[newX + world_size_a][newY + world_size_a]->s;
@@ -1162,13 +1118,8 @@ void move_maps(int dx, int dy, WINDOW *comment_win, WINDOW *map_win, WINDOW *sta
             moveCharX = world[newX + world_size_a][newY + world_size_a]->e;
             moveCharY = COL - 2;
         }
-        //             map->character_type[x][y] = type;
-        //             map->PC.x = x;
-        //             map->PC.y = y;
-        //             placed = true;
-        moveCharacter(world[newX + world_size_a][newY + world_size_a], &world[newX + world_size_a][newY + world_size_a]->PC, moveCharX, moveCharY, comment_win, action_win, map_win, status_win, true);
-        // placeCharacter(world[newX + world_size_a][newY + world_size_a], &world[newX + world_size_a][newY + world_size_a]->PC, player, false);
-        // world[newX + world_size_a][newY + world_size_a]->character_type[world[newX + world_size_a][newY + world_size_a]->PC.x][world[newX + world_size_a][newY + world_size_a]->PC.y] = -1;
+        moveCharacter(world[newX + world_size_a][newY + world_size_a], &world[newX + world_size_a][newY + world_size_a]->PC,
+            moveCharX, moveCharY, comment_win, action_win, map_win, status_win, true);
         setCostMaps(world[newX + world_size_a][newY + world_size_a]);
         dijkstra(&hiker_cost_map, world[newX + world_size_a][newY + world_size_a]->PC.x,
             world[newX + world_size_a][newY + world_size_a]->PC.y);
@@ -1313,7 +1264,6 @@ void gameLoop() {
                     minHeapNode->distance += cost;
                 }
                 addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
-//                printHeap(turnHeap);
             }
             else if (strcmp(command, "j") == 0 || strcmp(command, "2") == 0) {
                 //move down one
@@ -1332,7 +1282,6 @@ void gameLoop() {
                     minHeapNode->distance += cost;
                 }
                 addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
-//                printHeap(turnHeap);
             }
             else if (strcmp(command, "y") == 0 || strcmp(command, "7") == 0) {
                 //move up left
