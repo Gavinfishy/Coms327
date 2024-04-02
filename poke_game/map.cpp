@@ -43,6 +43,8 @@
 #define EAST 1
 #define SOUTH 2
 #define WEST 3
+#define pyrite_loc_1 "/share/cs327"
+#define local_location "/mnt/c/Users/BlueD/git_repos/327_poke/Coms327"
 bool in_store = false;
 bool in_battle = false;
 bool in_lot = false; //list of trainers
@@ -1481,28 +1483,38 @@ void gameLoop() {
 }
 
 
-void readCSV() {
-    std::ifstream file("/share/cs327/pokedex/pokedex/data/csv/");
+void readCSV(const std::string& filename) {
+    std::string fullPath = std::string(local_location) + "/pokedex/pokedex/data/csv/" + filename;
+    std::cout << "Attempting to open file: " << fullPath << std::endl;
+    std::ifstream file(fullPath);
     if (!file.is_open()) {
         std::cerr << "Error opening file";
         return;
     }
     std::string line;
     while (std::getline(file, line)) {
-        std::cout << line << std::endl;
+        std::cerr << "Error Reading file: " << fullPath << std::endl;
     }
     file.close();
 }
 
 
-int main() {
+int main(int argc, char* argv[]) {
+    if (argc < 2) {
+        std::cerr << "Please provide a filename as a command-line argument.";
+        return 1;
+    }
+    std::string filename = argv[1];
+    readCSV(filename);
+    return 0;
+    //vector for each csv
+    //each struct is a line
     initscr();
     cbreak();
     raw();
     keypad(stdscr, true);
     noecho();
     srand(time(NULL));
-    readCSV();
     gameLoop();
     endwin();
     return 0;
