@@ -11,6 +11,10 @@
 #include <ncurses.h>
 #include <unistd.h>
 #include <string>
+#include <iostream>
+#include <fstream>
+#include <ctime>
+
 
 #define ROW 21
 #define COL 80
@@ -69,9 +73,10 @@ class map_key{
         int terrain_type[ROW][COL];
         int character_type[ROW][COL];
         gameCharacter PC;
-        gameCharacter local_NPC[10];
+        gameCharacter NPC[10];
         int terrain_exists[5];
         int n,e,s,w;
+        // struct minHeap* turnHeap;
 };
 
 
@@ -114,7 +119,7 @@ gameCharacter* newGameCharacter(int id, int x, int y, int type, int movementCost
 }
 
 //TODO array of pointers
-gameCharacter NPC[10];
+// gameCharacter NPC[10];
 
 class adjacencyListNode {
     public:
@@ -565,6 +570,18 @@ void addCharacterToHeap(struct minHeap* minHeap, int characterId, int movementCo
 }
 
 
+// void setTurnHeap(map_key* map) {
+//     map->turnHeap = createMinHeap(sizeof(map->NPC) + 1);
+//     gameCharacter* pc = &map->PC;
+//     addCharacterToHeap(map->turnHeap, pc->id, -1);
+//     // for (int i = 0; i < sizeof(map->NPC)/sizeof(map->NPC[0]); i++) {
+//     //     struct gameCharacter* npc = &map->NPC[i];
+//     //     npc->battleReady = true;
+//     //     addCharacterToHeap(map->turnHeap, npc->id, 0);
+//     // }
+// }
+
+
 void printHeap(struct minHeap* minHeap) {
     for (int i = 0; i < minHeap->size; i++) {
         std::printf("Character ID: %d, Movement Cost: %d\n", minHeap->array[i]->v, minHeap->array[i]->distance);
@@ -897,10 +914,10 @@ void placeCharacter(struct map_key *map, struct gameCharacter *character, int ty
 
 void placeCharacters(struct map_key *map, bool new_map) {
     placeCharacter(map, &map->PC, player, new_map);
-    for (int i = 0; i < sizeof(NPC)/sizeof(NPC[0]); i++) {
+    for (int i = 0; i < sizeof(map->NPC)/sizeof(map->NPC[0]); i++) {
         int type = (i % 7) + 9;
-        NPC[i].type = type;
-        placeCharacter(map, &NPC[i], type, new_map);
+        map->NPC[i].type = type;
+        placeCharacter(map, &map->NPC[i], type, new_map);
     }
 }
 
@@ -963,7 +980,7 @@ WINDOW *comment_win, WINDOW *action_win, WINDOW *map_win, WINDOW *status_win, bo
         return -1;
     }
     if (map->character_type[newX][newY] != -1) {
-        struct gameCharacter *npc = &NPC[map->character_type[newX][newY]];
+        struct gameCharacter *npc = &map->NPC[map->character_type[newX][newY]];
         
         if (!(npc->battleReady)) {
             in_battle = true;
@@ -1084,7 +1101,6 @@ void mapGen(struct map_key *map, int x, int y, bool new_map) {
     dijkstra(&hiker_cost_map, map->PC.x, map->PC.y);
     dijkstra(&rival_cost_map, map->PC.x, map->PC.y);
     dijkstra(&swimmer_cost_map, map->PC.x, map->PC.y);
-
 }
 
 
@@ -1177,20 +1193,44 @@ void gameLoop() {
         world[currentX + world_size_a][currentY + world_size_a] = (struct map_key*) malloc(sizeof(struct map_key));
     }
     mapGen(world[currentX + world_size_a][currentY + world_size_a], currentX, currentY, true);
-    struct minHeap* turnHeap = createMinHeap(sizeof(NPC) + 1);
+    // struct gameCharacter* pc = newGameCharacter(-1, world[currentX + world_size_a][currentY + world_size_a]->PC.x,
+    //                                             world[currentX + world_size_a][currentY + world_size_a]->PC.y, 0, 0);
+    // for (int i = 0; i < 10; i++) {
+    //     struct gameCharacter* npc = newGameCharacter(i, world[currentX + world_size_a][currentY + world_size_a]->NPC[i].x, world[currentX + world_size_a][currentY + world_size_a]->NPC[i].y, 1, 0);
+    //     npc->battleReady = true;
+    //     // addCharacterToHeap(world[currentX + world_size_a][currentY + world_size_a]->turnHeap, npc->id, 0);
+    // }
+    // setTurnHeap(world[currentX + world_size_a][currentY + world_size_a]);
+
+
+
+    struct minHeap* turnHeap = createMinHeap(sizeof(world[currentX + world_size_a][currentY + world_size_a]->NPC) + 1);
+    // world[currentX + world_size_a][currentY + world_size_a]->turnHeap = createMinHeap(sizeof(world[currentX + world_size_a][currentY + world_size_a]->NPC) + 1);
+    // world[currentX + world_size_a][currentY + world_size_a]->turnHeap = createMinHeap(1);
     struct gameCharacter* pc = newGameCharacter(-1, world[currentX + world_size_a][currentY + world_size_a]->PC.x,
                                                 world[currentX + world_size_a][currentY + world_size_a]->PC.y, 0, 0);
-    addCharacterToHeap(turnHeap, pc->id, 0);
+    addCharacterToHeap(turnHeap, pc->id, -1);
     for (int i = 0; i < 10; i++) {
-        struct gameCharacter* npc = newGameCharacter(i, NPC[i].x, NPC[i].y, 1, 0);
+        struct gameCharacter* npc = newGameCharacter(i, world[currentX + world_size_a][currentY + world_size_a]->NPC[i].x, world[currentX + world_size_a][currentY + world_size_a]->NPC[i].y, 1, 0);
         npc->battleReady = true;
         addCharacterToHeap(turnHeap, npc->id, 0);
     }
+    // setTurnHeap(world[currentX + world_size_a][currentY + world_size_a]);
     nodelay(input_win, true);
     fly(0, 0, comment_win, map_win, status_win);
+    int i = 0;
     while (1) {
+        // i++;
+        // if (i == 10) {
+        //     break;
+        // }
+        // sleep(2);
+        // struct minHeapNode* minHeapNode = extractMin(world[currentX + world_size_a][currentY + world_size_a]->turnHeap);
         struct minHeapNode* minHeapNode = extractMin(turnHeap);
+
         int characterId = minHeapNode->v;
+        // std::cout << "minHeapNode->v: " << minHeapNode->v << std::endl;
+        // std::cout << "minHeapNode->distance: " << minHeapNode->distance << std::endl;
         if (characterId == -1) {
             wmove(input_win, 0, 0);
             wrefresh(input_win);
@@ -1345,13 +1385,13 @@ void gameLoop() {
                 box(action_win, 0, 0);
                 int pc_x = world[currentX + world_size_a][currentY + world_size_a]->PC.x;
                 int pc_y = world[currentX + world_size_a][currentY + world_size_a]->PC.y;
-                for (int i = 0; i < sizeof(NPC)/sizeof(NPC[0]); i++) {
-                    int dx = NPC[i].x - pc_x;
-                    int dy = NPC[i].y - pc_y;
+                for (int i = 0; i < sizeof(world[currentX + world_size_a][currentY + world_size_a]->NPC)/sizeof(world[currentX + world_size_a][currentY + world_size_a]->NPC[0]); i++) {
+                    int dx = world[currentX + world_size_a][currentY + world_size_a]->NPC[i].x - pc_x;
+                    int dy = world[currentX + world_size_a][currentY + world_size_a]->NPC[i].y - pc_y;
                     std::string direction_x = dx > 0 ? "south" : "north";
                     std::string direction_y = dy > 0 ? "east" : "west";
                     char npc_type;
-                    switch (NPC[i].type) {
+                    switch (world[currentX + world_size_a][currentY + world_size_a]->NPC[i].type) {
                         case hiker: npc_type = 'h'; break;
                         case rival: npc_type = 'r'; break;
                         case swimmer: npc_type = 'm'; break;
@@ -1398,7 +1438,7 @@ void gameLoop() {
             dijkstra(&explorer_cost_map, world[currentX + world_size_a][currentY + world_size_a]->PC.x, world[currentX + world_size_a][currentY + world_size_a]->PC.y);
         }
         else {
-            struct gameCharacter* npc = &NPC[characterId];
+            struct gameCharacter* npc = &world[currentX + world_size_a][currentY + world_size_a]->NPC[characterId];
             cost_map_key* cost_map;
             int npcType;
             switch (npc->type) {
@@ -1441,6 +1481,20 @@ void gameLoop() {
 }
 
 
+void readCSV() {
+    std::ifstream file("/share/cs327/pokedex/pokedex/data/csv/pokemon.csv");
+    if (!file.is_open()) {
+        std::cerr << "Error opening file";
+        return;
+    }
+    std::string line;
+    while (std::getline(file, line)) {
+        std::cout << line << std::endl;
+    }
+    file.close();
+}
+
+
 int main() {
     initscr();
     cbreak();
@@ -1448,6 +1502,7 @@ int main() {
     keypad(stdscr, true);
     noecho();
     srand(time(NULL));
+    readCSV();
     gameLoop();
     endwin();
     return 0;
