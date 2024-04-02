@@ -194,79 +194,6 @@ struct queue {
 /*
  * prints the terrain map and character map
  */
-//void printMap(struct map_key *map) {
-//    for (int i = 0; i < ROW; i++) {
-//        for (int j = 0; j < COL; j++ ) {
-//            if (map->character_type[i][j] != -1) {
-//                switch(map->character_type[i][j]) {
-//                    case player:
-//                        printf("%c", '@');
-//                        break;
-//                    case hiker:
-//                        printf("%c", 'h');
-//                        break;
-//                    case rival:
-//                        printf("%c", 'r');
-//                        break;
-//                    case pacers:
-//                        printf("%c", 'p');
-//                        break;
-//                    case wanderers:
-//                        printf("%c", 'w');
-//                        break;
-//                    case sentries:
-//                        printf("%c", 's');
-//                        break;
-//                    case explorers:
-//                        printf("%c", 'e');
-//                        break;
-//                    case swimmer:
-//                        printf("%c", 'm');
-//                        break;
-//                }
-//            }
-//            else {
-//                switch (map->terrain_type[i][j]) {
-//                    case boulder:
-//                        printf("%c", '%');
-//                        break;
-//                    case tree:
-//                        printf("%c", '^');
-//                        break;
-//                    case road:
-//                        printf("%c", '#');
-//                        break;
-//                    case grass:
-//                        printf("%c", ':');
-//                        break;
-//                    case clearing:
-//                        printf("%c", '.');
-//                        //mvaddch(i,j, '.');
-//                        break;
-//                    case water:
-//                        printf("%c", '~');
-//                        break;
-//                    case center:
-//                        printf("%c", 'C');
-//                        break;
-//                    case pokemart:
-//                        printf("%c", 'M');
-//                        break;
-//                    default:
-//                        printf("%c", '/');
-//                        break;
-//                }
-//            }
-//        }
-//        printf("\n");
-//    }
-//    printf("\n");
-//}
-
-
-/*
- * prints the terrain map and character map
- */
 void printMap(struct map_key *map, WINDOW *map_win) {
     for (int i = 0; i < ROW; i++) {
         for (int j = 0; j < COL; j++ ) {
@@ -276,7 +203,6 @@ void printMap(struct map_key *map, WINDOW *map_win) {
                         mvwaddch(map_win, i, j, '@');
                         break;
                     case hiker:
-//                        mvaddch(i,j, 'h');
                         mvwaddch(map_win, i, j, 'h');
                         break;
                     case rival:
