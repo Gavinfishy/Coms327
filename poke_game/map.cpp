@@ -44,7 +44,7 @@
 #define SOUTH 2
 #define WEST 3
 #define pyrite_loc_1 "/share/cs327"
-#define local_location "/mnt/c/Users/BlueD/git_repos/327_poke/Coms327"
+#define local_location "/mnt/c/Users/BlueD/git_repos/327_poke"
 bool in_store = false;
 bool in_battle = false;
 bool in_lot = false; //list of trainers
