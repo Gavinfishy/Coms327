@@ -227,7 +227,7 @@ struct queue {
 
 struct Pokemon {
     int id;
-    std:: string identifier;
+    std::string identifier;
     int species_id;
     int height;
     int weight;
@@ -235,6 +235,108 @@ struct Pokemon {
     int order;
     int is_default;
 };
+
+
+struct Moves {
+    int id;
+    std::string identifier;
+    int generation_id;
+    int type_id;
+    int power;
+    int pp;
+    int accuracy;
+    int priority;
+    int target_id;
+    int damage_class_id;
+    int effect_id;
+    int effect_chance;
+    int contest_type_id;
+    int contest_effect_id;
+    int super_contest_effect_id;
+};
+
+
+struct Pokemon_Moves {
+    int pokemon_id;
+    int version_group_id;
+    int move_id;
+    int pokemon_move_method_id;
+    int level;
+    int order;
+};
+
+
+struct Pokemon_Species {
+    int id;
+    std::string identifier;
+    int generation_id;
+    int evolves_from_species_id;
+    int evolution_chain_id;
+    int color_id;
+    int shape_id;
+    int habitat_id;
+    int gender_rate;
+    int capture_rate;
+    int base_happiness;
+    int is_baby;
+    int hatch_counter;
+    int has_gender_differences;
+    int growth_rate_id;
+    int forms_switchable;
+    int is_legendary;
+    int is_mythical;
+    int order;
+    int conquest_order;
+};
+
+
+struct Experience {
+    int growth_rate_id;
+    int level;
+    int experience;
+};
+
+
+struct Type_Names {
+    int type_id;
+    int local_language_id;
+    std::string name;
+};
+
+
+struct Pokemon_Stats {
+    int pokemon_id;
+    int stat_id;
+    int base_stat;
+    int effort;
+};
+
+
+struct Stats {
+    int id;
+    int damage_class_id;
+    std::string identifier;
+    int is_battle_only;
+    int game_index;
+};
+
+
+struct Pokemon_Types {
+    int pokemon_id;
+    int type_id;
+    int slot;
+};
+
+
+std::vector<Pokemon> pokemons;
+std::vector<Moves> moves;
+std::vector<Pokemon_Moves> pokemon_moves;
+std::vector<Pokemon_Species> pokemon_species;
+std::vector<Experience> experience;
+std::vector<Type_Names> type_names;
+std::vector<Pokemon_Stats> pokemon_stats;
+std::vector<Stats> stats;
+std::vector<Pokemon_Types> pokemon_types;
 
 
 void move_maps(int dx, int dy, WINDOW *comment_win, WINDOW *map_win, WINDOW *status_win, WINDOW *action_win);
@@ -1498,10 +1600,28 @@ void gameLoop() {
 }
 
 
+std::ifstream openFile(const std::string& filename) {
+    std::string pyritePath1 = std::string(pyrite_loc_1) + "/pokedex/pokedex/data/csv/" + filename;
+    std::ifstream file(pyritePath1);
+    if (file.is_open()) {
+        return file;
+    }
+    const char* home = std::getenv("HOME");
+    if (home != nullptr) {
+        std::string pyritePath2 = std::string(home) + pyrite_loc_2 + "/pokedex/pokedex/data/csv/" + filename;
+        file.open(pyritePath2);
+        if (file.is_open()) {
+            return file;
+        }
+    }
+    std::string localPath = std::string(local_location) + "/pokedex/pokedex/data/csv/" + filename;
+    file.open(localPath);
+    return file;
+}
+
+
 void readCSV(const std::string& filename) {
-    std::string fullPath = std::string(local_location) + "/pokedex/pokedex/data/csv/" + filename;
-    std::cout << "Attempting to open file: " << fullPath << std::endl;
-    std::ifstream file(fullPath);
+    std::ifstream file = openFile(filename);
     if (!file.is_open()) {
         std::cerr << "Error opening file";
         return;
@@ -1553,14 +1673,6 @@ void readCSV(const std::string& filename) {
     std::cout << "Is Default: " << pokemon.is_default << std::endl;
     std::cout << std::endl;  
     }
-
-
-    // const char* home = std::getenv("HOME");
-    // if (home == nullptr) {
-    //     std::cerr << "Error: HOME environment variable not set." << std::endl;
-    //     return 1;
-    // }
-    // std::string home_location = std::string(home) + pyrite_loc_2;
 }
 
 
