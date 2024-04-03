@@ -14,6 +14,8 @@
 #include <iostream>
 #include <fstream>
 #include <ctime>
+#include <vector>
+#include <sstream>
 
 
 #define ROW 21
@@ -44,6 +46,7 @@
 #define SOUTH 2
 #define WEST 3
 #define pyrite_loc_1 "/share/cs327"
+#define pyrite_loc_2 "/.poke327"
 #define local_location "/mnt/c/Users/BlueD/git_repos/327_poke"
 bool in_store = false;
 bool in_battle = false;
@@ -219,6 +222,18 @@ struct queue_node {
 struct queue {
     struct queue_node *head, *tail;
     int length;
+};
+
+
+struct Pokemon {
+    int id;
+    std:: string identifier;
+    int species_id;
+    int height;
+    int weight;
+    int base_xp;
+    int order;
+    int is_default;
 };
 
 
@@ -1491,11 +1506,61 @@ void readCSV(const std::string& filename) {
         std::cerr << "Error opening file";
         return;
     }
+    std::vector<Pokemon> pokemons;
     std::string line;
+    std::getline(file, line);
     while (std::getline(file, line)) {
-        std::cerr << "Error Reading file: " << fullPath << std::endl;
+        std::stringstream ss(line);
+        Pokemon pokemon;
+        std::string field;
+
+        std::getline(ss, field, ',');
+        pokemon.id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        pokemon.identifier = field;
+
+        std::getline(ss, field, ',');
+        pokemon.species_id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        pokemon.height = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        pokemon.weight = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        pokemon.base_xp = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        pokemon.order = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        pokemon.is_default = std::stoi(field);
+
+        pokemons.push_back(pokemon);
     }
     file.close();
+
+    for (const Pokemon& pokemon : pokemons) {
+    std::cout << "ID: " << pokemon.id << std::endl;
+    std::cout << "Identifier: " << pokemon.identifier << std::endl;
+    std::cout << "Species ID: " << pokemon.species_id << std::endl;
+    std::cout << "Height: " << pokemon.height << std::endl;
+    std::cout << "Weight: " << pokemon.weight << std::endl;
+    std::cout << "Base XP: " << pokemon.base_xp << std::endl;
+    std::cout << "Order: " << pokemon.order << std::endl;
+    std::cout << "Is Default: " << pokemon.is_default << std::endl;
+    std::cout << std::endl;  
+    }
+
+
+    // const char* home = std::getenv("HOME");
+    // if (home == nullptr) {
+    //     std::cerr << "Error: HOME environment variable not set." << std::endl;
+    //     return 1;
+    // }
+    // std::string home_location = std::string(home) + pyrite_loc_2;
 }
 
 
@@ -1507,8 +1572,6 @@ int main(int argc, char* argv[]) {
     std::string filename = argv[1];
     readCSV(filename);
     return 0;
-    //vector for each csv
-    //each struct is a line
     initscr();
     cbreak();
     raw();
