@@ -21,7 +21,7 @@
 
 #define ROW 21
 #define COL 80
-#define empty (-1)
+#define empty_loc (-1)
 #define boulder 0
 #define tree 1
 #define grass 2
@@ -424,7 +424,7 @@ void setGates(struct map_key *map, int x, int y) {
         map->n = world[x + world_size_a][y-1 + world_size_a]->s;
     }
     else if (y == -world_size_a) {
-        map->n = empty;
+        map->n = empty_loc;
     }
     else {
         map->n = (rand() % 78 + 1);
@@ -433,7 +433,7 @@ void setGates(struct map_key *map, int x, int y) {
         map->s = world[x + world_size_a][y+1 + world_size_a]->n;
     }
     else if (y == world_size_a) {
-        map->s = empty;
+        map->s = empty_loc;
     }
     else {
         map->s = (rand() % 78 + 1);
@@ -442,7 +442,7 @@ void setGates(struct map_key *map, int x, int y) {
         map->e = world[x+1 + world_size_a][y + world_size_a]->w;
     }
     else if (x == world_size_a) {
-        map->e = empty;
+        map->e = empty_loc;
     }
     else {
         map->e = (rand() % 19 + 1);
@@ -451,31 +451,31 @@ void setGates(struct map_key *map, int x, int y) {
         map->w = world[x-1 + world_size_a][y + world_size_a]->e;
     }
     else if (x == -world_size_a) {
-        map->w = empty;
+        map->w = empty_loc;
     }
     else {
         map->w = (rand() % 19 + 1);
     }
 
-    if (map->n != empty) {
+    if (map->n != empty_loc) {
         map->terrain_type[0][map->n] = road;
     }
     else {
         map->n = (rand() % 78 + 1);
     }
-    if (map->s != empty) {
+    if (map->s != empty_loc) {
         map->terrain_type[ROW-1][map->s] = road;
     }
     else {
         map->s = (rand() % 78 + 1);
     }
-    if (map->e != empty) {
+    if (map->e != empty_loc) {
         map->terrain_type[map->e][COL-1] = road;
     }
     else {
         map->e = (rand() % 19 + 1);
     }
-    if (map->w != empty) {
+    if (map->w != empty_loc) {
         map->terrain_type[map->w][0] = road;
     }
     else {
@@ -1198,9 +1198,9 @@ void mapGen(struct map_key *map, int x, int y, bool new_map) {
                 map->terrain_type[i][j] = boulder;
             }
             else {
-                map->terrain_type[i][j] = empty;
+                map->terrain_type[i][j] = empty_loc;
             }
-            map->character_type[i][j] = empty;
+            map->character_type[i][j] = empty_loc;
         }
     }
     // Gates
@@ -1654,28 +1654,28 @@ void populatePokemon(std::ifstream& file) {
         std::string field;
 
         std::getline(ss, field, ',');
-        pokemon.id = std::stoi(field);
+        pokemon.id = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
         pokemon.identifier = field;
 
         std::getline(ss, field, ',');
-        pokemon.species_id = std::stoi(field);
+        pokemon.species_id = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        pokemon.height = std::stoi(field);
+        pokemon.height = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        pokemon.weight = std::stoi(field);
+        pokemon.weight = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        pokemon.base_xp = std::stoi(field);
+        pokemon.base_xp = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        pokemon.order = std::stoi(field);
+        pokemon.order = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        pokemon.is_default = std::stoi(field);
+        pokemon.is_default = field.empty() ? INT_MAX : std::stoi(field);
 
         pokemons.push_back(pokemon);
     }
@@ -1691,49 +1691,53 @@ void populateMoves(std::ifstream& file) {
         std::string field;
 
         std::getline(ss, field, ',');
-        move.id = std::stoi(field);
+        move.id = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        move.identifier = field;
+        if (field.empty()) {
+            move.identifier = "INVALID_VALUE";
+        } else {
+            move.identifier = field;
+        }
 
         std::getline(ss, field, ',');
-        move.generation_id = std::stoi(field);
+        move.generation_id = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        move.type_id = std::stoi(field);
+        move.type_id = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        move.power = std::stoi(field);
+        move.power = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        move.pp = std::stoi(field);
+        move.pp = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        move.accuracy = std::stoi(field);
+        move.accuracy = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        move.priority = std::stoi(field);
+        move.priority = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        move.target_id = std::stoi(field);
+        move.target_id = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        move.damage_class_id = std::stoi(field);
+        move.damage_class_id = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        move.effect_id = std::stoi(field);
+        move.effect_id = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        move.effect_chance = std::stoi(field);
+        move.effect_chance = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        move.contest_type_id = std::stoi(field);
+        move.contest_type_id = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        move.contest_effect_id = std::stoi(field);
+        move.contest_effect_id = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        move.super_contest_effect_id = std::stoi(field);
+        move.super_contest_effect_id = field.empty() ? INT_MAX : std::stoi(field);
 
         moves.push_back(move);
     }
@@ -1749,22 +1753,22 @@ void populatePokemonMoves(std::ifstream& file) {
         std::string field;
 
         std::getline(ss, field, ',');
-        pokemon_move.pokemon_id = std::stoi(field);
+        pokemon_move.pokemon_id = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        pokemon_move.version_group_id = std::stoi(field);
+        pokemon_move.version_group_id = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        pokemon_move.move_id = std::stoi(field);
+        pokemon_move.move_id = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        pokemon_move.pokemon_move_method_id = std::stoi(field);
+        pokemon_move.pokemon_move_method_id = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        pokemon_move.level = std::stoi(field);
+        pokemon_move.level = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        pokemon_move.order = std::stoi(field);
+        pokemon_move.order = field.empty() ? INT_MAX : std::stoi(field);
 
         pokemon_moves.push_back(pokemon_move);
     }
@@ -1780,64 +1784,64 @@ void populatePokemonSpecies(std::ifstream& file) {
         std::string field;
 
         std::getline(ss, field, ',');
-        species.id = std::stoi(field);
+        species.id = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
         species.identifier = field;
 
         std::getline(ss, field, ',');
-        species.generation_id = std::stoi(field);
+        species.generation_id = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        species.evolves_from_species_id = std::stoi(field);
+        species.evolves_from_species_id = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        species.evolution_chain_id = std::stoi(field);
+        species.evolution_chain_id = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        species.color_id = std::stoi(field);
+        species.color_id = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        species.shape_id = std::stoi(field);
+        species.shape_id = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        species.habitat_id = std::stoi(field);
+        species.habitat_id = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        species.gender_rate = std::stoi(field);
+        species.gender_rate = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        species.capture_rate = std::stoi(field);
+        species.capture_rate = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        species.base_happiness = std::stoi(field);
+        species.base_happiness = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        species.is_baby = std::stoi(field);
+        species.is_baby = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        species.hatch_counter = std::stoi(field);
+        species.hatch_counter = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        species.has_gender_differences = std::stoi(field);
+        species.has_gender_differences = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        species.growth_rate_id = std::stoi(field);
+        species.growth_rate_id = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        species.forms_switchable = std::stoi(field);
+        species.forms_switchable = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        species.is_legendary = std::stoi(field);
+        species.is_legendary = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        species.is_mythical = std::stoi(field);
+        species.is_mythical = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        species.order = std::stoi(field);
+        species.order = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        species.conquest_order = std::stoi(field);
+        species.conquest_order = field.empty() ? INT_MAX : std::stoi(field);
 
         pokemon_species.push_back(species);
     }
@@ -1922,19 +1926,19 @@ void populateStats(std::ifstream& file) {
         std::string field;
 
         std::getline(ss, field, ',');
-        stat.id = std::stoi(field);
+        stat.id = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        stat.damage_class_id = std::stoi(field);
+        stat.damage_class_id = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
         stat.identifier = field;
 
         std::getline(ss, field, ',');
-        stat.is_battle_only = std::stoi(field);
+        stat.is_battle_only = field.empty() ? INT_MAX : std::stoi(field);
 
         std::getline(ss, field, ',');
-        stat.game_index = std::stoi(field);
+        stat.game_index = field.empty() ? INT_MAX : std::stoi(field);
 
         stats.push_back(stat);
     }
@@ -1980,21 +1984,49 @@ void printPokemonVector() {
 
 void printMovesVector() {
     for (const Moves& move : moves) {
+        if(move.id != INT_MAX) {
         std::cout << "ID: " << move.id << std::endl;
+        }
         std::cout << "Identifier: " << move.identifier << std::endl;
+        if(move.generation_id != INT_MAX) {
         std::cout << "Generation ID: " << move.generation_id << std::endl;
+        }
+        if(move.type_id != INT_MAX) {
         std::cout << "Type ID: " << move.type_id << std::endl;
+        }
+        if(move.power != INT_MAX) {
         std::cout << "Power: " << move.power << std::endl;
+        }
+        if(move.pp != INT_MAX) {
         std::cout << "PP: " << move.pp << std::endl;
+        }
+        if(move.accuracy != INT_MAX) {
         std::cout << "Accuracy: " << move.accuracy << std::endl;
+        }
+        if(move.priority != INT_MAX) {
         std::cout << "Priority: " << move.priority << std::endl;
+        }
+        if(move.target_id != INT_MAX) {
         std::cout << "Target ID: " << move.target_id << std::endl;
+        }
+        if(move.damage_class_id != INT_MAX) {
         std::cout << "Damage Class ID: " << move.damage_class_id << std::endl;
+        }
+        if(move.effect_id != INT_MAX) {
         std::cout << "Effect ID: " << move.effect_id << std::endl;
+        }
+        if(move.effect_chance != INT_MAX) {
         std::cout << "Effect Chance: " << move.effect_chance << std::endl;
+        }
+        if(move.contest_type_id != INT_MAX) {
         std::cout << "Contest Type ID: " << move.contest_type_id << std::endl;
+        }
+        if(move.contest_effect_id != INT_MAX) {
         std::cout << "Contest Effect ID: " << move.contest_effect_id << std::endl;
+        }
+        if(move.super_contest_effect_id != INT_MAX) {
         std::cout << "Super Contest Effect ID: " << move.super_contest_effect_id << std::endl;
+        }
         std::cout << std::endl;
     }
 }
@@ -2015,26 +2047,64 @@ void printPokemonMovesVector() {
 
 void printPokemonSpeciesVector() {
     for (const Pokemon_Species& pokemon_species : pokemon_species) {
+        if(pokemon_species.id != INT_MAX) {
         std::cout << "ID: " << pokemon_species.id << std::endl;
+        }
         std::cout << "Identifier: " << pokemon_species.identifier << std::endl;
+        if(pokemon_species.generation_id != INT_MAX) {
         std::cout << "Generation ID: " << pokemon_species.generation_id << std::endl;
+        }
+        if(pokemon_species.evolves_from_species_id != INT_MAX) {
         std::cout << "Evolves From Species ID: " << pokemon_species.evolves_from_species_id << std::endl;
+        }
+        if(pokemon_species.evolution_chain_id != INT_MAX) {
         std::cout << "Evolution Chain ID: " << pokemon_species.evolution_chain_id << std::endl;
+        }
+        if(pokemon_species.color_id != INT_MAX) {
         std::cout << "Color ID: " << pokemon_species.color_id << std::endl;
+        }
+        if(pokemon_species.shape_id != INT_MAX) {
         std::cout << "Shape ID: " << pokemon_species.shape_id << std::endl;
+        }
+        if(pokemon_species.habitat_id != INT_MAX) {
         std::cout << "Habitat ID: " << pokemon_species.habitat_id << std::endl;
+        }
+        if(pokemon_species.gender_rate != INT_MAX) {
         std::cout << "Gender Rate: " << pokemon_species.gender_rate << std::endl;
+        }
+        if(pokemon_species.capture_rate != INT_MAX) {
         std::cout << "Capture Rate: " << pokemon_species.capture_rate << std::endl;
+        }
+        if(pokemon_species.base_happiness != INT_MAX) {
         std::cout << "Base Happiness: " << pokemon_species.base_happiness << std::endl;
+        }
+        if(pokemon_species.is_baby != INT_MAX) {
         std::cout << "Is Baby: " << pokemon_species.is_baby << std::endl;
+        }
+        if(pokemon_species.hatch_counter != INT_MAX) {
         std::cout << "Hatch Counter: " << pokemon_species.hatch_counter << std::endl;
+        }
+        if(pokemon_species.has_gender_differences != INT_MAX) {
         std::cout << "Has Gender Differences: " << pokemon_species.has_gender_differences << std::endl;
+        }
+        if(pokemon_species.growth_rate_id != INT_MAX) {
         std::cout << "Growth Rate ID: " << pokemon_species.growth_rate_id << std::endl;
+        }
+        if(pokemon_species.forms_switchable != INT_MAX) {
         std::cout << "Forms Switchable: " << pokemon_species.forms_switchable << std::endl;
+        }
+        if(pokemon_species.is_legendary != INT_MAX) {
         std::cout << "Is Legendary: " << pokemon_species.is_legendary << std::endl;
+        }
+        if(pokemon_species.is_mythical != INT_MAX) {
         std::cout << "Is Mythical: " << pokemon_species.is_mythical << std::endl;
+        }
+        if(pokemon_species.order != INT_MAX) {
         std::cout << "Order: " << pokemon_species.order << std::endl;
+        }
+        if(pokemon_species.conquest_order != INT_MAX) {
         std::cout << "Conquest Order: " << pokemon_species.conquest_order << std::endl;
+        }
         std::cout << std::endl;
     }
 }
@@ -2075,11 +2145,19 @@ void printPokemonStatsVector() {
 
 void printStatsVector() {
     for (const Stats& stat : stats) {
+        if(stat.id != INT_MAX) {
         std::cout << "ID: " << stat.id << std::endl;
+        }
+        if(stat.damage_class_id != INT_MAX) {
         std::cout << "Damage Class ID: " << stat.damage_class_id << std::endl;
+        }
         std::cout << "Identifier: " << stat.identifier << std::endl;
+        if(stat.is_battle_only != INT_MAX) {
         std::cout << "Is Battle Only: " << stat.is_battle_only << std::endl;
+        }
+        if(stat.game_index != INT_MAX) {
         std::cout << "Game Index: " << stat.game_index << std::endl;
+        }
         std::cout << std::endl;
     }
 }

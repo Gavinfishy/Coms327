@@ -1,3 +1,6 @@
+NOTE: READ BOTTOM NOTE
+
+
 This project is the implementation of a pokemon type game made in C++.
 Currently, a map is generated with a random background, borders, roads, buildings, and npc's
 When pc moves r and h will aim for PC while w e p wander and s stands still
@@ -20,13 +23,13 @@ t view trainers
     up arrow move up in trainer list
     down arrow move down in trainer list
     esc close trainer window
-q quit game
 f 
     x y "enter"
+q quit game
 
 NOTE:
 All above statements are null for this week
-Information of files are printed in the terminal when ./map filename is called
+Information of files are printed in the terminal when ./map filename is called 
 Below is a list of files the program is set to find:
 
 pokemon.csv
@@ -38,3 +41,7 @@ type names.csv
 pokemon stats.csv
 stats.csv
 pokemon types.csv
+
+for example in the terminal type
+make
+./map pokemon.csv
