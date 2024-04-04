@@ -16,7 +16,8 @@
 #include <ctime>
 #include <vector>
 #include <sstream>
-
+#include <sys/stat.h>
+#include <climits>
 
 #define ROW 21
 #define COL 80
@@ -332,7 +333,7 @@ std::vector<Pokemon> pokemons;
 std::vector<Moves> moves;
 std::vector<Pokemon_Moves> pokemon_moves;
 std::vector<Pokemon_Species> pokemon_species;
-std::vector<Experience> experience;
+std::vector<Experience> experiences;
 std::vector<Type_Names> type_names;
 std::vector<Pokemon_Stats> pokemon_stats;
 std::vector<Stats> stats;
@@ -1620,13 +1621,31 @@ std::ifstream openFile(const std::string& filename) {
 }
 
 
-void readCSV(const std::string& filename) {
-    std::ifstream file = openFile(filename);
-    if (!file.is_open()) {
-        std::cerr << "Error opening file";
-        return;
+bool directoryExists(const std::string& dir) {
+    struct stat buffer;
+    return (stat(dir.c_str(), &buffer) == 0);
+}
+
+
+std::string openDirectory() {
+    std::string pyritePath1 = std::string(pyrite_loc_1) + "/pokedex/pokedex/data/csv/";
+    if (directoryExists(pyritePath1)) {
+        return pyritePath1;
     }
-    std::vector<Pokemon> pokemons;
+    const char* home = std::getenv("HOME");
+    if (home != nullptr) {
+        std::string pyritePath2 = std::string(home) + pyrite_loc_2 + "/pokedex/pokedex/data/csv/";
+        if (directoryExists(pyritePath2)) {
+            return pyritePath2;
+        }
+    }
+    std::string localPath = std::string(local_location) + "/pokedex/pokedex/data/csv/";
+    return localPath;
+}
+
+
+
+void populatePokemon(std::ifstream& file) {
     std::string line;
     std::getline(file, line);
     while (std::getline(file, line)) {
@@ -1660,25 +1679,539 @@ void readCSV(const std::string& filename) {
 
         pokemons.push_back(pokemon);
     }
-    file.close();
+}
 
-    for (const Pokemon& pokemon : pokemons) {
-    std::cout << "ID: " << pokemon.id << std::endl;
-    std::cout << "Identifier: " << pokemon.identifier << std::endl;
-    std::cout << "Species ID: " << pokemon.species_id << std::endl;
-    std::cout << "Height: " << pokemon.height << std::endl;
-    std::cout << "Weight: " << pokemon.weight << std::endl;
-    std::cout << "Base XP: " << pokemon.base_xp << std::endl;
-    std::cout << "Order: " << pokemon.order << std::endl;
-    std::cout << "Is Default: " << pokemon.is_default << std::endl;
-    std::cout << std::endl;  
+
+void populateMoves(std::ifstream& file) {
+    std::string line;
+    std::getline(file, line);
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        Moves move;
+        std::string field;
+
+        std::getline(ss, field, ',');
+        move.id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        move.identifier = field;
+
+        std::getline(ss, field, ',');
+        move.generation_id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        move.type_id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        move.power = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        move.pp = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        move.accuracy = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        move.priority = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        move.target_id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        move.damage_class_id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        move.effect_id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        move.effect_chance = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        move.contest_type_id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        move.contest_effect_id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        move.super_contest_effect_id = std::stoi(field);
+
+        moves.push_back(move);
     }
+}
+
+
+void populatePokemonMoves(std::ifstream& file) {
+    std::string line;
+    std::getline(file, line);  
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        Pokemon_Moves pokemon_move;
+        std::string field;
+
+        std::getline(ss, field, ',');
+        pokemon_move.pokemon_id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        pokemon_move.version_group_id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        pokemon_move.move_id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        pokemon_move.pokemon_move_method_id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        pokemon_move.level = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        pokemon_move.order = std::stoi(field);
+
+        pokemon_moves.push_back(pokemon_move);
+    }
+}
+
+
+void populatePokemonSpecies(std::ifstream& file) {
+    std::string line;
+    std::getline(file, line);
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        Pokemon_Species species;
+        std::string field;
+
+        std::getline(ss, field, ',');
+        species.id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        species.identifier = field;
+
+        std::getline(ss, field, ',');
+        species.generation_id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        species.evolves_from_species_id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        species.evolution_chain_id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        species.color_id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        species.shape_id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        species.habitat_id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        species.gender_rate = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        species.capture_rate = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        species.base_happiness = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        species.is_baby = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        species.hatch_counter = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        species.has_gender_differences = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        species.growth_rate_id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        species.forms_switchable = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        species.is_legendary = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        species.is_mythical = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        species.order = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        species.conquest_order = std::stoi(field);
+
+        pokemon_species.push_back(species);
+    }
+}
+
+
+void populateExperience(std::ifstream& file) {
+    std::string line;
+    std::getline(file, line);
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        Experience experience;
+        std::string field;
+
+        std::getline(ss, field, ',');
+        experience.growth_rate_id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        experience.level = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        experience.experience = std::stoi(field);
+
+        experiences.push_back(experience);
+    }
+}
+
+
+void populateTypeNames(std::ifstream& file) {
+    std::string line;
+    std::getline(file, line);
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        Type_Names type_name;
+        std::string field;
+
+        std::getline(ss, field, ',');
+        type_name.type_id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        type_name.local_language_id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        type_name.name = field;
+
+        type_names.push_back(type_name);
+    }
+}
+
+
+void populatePokemonStats(std::ifstream& file) {
+    std::string line;
+    std::getline(file, line);
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        Pokemon_Stats pokemon_stat;
+        std::string field;
+
+        std::getline(ss, field, ',');
+        pokemon_stat.pokemon_id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        pokemon_stat.stat_id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        pokemon_stat.base_stat = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        pokemon_stat.effort = std::stoi(field);
+
+        pokemon_stats.push_back(pokemon_stat);
+    }
+}
+
+
+void populateStats(std::ifstream& file) {
+    std::string line;
+    std::getline(file, line);
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        Stats stat;
+        std::string field;
+
+        std::getline(ss, field, ',');
+        stat.id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        stat.damage_class_id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        stat.identifier = field;
+
+        std::getline(ss, field, ',');
+        stat.is_battle_only = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        stat.game_index = std::stoi(field);
+
+        stats.push_back(stat);
+    }
+}
+
+
+void populatePokemonTypes(std::ifstream& file) {
+    std::string line;
+    std::getline(file, line);
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        Pokemon_Types pokemon_type;
+        std::string field;
+
+        std::getline(ss, field, ',');
+        pokemon_type.pokemon_id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        pokemon_type.type_id = std::stoi(field);
+
+        std::getline(ss, field, ',');
+        pokemon_type.slot = std::stoi(field);
+
+        pokemon_types.push_back(pokemon_type);
+    }
+}
+
+
+void printPokemonVector() {
+    for (const Pokemon& pokemon : pokemons) {
+        std::cout << "ID: " << pokemon.id << std::endl;
+        std::cout << "Identifier: " << pokemon.identifier << std::endl;
+        std::cout << "Species ID: " << pokemon.species_id << std::endl;
+        std::cout << "Height: " << pokemon.height << std::endl;
+        std::cout << "Weight: " << pokemon.weight << std::endl;
+        std::cout << "Base Experience: " << pokemon.base_xp << std::endl;
+        std::cout << "Order: " << pokemon.order << std::endl;
+        std::cout << "Is Default: " << pokemon.is_default << std::endl;
+        std::cout << std::endl;  
+    }
+}
+
+
+void printMovesVector() {
+    for (const Moves& move : moves) {
+        std::cout << "ID: " << move.id << std::endl;
+        std::cout << "Identifier: " << move.identifier << std::endl;
+        std::cout << "Generation ID: " << move.generation_id << std::endl;
+        std::cout << "Type ID: " << move.type_id << std::endl;
+        std::cout << "Power: " << move.power << std::endl;
+        std::cout << "PP: " << move.pp << std::endl;
+        std::cout << "Accuracy: " << move.accuracy << std::endl;
+        std::cout << "Priority: " << move.priority << std::endl;
+        std::cout << "Target ID: " << move.target_id << std::endl;
+        std::cout << "Damage Class ID: " << move.damage_class_id << std::endl;
+        std::cout << "Effect ID: " << move.effect_id << std::endl;
+        std::cout << "Effect Chance: " << move.effect_chance << std::endl;
+        std::cout << "Contest Type ID: " << move.contest_type_id << std::endl;
+        std::cout << "Contest Effect ID: " << move.contest_effect_id << std::endl;
+        std::cout << "Super Contest Effect ID: " << move.super_contest_effect_id << std::endl;
+        std::cout << std::endl;
+    }
+}
+
+
+void printPokemonMovesVector() {
+    for (const Pokemon_Moves& pokemon_move : pokemon_moves) {
+        std::cout << "Pokemon ID: " << pokemon_move.pokemon_id << std::endl;
+        std::cout << "Version Group ID: " << pokemon_move.version_group_id << std::endl;
+        std::cout << "Move ID: " << pokemon_move.move_id << std::endl;
+        std::cout << "Pokemon Move Method ID: " << pokemon_move.pokemon_move_method_id << std::endl;
+        std::cout << "Level: " << pokemon_move.level << std::endl;
+        std::cout << "Order: " << pokemon_move.order << std::endl;
+        std::cout << std::endl;
+    }
+}
+
+
+void printPokemonSpeciesVector() {
+    for (const Pokemon_Species& pokemon_species : pokemon_species) {
+        std::cout << "ID: " << pokemon_species.id << std::endl;
+        std::cout << "Identifier: " << pokemon_species.identifier << std::endl;
+        std::cout << "Generation ID: " << pokemon_species.generation_id << std::endl;
+        std::cout << "Evolves From Species ID: " << pokemon_species.evolves_from_species_id << std::endl;
+        std::cout << "Evolution Chain ID: " << pokemon_species.evolution_chain_id << std::endl;
+        std::cout << "Color ID: " << pokemon_species.color_id << std::endl;
+        std::cout << "Shape ID: " << pokemon_species.shape_id << std::endl;
+        std::cout << "Habitat ID: " << pokemon_species.habitat_id << std::endl;
+        std::cout << "Gender Rate: " << pokemon_species.gender_rate << std::endl;
+        std::cout << "Capture Rate: " << pokemon_species.capture_rate << std::endl;
+        std::cout << "Base Happiness: " << pokemon_species.base_happiness << std::endl;
+        std::cout << "Is Baby: " << pokemon_species.is_baby << std::endl;
+        std::cout << "Hatch Counter: " << pokemon_species.hatch_counter << std::endl;
+        std::cout << "Has Gender Differences: " << pokemon_species.has_gender_differences << std::endl;
+        std::cout << "Growth Rate ID: " << pokemon_species.growth_rate_id << std::endl;
+        std::cout << "Forms Switchable: " << pokemon_species.forms_switchable << std::endl;
+        std::cout << "Is Legendary: " << pokemon_species.is_legendary << std::endl;
+        std::cout << "Is Mythical: " << pokemon_species.is_mythical << std::endl;
+        std::cout << "Order: " << pokemon_species.order << std::endl;
+        std::cout << "Conquest Order: " << pokemon_species.conquest_order << std::endl;
+        std::cout << std::endl;
+    }
+}
+
+
+
+void printExperienceVector() {
+    for (const Experience& experience : experiences) {
+        std::cout << "Growth Rate ID: " << experience.growth_rate_id << std::endl;
+        std::cout << "Level: " << experience.level << std::endl;
+        std::cout << "Experience: " << experience.experience << std::endl;
+        std::cout << std::endl;
+    }
+}
+
+
+void printTypeNamesVector() {
+    for (const Type_Names& type_name : type_names) {
+        std::cout << "Type ID: " << type_name.type_id << std::endl;
+        std::cout << "Local Language ID: " << type_name.local_language_id << std::endl;
+        std::cout << "Name: " << type_name.name << std::endl;
+        std::cout << std::endl;
+    }
+}
+
+
+
+void printPokemonStatsVector() {
+    for (const Pokemon_Stats& pokemon_stat : pokemon_stats) {
+        std::cout << "Pokemon ID: " << pokemon_stat.pokemon_id << std::endl;
+        std::cout << "Stat ID: " << pokemon_stat.stat_id << std::endl;
+        std::cout << "Base Stat: " << pokemon_stat.base_stat << std::endl;
+        std::cout << "Effort: " << pokemon_stat.effort << std::endl;
+        std::cout << std::endl;
+    }
+}
+
+
+void printStatsVector() {
+    for (const Stats& stat : stats) {
+        std::cout << "ID: " << stat.id << std::endl;
+        std::cout << "Damage Class ID: " << stat.damage_class_id << std::endl;
+        std::cout << "Identifier: " << stat.identifier << std::endl;
+        std::cout << "Is Battle Only: " << stat.is_battle_only << std::endl;
+        std::cout << "Game Index: " << stat.game_index << std::endl;
+        std::cout << std::endl;
+    }
+}
+
+
+void printPokemonTypesVector() {
+    for (const Pokemon_Types& pokemon_type : pokemon_types) {
+        std::cout << "Pokemon ID: " << pokemon_type.pokemon_id << std::endl;
+        std::cout << "Type ID: " << pokemon_type.type_id << std::endl;
+        std::cout << "Slot: " << pokemon_type.slot << std::endl;
+        std::cout << std::endl;
+    }
+}
+
+
+void readCSV(const std::string& filename) {
+    // std::string directory = openDirectory();
+    // std::ifstream file;
+
+    // file.open(directory + "pokemon.csv");
+    // if (file.is_open()) {
+    //     populatePokemon(file);
+    //     file.close();
+    // }
+
+    // file.open(directory + "moves.csv");
+    // if (file.is_open()) {
+    //     populateMoves(file);
+    //     file.close();
+    // }
+
+    // file.open(directory + "pokemon_moves.csv");
+    // if (file.is_open()) {
+    //     populatePokemonMoves(file);
+    //     file.close();
+    // }
+
+    // file.open(directory + "pokemon_species.csv");
+    // if (file.is_open()) {
+    //     populatePokemonSpecies(file);
+    //     file.close();
+    // }
+
+    // file.open(directory + "experience.csv");
+    // if (file.is_open()) {
+    //     populateExperience(file);
+    //     file.close();
+    // }
+
+    // file.open(directory + "type_names.csv");
+    // if (file.is_open()) {
+    //     populateTypeNames(file);
+    //     file.close();
+    // }
+
+    // file.open(directory + "pokemon_stats.csv");
+    // if (file.is_open()) {
+    //     populatePokemonStats(file);
+    //     file.close();
+    // }
+
+    // file.open(directory + "stats.csv");
+    // if (file.is_open()) {
+    //     populateStats(file);
+    //     file.close();
+    // }
+
+    // file.open(directory + "pokemon_types.csv");
+    // if (file.is_open()) {
+    //     populatePokemonTypes(file);
+    //     file.close();
+    // }
+    std::ifstream file = openFile(filename);
+    if (!file.is_open()) {
+        std::cerr << "Error opening file";
+        return;
+    }
+
+    // populatePokemon(file);
+    // populateMoves(file);
+    // populatePokemonMoves(file);
+    // populatePokemonSpecies(file);
+    // populateExperience(file);
+    // populateTypeNames(file);
+    // populatePokemonStats(file);
+    // populateStats(file);
+    // populatePokemonTypes(file);
+    // file.close();
+
+    if (filename == "pokemon.csv") {
+        populatePokemon(file);
+        printPokemonVector();
+    }
+    else if (filename == "moves.csv") {
+        populateMoves(file);
+        printMovesVector();
+    }
+    else if (filename == "pokemon_moves.csv") {
+        populatePokemonMoves(file);
+        printPokemonMovesVector();
+    }
+    else if (filename == "pokemon_species.csv") {
+        populatePokemonSpecies(file);
+        printPokemonSpeciesVector();
+    }
+    else if (filename == "experience.csv") {
+        populateExperience(file);
+        printExperienceVector();
+    }
+    else if (filename == "type_names.csv") {
+        populateTypeNames(file);
+        printTypeNamesVector();
+    }
+    else if (filename == "pokemon_stats.csv") {
+        populatePokemonStats(file);
+        printPokemonStatsVector();
+    }
+    else if (filename == "stats.csv") {
+        populateStats(file);
+        printStatsVector();
+    }
+    else if (filename == "pokemon_types.csv") {
+        populatePokemonTypes(file);
+        printPokemonTypesVector();
+    }    
+    file.close();
 }
 
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        std::cerr << "Please provide a filename as a command-line argument.";
+        std::cerr << "Please provide a filename as a command-line argument. ";
         return 1;
     }
     std::string filename = argv[1];

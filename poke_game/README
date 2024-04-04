@@ -24,3 +24,17 @@ q quit game
 f 
     x y "enter"
 
+NOTE:
+All above statements are null for this week
+Information of files are printed in the terminal when ./map filename is called
+Below is a list of files the program is set to find:
+
+pokemon.csv
+moves.csv
+pokemon moves.csv
+pokemon species.csv
+experience.csv
+type names.csv
+pokemon stats.csv
+stats.csv
+pokemon types.csv
