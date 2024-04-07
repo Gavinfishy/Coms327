@@ -82,7 +82,7 @@ class map_key{
         gameCharacter NPC[10];
         int terrain_exists[5];
         int n,e,s,w;
-        // struct minHeap* turnHeap;
+        struct minHeap* turnHeap;
 };
 
 
@@ -687,26 +687,40 @@ void addCharacterToHeap(struct minHeap* minHeap, int characterId, int movementCo
     minHeap->position[characterId] = minHeap->size;
     minHeap->size++;
     decreaseKey(minHeap, characterId, movementCost);
+    //TODO heapEmpty is false
+    // if(heapIsEmpty(world[currentX + world_size_a][currentY + world_size_a]->turnHeap)) {
+    //     std::cout << "Heap is empty char: true" << std::endl;
+    // } else {
+    //     std::cout << "Heap is empty char: false" << std::endl;
+    // }
 }
 
 
-// void setTurnHeap(map_key* map) {
-//     map->turnHeap = createMinHeap(sizeof(map->NPC) + 1);
-//     gameCharacter* pc = &map->PC;
-//     addCharacterToHeap(map->turnHeap, pc->id, -1);
-//     // for (int i = 0; i < sizeof(map->NPC)/sizeof(map->NPC[0]); i++) {
-//     //     struct gameCharacter* npc = &map->NPC[i];
-//     //     npc->battleReady = true;
-//     //     addCharacterToHeap(map->turnHeap, npc->id, 0);
-//     // }
-// }
+void setTurnHeap(map_key* map) {
+    map->turnHeap = createMinHeap(sizeof(map->NPC) + 1);
+    gameCharacter* pc = &map->PC;
+    // std::cout << "Address of pc: " << &pc << std::endl;
+    // std::cout << "Address of map->PC: " << &map->PC << std::endl;
+    // std::cout << "PC in map with ID: " << pc->id << ", X: " << pc->x << ", Y: " << pc->y << std::endl;
+    // sleep(5);
+    addCharacterToHeap(map->turnHeap, pc->id, -1);
+    // for (int i = 0; i < sizeof(map->NPC)/sizeof(map->NPC[0]); i++) {
+    //     struct gameCharacter* npc = &map->NPC[i];
+    //     npc->battleReady = true;
+    //     addCharacterToHeap(map->turnHeap, npc->id, 0);
+    // }
+}
 
 
 void printHeap(struct minHeap* minHeap) {
+    // for (int i = 0; i < minHeap->size; i++) {
+    //     std::printf("Character ID: %d, Movement Cost: %d\n", minHeap->array[i]->v, minHeap->array[i]->distance);
+    // }
+    // printf("\n");
     for (int i = 0; i < minHeap->size; i++) {
-        std::printf("Character ID: %d, Movement Cost: %d\n", minHeap->array[i]->v, minHeap->array[i]->distance);
+        std::cout << "Character ID: " << minHeap->array[i]->v << ", Movement Cost: " << minHeap->array[i]->distance << std::endl;
     }
-    printf("\n");
+    std::cout << std::endl;
 }
 
 
@@ -1236,6 +1250,26 @@ void move_maps(int dx, int dy, WINDOW *comment_win, WINDOW *map_win, WINDOW *sta
     if (world[newX + world_size_a][newY + world_size_a] == NULL) {
         world[newX + world_size_a][newY + world_size_a] = new map_key;
         mapGen(world[newX + world_size_a][newY + world_size_a], newX, newY, false);
+        world[newX + world_size_a][newY + world_size_a]->PC = world[currentX + world_size_a][currentY + world_size_a]->PC;
+
+        if (gate_entered == NORTH) {
+            world[newX + world_size_a][newY + world_size_a]->PC.x = ROW - 2;
+            world[newX + world_size_a][newY + world_size_a]->PC.y = world[newX + world_size_a][newY + world_size_a]->s;
+        }
+        else if (gate_entered == EAST) {
+            world[newX + world_size_a][newY + world_size_a]->PC.x = world[newX + world_size_a][newY + world_size_a]->w;
+            world[newX + world_size_a][newY + world_size_a]->PC.y = 1;
+        }
+        else if (gate_entered == SOUTH) {
+            world[newX + world_size_a][newY + world_size_a]->PC.x = 1;
+            world[newX + world_size_a][newY + world_size_a]->PC.y = world[newX + world_size_a][newY + world_size_a]->n;
+        }
+        else if (gate_entered == WEST) {
+            world[newX + world_size_a][newY + world_size_a]->PC.x = world[newX + world_size_a][newY + world_size_a]->e;
+            world[newX + world_size_a][newY + world_size_a]->PC.y = COL - 2;
+        }    
+
+        setTurnHeap(world[newX + world_size_a][newY + world_size_a]);
     }
     else {
         if (gate_entered == NORTH) {
@@ -1313,42 +1347,54 @@ void gameLoop() {
         world[currentX + world_size_a][currentY + world_size_a] = (struct map_key*) malloc(sizeof(struct map_key));
     }
     mapGen(world[currentX + world_size_a][currentY + world_size_a], currentX, currentY, true);
-    // struct gameCharacter* pc = newGameCharacter(-1, world[currentX + world_size_a][currentY + world_size_a]->PC.x,
-    //                                             world[currentX + world_size_a][currentY + world_size_a]->PC.y, 0, 0);
+    struct gameCharacter* pc = newGameCharacter(-1, world[currentX + world_size_a][currentY + world_size_a]->PC.x,
+                                                world[currentX + world_size_a][currentY + world_size_a]->PC.y, 0, 0);
+    world[currentX + world_size_a][currentY + world_size_a]->PC = *pc;
+    // std::cout << "PC created with ID: " << pc->id << ", X: " << pc->x << ", Y: " << pc->y << std::endl;
+    // sleep(4);
     // for (int i = 0; i < 10; i++) {
     //     struct gameCharacter* npc = newGameCharacter(i, world[currentX + world_size_a][currentY + world_size_a]->NPC[i].x, world[currentX + world_size_a][currentY + world_size_a]->NPC[i].y, 1, 0);
     //     npc->battleReady = true;
     //     // addCharacterToHeap(world[currentX + world_size_a][currentY + world_size_a]->turnHeap, npc->id, 0);
     // }
-    // setTurnHeap(world[currentX + world_size_a][currentY + world_size_a]);
+    setTurnHeap(world[currentX + world_size_a][currentY + world_size_a]);
 
 
 
-    struct minHeap* turnHeap = createMinHeap(sizeof(world[currentX + world_size_a][currentY + world_size_a]->NPC) + 1);
-    // world[currentX + world_size_a][currentY + world_size_a]->turnHeap = createMinHeap(sizeof(world[currentX + world_size_a][currentY + world_size_a]->NPC) + 1);
-    // world[currentX + world_size_a][currentY + world_size_a]->turnHeap = createMinHeap(1);
-    struct gameCharacter* pc = newGameCharacter(-1, world[currentX + world_size_a][currentY + world_size_a]->PC.x,
-                                                world[currentX + world_size_a][currentY + world_size_a]->PC.y, 0, 0);
-    addCharacterToHeap(turnHeap, pc->id, -1);
-    for (int i = 0; i < 10; i++) {
-        struct gameCharacter* npc = newGameCharacter(i, world[currentX + world_size_a][currentY + world_size_a]->NPC[i].x, world[currentX + world_size_a][currentY + world_size_a]->NPC[i].y, 1, 0);
-        npc->battleReady = true;
-        addCharacterToHeap(turnHeap, npc->id, 0);
-    }
-    // setTurnHeap(world[currentX + world_size_a][currentY + world_size_a]);
+    // struct minHeap* turnHeap = createMinHeap(sizeof(world[currentX + world_size_a][currentY + world_size_a]->NPC) + 1);
+    // // world[currentX + world_size_a][currentY + world_size_a]->turnHeap = createMinHeap(sizeof(world[currentX + world_size_a][currentY + world_size_a]->NPC) + 1);
+    // // world[currentX + world_size_a][currentY + world_size_a]->turnHeap = createMinHeap(1);
+    // struct gameCharacter* pc = newGameCharacter(-1, world[currentX + world_size_a][currentY + world_size_a]->PC.x,
+    //                                             world[currentX + world_size_a][currentY + world_size_a]->PC.y, 0, 0);
+    // addCharacterToHeap(turnHeap, pc->id, -1);
+    // for (int i = 0; i < 10; i++) {
+    //     struct gameCharacter* npc = newGameCharacter(i, world[currentX + world_size_a][currentY + world_size_a]->NPC[i].x, world[currentX + world_size_a][currentY + world_size_a]->NPC[i].y, 1, 0);
+    //     npc->battleReady = true;
+    //     addCharacterToHeap(turnHeap, npc->id, 0);
+    // }
+    // // setTurnHeap(world[currentX + world_size_a][currentY + world_size_a]);
     nodelay(input_win, true);
     fly(0, 0, comment_win, map_win, status_win);
     int i = 0;
     while (1) {
         // i++;
-        // if (i == 10) {
+        // if (i == 20) {
         //     break;
         // }
         // sleep(2);
-        // struct minHeapNode* minHeapNode = extractMin(world[currentX + world_size_a][currentY + world_size_a]->turnHeap);
-        struct minHeapNode* minHeapNode = extractMin(turnHeap);
+        struct minHeapNode* minHeapNode = extractMin(world[currentX + world_size_a][currentY + world_size_a]->turnHeap);
+        // struct minHeapNode* minHeapNode = extractMin(turnHeap);
 
         int characterId = minHeapNode->v;
+        
+        printHeap(world[currentX + world_size_a][currentY + world_size_a]->turnHeap);
+        //TODO heapempty prints true
+        // if(heapIsEmpty(world[currentX + world_size_a][currentY + world_size_a]->turnHeap)) {
+        //     std::cout << "Heap is empty: true" << std::endl;
+        // } else {
+        //     std::cout << "Heap is empty: false" << std::endl;
+        // }
+        // sleep(2);
         // std::cout << "minHeapNode->v: " << minHeapNode->v << std::endl;
         // std::cout << "minHeapNode->distance: " << minHeapNode->distance << std::endl;
         if (characterId == -1) {
@@ -1383,25 +1429,25 @@ void gameLoop() {
                 wrefresh(comment_win);
                 if (in_store && strcmp(command, "<") == 0) {
                     in_store = false;
-                    addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                    addCharacterToHeap(world[currentX + world_size_a][currentY + world_size_a]->turnHeap, characterId, minHeapNode->distance);
                     continue;
                 }
                 else if (in_lot && strlen(command) == 1 && command[0] == 27) {
                     in_lot = false;
-                    addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                    addCharacterToHeap(world[currentX + world_size_a][currentY + world_size_a]->turnHeap, characterId, minHeapNode->distance);
                     continue;
                 }
                 else if (in_battle) {
                     if (strlen(command) == 1 && command[0] == 27) {
                         in_battle = false;
-                        addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                        addCharacterToHeap(world[currentX + world_size_a][currentY + world_size_a]->turnHeap, characterId, minHeapNode->distance);
                         continue;
                     }
                     else {
                         action_win = newwin(15, 62, 4, 9);
                         box(action_win, 0, 0);
                         wrefresh(action_win);
-                        addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                        addCharacterToHeap(world[currentX + world_size_a][currentY + world_size_a]->turnHeap, characterId, minHeapNode->distance);
                         continue;
                     }
                 }
@@ -1414,7 +1460,7 @@ void gameLoop() {
                 if (cost != -1) {
                     minHeapNode->distance += cost;
                 }
-                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                addCharacterToHeap(world[currentX + world_size_a][currentY + world_size_a]->turnHeap, characterId, minHeapNode->distance);
             }
             else if (strcmp(command, "l") == 0 || strcmp(command, "6") == 0) {
                 //move one right
@@ -1423,7 +1469,7 @@ void gameLoop() {
                 if (cost != -1) {
                     minHeapNode->distance += cost;
                 }
-                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                addCharacterToHeap(world[currentX + world_size_a][currentY + world_size_a]->turnHeap, characterId, minHeapNode->distance);
             }
             else if (strcmp(command, "j") == 0 || strcmp(command, "2") == 0) {
                 //move down one
@@ -1432,7 +1478,7 @@ void gameLoop() {
                 if (cost != -1) {
                     minHeapNode->distance += cost;
                 }
-                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                addCharacterToHeap(world[currentX + world_size_a][currentY + world_size_a]->turnHeap, characterId, minHeapNode->distance);
             }
             else if (strcmp(command, "h") == 0 || strcmp(command, "4") == 0) {
                 //move left one
@@ -1441,7 +1487,7 @@ void gameLoop() {
                 if (cost != -1) {
                     minHeapNode->distance += cost;
                 }
-                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                addCharacterToHeap(world[currentX + world_size_a][currentY + world_size_a]->turnHeap, characterId, minHeapNode->distance);
             }
             else if (strcmp(command, "y") == 0 || strcmp(command, "7") == 0) {
                 //move up left
@@ -1450,7 +1496,7 @@ void gameLoop() {
                 if (cost != -1) {
                     minHeapNode->distance += cost;
                 }
-                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                addCharacterToHeap(world[currentX + world_size_a][currentY + world_size_a]->turnHeap, characterId, minHeapNode->distance);
             }
             else if (strcmp(command, "u") == 0 || strcmp(command, "9") == 0) {
                 //move up right
@@ -1459,7 +1505,7 @@ void gameLoop() {
                 if (cost != -1) {
                     minHeapNode->distance += cost;
                 }
-                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                addCharacterToHeap(world[currentX + world_size_a][currentY + world_size_a]->turnHeap, characterId, minHeapNode->distance);
             }
             else if (strcmp(command, "n") == 0 || strcmp(command, "3") == 0) {
                 //move down right
@@ -1468,7 +1514,7 @@ void gameLoop() {
                 if (cost != -1) {
                     minHeapNode->distance += cost;
                 }
-                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                addCharacterToHeap(world[currentX + world_size_a][currentY + world_size_a]->turnHeap, characterId, minHeapNode->distance);
             }
             else if (strcmp(command, "b") == 0 || strcmp(command, "1") == 0) {
                 //move down left
@@ -1477,7 +1523,7 @@ void gameLoop() {
                 if (cost != -1) {
                     minHeapNode->distance += cost;
                 }
-                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                addCharacterToHeap(world[currentX + world_size_a][currentY + world_size_a]->turnHeap, characterId, minHeapNode->distance);
             }
             else if (strcmp(command, ">") == 0) {
                 struct gameCharacter *PC = &world[currentX + world_size_a][currentY + world_size_a]->PC;
@@ -1487,17 +1533,17 @@ void gameLoop() {
                     action_win = newwin(15, 62, 4, 9);
                     box(action_win, 0, 0);
                     wrefresh(action_win);
-                    addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                    addCharacterToHeap(world[currentX + world_size_a][currentY + world_size_a]->turnHeap, characterId, minHeapNode->distance);
                 }
                 else {
                     mvwprintw(comment_win, 0, 0, "Not near a building");
                     wrefresh(comment_win);
-                    addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                    addCharacterToHeap(world[currentX + world_size_a][currentY + world_size_a]->turnHeap, characterId, minHeapNode->distance);
                 }
             }
             else if (strcmp(command, "5") == 0 || strcmp(command, " ") == 0 || strcmp(command, ".") == 0 ) {
                 minHeapNode->distance += 10;
-                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                addCharacterToHeap(world[currentX + world_size_a][currentY + world_size_a]->turnHeap, characterId, minHeapNode->distance);
             }
             else if (strcmp(command, "t") == 0) {
                 in_lot = true;
@@ -1524,7 +1570,7 @@ void gameLoop() {
                     mvwprintw(action_win, i + 1, 1, "%c, %d %s and %d %s", npc_type, abs(dx), direction_x.c_str(), abs(dy), direction_y.c_str());
                 }
                 wrefresh(action_win);
-                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                addCharacterToHeap(world[currentX + world_size_a][currentY + world_size_a]->turnHeap, characterId, minHeapNode->distance);
             }
            else if (strcmp(command, "f") == 0) {
                 wmove(input_win, 0, 0);
@@ -1537,7 +1583,7 @@ void gameLoop() {
                 wmove(input_win, 0, 0);
                 wrefresh(input_win);
                 fly(x, y, comment_win, map_win, status_win);
-                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                addCharacterToHeap(world[currentX + world_size_a][currentY + world_size_a]->turnHeap, characterId, minHeapNode->distance);
            }
             else if (strcmp(command, "q") == 0 || strcmp(command, "Q") == 0) {
                 break;
@@ -1546,7 +1592,7 @@ void gameLoop() {
                 werase(comment_win);
                 mvwprintw(comment_win, 0, 0, "Invalid command");
                 wrefresh(comment_win);
-                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                addCharacterToHeap(world[currentX + world_size_a][currentY + world_size_a]->turnHeap, characterId, minHeapNode->distance);
             }
             setCostMaps(world[currentX + world_size_a][currentY + world_size_a]);
             dijkstra(&hiker_cost_map, world[currentX + world_size_a][currentY + world_size_a]->PC.x, world[currentX + world_size_a][currentY + world_size_a]->PC.y);
@@ -1594,7 +1640,7 @@ void gameLoop() {
             int cost = moveNPC(npc, cost_map, world[currentX + world_size_a][currentY + world_size_a], npcType);
             if (cost != -1) {
                 minHeapNode->distance += cost;
-                addCharacterToHeap(turnHeap, characterId, minHeapNode->distance);
+                addCharacterToHeap(world[currentX + world_size_a][currentY + world_size_a]->turnHeap, characterId, minHeapNode->distance);
             }
         }
     }
@@ -2288,13 +2334,14 @@ void readCSV(const std::string& filename) {
 
 
 int main(int argc, char* argv[]) {
-    if (argc < 2) {
-        std::cerr << "Please provide a filename as a command-line argument. ";
-        return 1;
-    }
-    std::string filename = argv[1];
-    readCSV(filename);
-    return 0;
+    // if (argc < 2) {
+    //     std::cerr << "Please provide a filename as a command-line argument. ";
+    //     return 1;
+    // }
+    // std::string filename = argv[1];
+    // std::string filename = "moves.csv";
+    // readCSV(filename);
+    // return 0;
     initscr();
     cbreak();
     raw();
