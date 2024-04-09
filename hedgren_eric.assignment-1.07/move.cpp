@@ -35,10 +35,7 @@
 
 
 #define inAttackRange(c, y, x)                                  \
-    ((c == r ||                                                 \
-        c == h ||                                               \
-        c == s) &&                                              \
-        wrld->curr_map->c_map[y][x] == &wrld->pc)      
+    ((c == r || c == h || c == s || c == e || c == w || c == p) && wrld->curr_map->c_map[y][x] == &wrld->pc)      
 
 #define notAShop(y, x)                                          \
     (wrld->curr_map->ascii[y][x] != pMart &&                    \
@@ -227,14 +224,20 @@ char move_player(world_t *wrld, heap_t *turn_heap) {
         
         wrld->pc_turn.hn = heap_insert(turn_heap, &wrld->pc_turn);
         for (i = 0; i < (int) curr_m->num_trainers; i++){
-            curr_m->turn_table[i].hn = heap_insert(turn_heap,
-                                                    &curr_m->turn_table[i]);
+            curr_m->turn_table[i].hn = heap_insert(turn_heap, &curr_m->turn_table[i]);
         }
     }
     else {
         pc_y = y;
         pc_x = x;
 
+        if (curr_m->ascii[y][x] == tGrass) {
+            int encounterChance = rand() % 100;
+            if (encounterChance < 10) {
+                int index = rand() % pokemons.size();
+                pokemon_encounter_window(wrld, pokemons, index);
+            }
+        }
         wrld->pc_turn.next_turn += MV_COST(player, wrld->curr_map->ascii[y][x]);
     }
 

@@ -156,6 +156,7 @@ void print_map(world_t *wrld);
 int trainers_window(map_t *m, WINDOW *parent_WIN);
 int poke_mart_window(world_t *wrld);
 int poke_center_window(world_t *wrld);
+int pokemon_encounter_window(world_t *wrld, std::list<pokemon_t> pokemons, int index);
 
 void print_top_msg(world_t *wrld, bool isInput, const char *msg, ...);
 void print_bottom_msg(world_t *wrld, char *msg);

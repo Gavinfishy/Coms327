@@ -163,3 +163,34 @@ int poke_center_window(world_t *wrld) {
     
     return 0;
 }
+
+int pokemon_encounter_window(world_t *wrld, std::list<pokemon_t> pokemons, int index) {
+    uint8_t num_rows = 15;
+    uint8_t num_cols = 68;
+    uint8_t begin_y = 4;
+    uint8_t begin_x = 6;
+    int input = 0;
+    WINDOW *pEncntr_win = subwin(main_w, num_rows, num_cols, begin_y, begin_x);
+    while(1) {
+        if (input == 27) { //esc key
+            break;
+        }
+        else if (input == 'Q' || input == 'q') {
+            return 'Q';
+        }
+
+        wclear(pEncntr_win);
+
+        // mvwprintw(main_w, 5, 30, "POKEMON ENCOUNTER");
+        auto it = std::next(pokemons.begin(), index);
+        pokemon_t encounteredPokemon = *it;
+
+        mvwprintw(main_w, 5, 30, "A wild %s appeared!", encounteredPokemon.identifier.c_str());
+
+        wrefresh(pEncntr_win);
+
+        input = wgetch(pEncntr_win);
+    }
+    delwin(pEncntr_win);
+    return 0;
+}

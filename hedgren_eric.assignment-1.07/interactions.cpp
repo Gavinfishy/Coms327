@@ -17,6 +17,14 @@ bool battle(world_t *wrld, Character *trainer) {
         case s:
             mvwprintw(main_w, 9, 35, "player vs sentry");
             break; 
+        case w:
+            mvwprintw(main_w, 9, 35, "player vs wanderer");
+            break;
+        case e:
+            mvwprintw(main_w, 9, 35, "player vs explorer");
+            break;
+        case p: 
+            mvwprintw(main_w, 9, 35, "player vs pacer");
         default:
             break;
     }
