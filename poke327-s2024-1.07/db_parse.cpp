@@ -90,6 +90,7 @@ void db_parse(bool print)
   } else if (!prefix) {
     // Your third location goes here, if needed.
     // prefix is freed later, so be sure you malloc it
+    prefix = strdup("/mnt/c/Users/BlueD/git_repos/327_poke");
   }
 
   //No error checking on file load from here on out.  Missing
