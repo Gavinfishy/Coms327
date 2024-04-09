@@ -25,6 +25,7 @@ f
 q quit game
 
 Below is a list of files the program is set to find on pyrite:
+
 pokemon.csv
 moves.csv
 pokemon moves.csv
