@@ -1065,6 +1065,7 @@ WINDOW *comment_win, WINDOW *action_win, WINDOW *map_win, WINDOW *status_win, bo
     int newY = character->y +dy;
     int row_lim = ROW - 2;
     int col_lim = COL - 2;
+    int terrain = world[currentX + world_size_a][currentY + world_size_a]->terrain_type[newX][newY];
     werase(comment_win);
     if (visited) {
         map->character_type[character->x][character->y] = -1;
@@ -1074,7 +1075,6 @@ WINDOW *comment_win, WINDOW *action_win, WINDOW *map_win, WINDOW *status_win, bo
         return player_cost_map.map[newX][newY];
     }
     if (newX < 1 || newX > row_lim || newY < 1 || newY > col_lim) {
-        int terrain = world[currentX + world_size_a][currentY + world_size_a]->terrain_type[newX][newY];
         if (terrain == road) {
             werase(comment_win);
             mvwprintw(comment_win, 0, 0, "Changing Maps\n");
@@ -1125,6 +1125,19 @@ WINDOW *comment_win, WINDOW *action_win, WINDOW *map_win, WINDOW *status_win, bo
         }
         return -1;
     }
+    // if (terrain == grass) {
+    //     int encounterChance = rand() % 100;
+    //     if (encounterChance < 10) {
+    //         int index = rand() % pokemons.size();
+    //         Pokemon encounteredPokemon = pokemons[index];
+    //         in_battle = true;
+    //         action_win = newwin(15, 62, 4, 9);
+    //         box(action_win, 0, 0);
+    //         wrefresh(action_win);
+    //         mvwprintw(action_win, 1, 1, "A wild %s appeared!", encounteredPokemon.identifier.c_str());
+    //         wrefresh(action_win);
+    //     }
+    // }
     map->character_type[character->x][character->y] = -1;
     character->x += dx;
     character->y += dy;
@@ -1393,7 +1406,6 @@ void gameLoop() {
         //     break;
         // }
         struct minHeapNode* minHeapNode = extractMin(world[currentX + world_size_a][currentY + world_size_a]->turnHeap);
-        // struct minHeapNode* minHeapNode = extractMin(turnHeap);
 
         int characterId = minHeapNode->v;
         
@@ -2351,8 +2363,8 @@ int main(int argc, char* argv[]) {
     //     return 1;
     // }
     // std::string filename = argv[1];
-    // std::string filename = "moves.csv";
-    // readCSV(filename);
+    std::string filename = "moves.csv";
+    readCSV(filename);
     // return 0;
     initscr();
     cbreak();
