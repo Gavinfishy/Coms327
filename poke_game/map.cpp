@@ -704,11 +704,11 @@ void setTurnHeap(map_key* map) {
     // std::cout << "PC in map with ID: " << pc->id << ", X: " << pc->x << ", Y: " << pc->y << std::endl;
     // sleep(5);
     addCharacterToHeap(map->turnHeap, pc->id, -1);
-    // for (int i = 0; i < sizeof(map->NPC)/sizeof(map->NPC[0]); i++) {
-    //     struct gameCharacter* npc = &map->NPC[i];
-    //     npc->battleReady = true;
-    //     addCharacterToHeap(map->turnHeap, npc->id, 0);
-    // }
+    for (int i = 0; i < sizeof(map->NPC)/sizeof(map->NPC[0]); i++) {
+        struct gameCharacter* npc = &map->NPC[i];
+        npc->battleReady = true;
+        addCharacterToHeap(map->turnHeap, npc->id, 0);
+    }
 }
 
 
@@ -1160,7 +1160,7 @@ int moveNPC(struct gameCharacter* npc, cost_map_key* cost_map, struct map_key *m
                 return INT_MAX;
             case rival:
             case hiker:
-                if (!npc->battleReady) {
+                if (npc->battleReady) {
                     dx = directions[i][0];
                     dy = directions[i][1];
                 }
@@ -1251,7 +1251,6 @@ void move_maps(int dx, int dy, WINDOW *comment_win, WINDOW *map_win, WINDOW *sta
         world[newX + world_size_a][newY + world_size_a] = new map_key;
         mapGen(world[newX + world_size_a][newY + world_size_a], newX, newY, false);
         world[newX + world_size_a][newY + world_size_a]->PC = world[currentX + world_size_a][currentY + world_size_a]->PC;
-
         if (gate_entered == NORTH) {
             world[newX + world_size_a][newY + world_size_a]->PC.x = ROW - 2;
             world[newX + world_size_a][newY + world_size_a]->PC.y = world[newX + world_size_a][newY + world_size_a]->s;
@@ -1267,8 +1266,13 @@ void move_maps(int dx, int dy, WINDOW *comment_win, WINDOW *map_win, WINDOW *sta
         else if (gate_entered == WEST) {
             world[newX + world_size_a][newY + world_size_a]->PC.x = world[newX + world_size_a][newY + world_size_a]->e;
             world[newX + world_size_a][newY + world_size_a]->PC.y = COL - 2;
-        }    
-
+        }
+        for (int i = 0; i < 10; i++) {
+            int type = (i % 7) + 9;
+            struct gameCharacter* npc = newGameCharacter(i, world[newX + world_size_a][newY + world_size_a]->NPC[i].x, world[newX + world_size_a][currentY + world_size_a]->NPC[i].y, type, 0);
+            npc->battleReady = true;
+            world[newX + world_size_a][newY + world_size_a]->NPC[i] = *npc;
+        }
         setTurnHeap(world[newX + world_size_a][newY + world_size_a]);
     }
     else {
@@ -1303,6 +1307,13 @@ void move_maps(int dx, int dy, WINDOW *comment_win, WINDOW *map_win, WINDOW *sta
     currentY = newY;
     printMap(world[currentX + world_size_a][currentY + world_size_a], map_win);
     mvwprintw(status_win, 0, 0, "Current coordinates: (%d, %d)\n", currentX, currentY);
+    // std::cout << "Created new map at (" << newX << ", " << newY << ")" << std::endl;
+    // for (int i = 0; i < 10; i++) {
+    //     std::cout << "NPC " << i << ": ID = " << world[newX + world_size_a][newY + world_size_a]->NPC[i].id
+    //             << ", Type = " << world[newX + world_size_a][newY + world_size_a]->NPC[i].type
+    //             << ", Coordinates = (" << world[newX + world_size_a][newY + world_size_a]->NPC[i].x
+    //             << ", " << world[newX + world_size_a][newY + world_size_a]->NPC[i].y << ")" << std::endl;
+    // }
 }
 
 
@@ -1351,12 +1362,12 @@ void gameLoop() {
                                                 world[currentX + world_size_a][currentY + world_size_a]->PC.y, 0, 0);
     world[currentX + world_size_a][currentY + world_size_a]->PC = *pc;
     // std::cout << "PC created with ID: " << pc->id << ", X: " << pc->x << ", Y: " << pc->y << std::endl;
-    // sleep(4);
-    // for (int i = 0; i < 10; i++) {
-    //     struct gameCharacter* npc = newGameCharacter(i, world[currentX + world_size_a][currentY + world_size_a]->NPC[i].x, world[currentX + world_size_a][currentY + world_size_a]->NPC[i].y, 1, 0);
-    //     npc->battleReady = true;
-    //     // addCharacterToHeap(world[currentX + world_size_a][currentY + world_size_a]->turnHeap, npc->id, 0);
-    // }
+    for (int i = 0; i < 10; i++) {
+        int type = (i % 7) + 9;
+        struct gameCharacter* npc = newGameCharacter(i, world[currentX + world_size_a][currentY + world_size_a]->NPC[i].x, world[currentX + world_size_a][currentY + world_size_a]->NPC[i].y, type, 0);
+        npc->battleReady = true;
+        world[currentX + world_size_a][currentY + world_size_a]->NPC[i] = *npc;
+    }
     setTurnHeap(world[currentX + world_size_a][currentY + world_size_a]);
 
 
@@ -1378,23 +1389,15 @@ void gameLoop() {
     int i = 0;
     while (1) {
         // i++;
-        // if (i == 20) {
+        // if (i == 300) {
         //     break;
         // }
-        // sleep(2);
         struct minHeapNode* minHeapNode = extractMin(world[currentX + world_size_a][currentY + world_size_a]->turnHeap);
         // struct minHeapNode* minHeapNode = extractMin(turnHeap);
 
         int characterId = minHeapNode->v;
         
-        printHeap(world[currentX + world_size_a][currentY + world_size_a]->turnHeap);
-        //TODO heapempty prints true
-        // if(heapIsEmpty(world[currentX + world_size_a][currentY + world_size_a]->turnHeap)) {
-        //     std::cout << "Heap is empty: true" << std::endl;
-        // } else {
-        //     std::cout << "Heap is empty: false" << std::endl;
-        // }
-        // sleep(2);
+        // printHeap(world[currentX + world_size_a][currentY + world_size_a]->turnHeap);
         // std::cout << "minHeapNode->v: " << minHeapNode->v << std::endl;
         // std::cout << "minHeapNode->distance: " << minHeapNode->distance << std::endl;
         if (characterId == -1) {
@@ -1638,6 +1641,15 @@ void gameLoop() {
                     break;
             }
             int cost = moveNPC(npc, cost_map, world[currentX + world_size_a][currentY + world_size_a], npcType);
+            // std::cout << "NPC ID: " << npc->id << std::endl;
+            // std::cout << "NPC Type: " << npcType << std::endl;
+            // std::cout << "Movement Cost: " << cost << std::endl;
+            // std::cout << "New NPC Coordinates: (" << npc->x << ", " << npc->y << ")" << std::endl;
+            // minHeapNode->distance += 50;
+            // std::cout << "Moved NPC: ID = " << npc->id
+            //   << ", Type = " << npcType
+            //   << ", Movement Cost = " << cost
+            //   << ", New Coordinates = (" << npc->x << ", " << npc->y << ")" << std::endl;
             if (cost != -1) {
                 minHeapNode->distance += cost;
                 addCharacterToHeap(world[currentX + world_size_a][currentY + world_size_a]->turnHeap, characterId, minHeapNode->distance);
