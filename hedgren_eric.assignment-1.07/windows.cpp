@@ -171,6 +171,20 @@ int pokemon_encounter_window(world_t *wrld, std::list<pokemon_t> pokemons, int i
     uint8_t begin_x = 6;
     int input = 0;
     WINDOW *pEncntr_win = subwin(main_w, num_rows, num_cols, begin_y, begin_x);
+
+    int manhattan = (abs(wrld->curr_idx[0]-200) + abs(wrld->curr_idx[1]-200));
+    int minLevel;
+    int maxLevel;
+    if (manhattan <= 200) {
+        minLevel = 1;
+        maxLevel = (manhattan > 0) ? manhattan / 2 : 1;
+    }
+    else {
+        minLevel = (manhattan - 200) / 2;
+        maxLevel = 100;
+    }
+    // printf("Min level: %d, Max level: %d, manhattan: %d\n", minLevel, maxLevel, manhattan);
+    int level = minLevel + rand() % (maxLevel - minLevel + 1);
     while(1) {
         if (input == 27) { //esc key
             break;
@@ -178,17 +192,13 @@ int pokemon_encounter_window(world_t *wrld, std::list<pokemon_t> pokemons, int i
         else if (input == 'Q' || input == 'q') {
             return 'Q';
         }
-
         wclear(pEncntr_win);
-
-        // mvwprintw(main_w, 5, 30, "POKEMON ENCOUNTER");
         auto it = std::next(pokemons.begin(), index);
         pokemon_t encounteredPokemon = *it;
-
         mvwprintw(main_w, 5, 30, "A wild %s appeared!", encounteredPokemon.identifier.c_str());
-
+        mvwprintw(main_w, 6, 30, "Level: %d", level);
+        mvwprintw(main_w, 7, 20, "Min level: %d, Max level: %d, manhattan: %d\n", minLevel, maxLevel, manhattan);
         wrefresh(pEncntr_win);
-
         input = wgetch(pEncntr_win);
     }
     delwin(pEncntr_win);

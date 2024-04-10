@@ -27,8 +27,8 @@
      (wrld->curr_map->c_map[y][x] == NULL))
 
 #define validWrldMove(y, x)                                     \
-    ((0 <= y && y < 400) &&                                     \
-     (0 <= x && x < 400))
+    ((0 <= y && y < 401) &&                                     \
+     (0 <= x && x < 401))
 
 #define isGate(y, x)                                            \
     ((y == 0 || y == 20) || (x == 0 || x == 79))
