@@ -357,6 +357,12 @@ void generate_npc (map_t* m, NPC *npc) {
     }
 }
 
+
+void generate_pokemon (map_t* m) {
+
+}
+
+
 /*
     get the x and y coord in the 2D array of maps
 

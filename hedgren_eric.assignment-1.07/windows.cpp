@@ -172,19 +172,18 @@ int pokemon_encounter_window(world_t *wrld, std::list<pokemon_t> pokemons, int i
     int input = 0;
     WINDOW *pEncntr_win = subwin(main_w, num_rows, num_cols, begin_y, begin_x);
 
-    int manhattan = (abs(wrld->curr_idx[0]-200) + abs(wrld->curr_idx[1]-200));
-    int minLevel;
-    int maxLevel;
-    if (manhattan <= 200) {
-        minLevel = 1;
-        maxLevel = (manhattan > 0) ? manhattan / 2 : 1;
-    }
-    else {
-        minLevel = (manhattan - 200) / 2;
-        maxLevel = 100;
-    }
-    // printf("Min level: %d, Max level: %d, manhattan: %d\n", minLevel, maxLevel, manhattan);
-    int level = minLevel + rand() % (maxLevel - minLevel + 1);
+    // int manhattan = (abs(wrld->curr_idx[0]-200) + abs(wrld->curr_idx[1]-200));
+    // int minLevel;
+    // int maxLevel;
+    // if (manhattan <= 200) {
+    //     minLevel = 1;
+    //     maxLevel = (manhattan > 0) ? manhattan / 2 : 1;
+    // }
+    // else {
+    //     minLevel = (manhattan - 200) / 2;
+    //     maxLevel = 100;
+    // }
+    // int level = minLevel + rand() % (maxLevel - minLevel + 1);
     while(1) {
         if (input == 27) { //esc key
             break;
@@ -193,11 +192,24 @@ int pokemon_encounter_window(world_t *wrld, std::list<pokemon_t> pokemons, int i
             return 'Q';
         }
         wclear(pEncntr_win);
-        auto it = std::next(pokemons.begin(), index);
-        pokemon_t encounteredPokemon = *it;
-        mvwprintw(main_w, 5, 30, "A wild %s appeared!", encounteredPokemon.identifier.c_str());
-        mvwprintw(main_w, 6, 30, "Level: %d", level);
-        mvwprintw(main_w, 7, 20, "Min level: %d, Max level: %d, manhattan: %d\n", minLevel, maxLevel, manhattan);
+        // auto it = std::next(pokemons.begin(), index);
+        Pokemon encounteredPokemon(1, 1);
+        int moveIndex = 1;
+        for (const auto& move : encounteredPokemon.move) {
+            mvwprintw(main_w, 7 + moveIndex, 30, "Move %d: %s", moveIndex, move->identifier.c_str());
+            moveIndex++;
+        }
+        mvwprintw(main_w, 8 + moveIndex, 30, "HP: %d", encounteredPokemon.hp_cur);
+        mvwprintw(main_w, 9 + moveIndex, 30, "Attack: %d", encounteredPokemon.attack_cur);
+        // ... print other _cur variables ...
+        mvwprintw(main_w, 10 + moveIndex, 30, "Gender: %d", encounteredPokemon.gender);
+        mvwprintw(main_w, 11 + moveIndex, 30, "Shiny: %d", encounteredPokemon.shiny);
+
+        // pokemon_t encounteredPokemon = *it;
+        // mvwprintw(main_w, 5, 30, "A wild %s appeared!", encounteredPokemon.identifier.c_str());
+        // mvwprintw(main_w, 6, 30, "Level: %d", level);
+        // mvwprintw(main_w, 7, 30, "Moves");
+
         wrefresh(pEncntr_win);
         input = wgetch(pEncntr_win);
     }
