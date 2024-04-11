@@ -338,7 +338,7 @@ void generate_pc (world_t* wrld) {
     wrld->curr_map->c_map[wrld->pc.y][wrld->pc.x] = &wrld->pc;
 }
 
-void generate_npc (map_t* m, NPC *npc) {
+void generate_npc (map_t* m, NPC *npc, world_t* wrld) {
     npc->type = (character_t) ((rand() % 6) + h); // random type starting at h (first enum)
     npc->direction = (cardinal_t) (rand() % 4);
     npc->isDefeated = false;
@@ -355,6 +355,16 @@ void generate_npc (map_t* m, NPC *npc) {
 
         clayer(npc->y, npc->x) = npc;
         // npc->addPokemon(201, 201);
+
+        // npc->pokemons.push_back(Pokemon(wrld->curr_idx[0], wrld->curr_idx[1])); 
+
+        // for (int i = 0; i < 5; i++) {
+        //     if ((rand() % 100) < 60) {
+        //         npc->pokemons.push_back(Pokemon(wrld->curr_idx[0], wrld->curr_idx[1]));
+        //     } else {
+        //         break;
+        //     }
+        // }
     }
 }
 
@@ -484,7 +494,7 @@ void generate_map(world_t *wrld){
     for (d = 0; d < (curr_m->num_trainers); d++) {
         curr_m->turn_table[d].character = (NPC*) malloc(sizeof(NPC));
         curr_m->turn_table[d].seq_num = d + 1;
-        generate_npc(curr_m, static_cast<NPC*>(curr_m->turn_table[d].character));
+        generate_npc(curr_m, static_cast<NPC*>(curr_m->turn_table[d].character), wrld);
     }
 
     generate_pc(wrld);

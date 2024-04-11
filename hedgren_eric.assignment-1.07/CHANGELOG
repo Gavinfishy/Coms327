@@ -3,7 +3,7 @@ Project 8
 04/08/2024 7pm-10:30pm Attempting to fix NPC heap issues, TLDR the npc's did not want to be fixed
 04/09/2024 10:09am It's been a good run with my one file c program but the NPC's did not want to cooperate. It is finally time to accept defeat and switch code. All comments below the first line are from my poke_game file which made it through 70% of the class. I am switching to Eric Hedgren's code drop from 1.07, below the second line is his changelog.
 1pm-1:30pm, 2pm-6pm, 7:45pm-9:45pm Added pokemon encounter screen which prints name and level
-04/10/2024 12pm-1pm, 2:15pm-6pm, 6:30pm-
+04/10/2024 12pm-1pm, 2:15pm-6pm, 6:30pm-10:15pm added Pokemon class and functions along with start screen and NPC pokemon generation, encounter random with stats
 
 ----------------------------------------------------------------------------------------
 
@@ -62,6 +62,7 @@ Project 7
 04/01/2024 9pm-10:30pm added csv read functionality
 04/02/2024 8am-9am, 5pm-6:50pm, 9:45pm - 10:30pm can read all three data locations and print the first csv contents after creating struct
 04/03/2024 9:30am-11am, 12pm-12:30pm, 6pm-7:15pm, 8pm-11pm added structs, print vectors, populate vectors, ignores int_max
+
 ----------------------------------------------------------------------------------------
 
 commit 2f420bdb0f69806a7b47c8412bbb353d9e014941

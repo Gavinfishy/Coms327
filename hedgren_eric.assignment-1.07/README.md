@@ -5,7 +5,7 @@ I will keep the README the same and add a 1.08 section
 
 1.08
 
-
+This assignment uses the CSV's from the previous assignment in order to randomly generate pokemon to give to NPC's and encounter in tall grass.
 
 --------------------------------------------------------------------------
 # Pokemon
