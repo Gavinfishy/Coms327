@@ -184,33 +184,38 @@ int pokemon_encounter_window(world_t *wrld, std::list<pokemon_t> pokemons, int i
     //     maxLevel = 100;
     // }
     // int level = minLevel + rand() % (maxLevel - minLevel + 1);
+    bool placed = false;
     while(1) {
-        if (input == 27) { //esc key
+        if (input == 27) {
             break;
         }
         else if (input == 'Q' || input == 'q') {
             return 'Q';
         }
-        wclear(pEncntr_win);
         // auto it = std::next(pokemons.begin(), index);
-        Pokemon encounteredPokemon(1, 1);
-        int moveIndex = 1;
-        for (const auto& move : encounteredPokemon.move) {
-            mvwprintw(main_w, 7 + moveIndex, 30, "Move %d: %s", moveIndex, move->identifier.c_str());
-            moveIndex++;
+        if (!placed) {
+            wclear(pEncntr_win);
+            Pokemon encounteredPokemon(200, 200);
+            int moveIndex = 1;
+            mvwprintw(main_w, 5, 30, "A wild %s appeared!", encounteredPokemon.name.c_str());
+            mvwprintw(main_w, 6, 30, "Level: %d", encounteredPokemon.level);
+            for (const auto& move : encounteredPokemon.move) {
+                mvwprintw(main_w, 7 + moveIndex, 30, "Move %d: %s", moveIndex, move->identifier.c_str());
+                moveIndex++;
+            }
+            mvwprintw(main_w, 8 + moveIndex, 10, "HP: %d", encounteredPokemon.hp_cur);
+            mvwprintw(main_w, 9 + moveIndex, 10, "Attack: %d", encounteredPokemon.attack_cur);
+            mvwprintw(main_w, 10 + moveIndex, 10, "Defense: %d", encounteredPokemon.defense_cur);
+            mvwprintw(main_w, 8 + moveIndex, 25, "Special Attack: %d", encounteredPokemon.special_attack_cur);
+            mvwprintw(main_w, 9 + moveIndex, 25, "Special Defense: %d", encounteredPokemon.special_defense_cur);
+            mvwprintw(main_w, 10 + moveIndex, 25, "Speed: %d", encounteredPokemon.speed_cur);
+            mvwprintw(main_w, 8 + moveIndex, 50, "Accuracy: %d", encounteredPokemon.accuracy_cur);
+            mvwprintw(main_w, 9 + moveIndex, 50, "Evasion: %d", encounteredPokemon.evasion_cur);
+            mvwprintw(main_w, 10 + moveIndex, 50, "Gender: %s", encounteredPokemon.gender ? "Male" : "Female");
+            mvwprintw(main_w, 11 + moveIndex, 50, "Shiny: %s", encounteredPokemon.shiny ? "Yes" : "No");
+            wrefresh(pEncntr_win);
+            placed = true;
         }
-        mvwprintw(main_w, 8 + moveIndex, 30, "HP: %d", encounteredPokemon.hp_cur);
-        mvwprintw(main_w, 9 + moveIndex, 30, "Attack: %d", encounteredPokemon.attack_cur);
-        // ... print other _cur variables ...
-        mvwprintw(main_w, 10 + moveIndex, 30, "Gender: %d", encounteredPokemon.gender);
-        mvwprintw(main_w, 11 + moveIndex, 30, "Shiny: %d", encounteredPokemon.shiny);
-
-        // pokemon_t encounteredPokemon = *it;
-        // mvwprintw(main_w, 5, 30, "A wild %s appeared!", encounteredPokemon.identifier.c_str());
-        // mvwprintw(main_w, 6, 30, "Level: %d", level);
-        // mvwprintw(main_w, 7, 30, "Moves");
-
-        wrefresh(pEncntr_win);
         input = wgetch(pEncntr_win);
     }
     delwin(pEncntr_win);

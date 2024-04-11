@@ -489,7 +489,7 @@ void turn_move(world_t *wrld) {
         wrld->curr_map->turn_table[i].hn = heap_insert(&h,
                                             &wrld->curr_map->turn_table[i]);
     }
-
+    
     while ((t = (turn_t*) heap_remove_min(&h))) {
         char rtrn;
 
