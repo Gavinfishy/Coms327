@@ -143,6 +143,7 @@ int main(int argc, char *argv[]) {
     wrld.pc.type = player;
     wrld.pc.y = 0;
     wrld.pc.x = 0;
+    // wrld.pc.addPokemon(wrld.curr_idx[0], wrld.curr_idx[1]);
     wrld.pc_turn.next_turn = 0;
     wrld.pc_turn.seq_num = 0;
 
@@ -158,7 +159,7 @@ int main(int argc, char *argv[]) {
 
     // generates and prints center map
     generate_map(&wrld);
-
+    pokemon_start_win(&wrld);
     turn_move(&wrld);
 
     delwin(wrld.top_msg_win);

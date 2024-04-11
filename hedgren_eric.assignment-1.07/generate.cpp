@@ -354,12 +354,8 @@ void generate_npc (map_t* m, NPC *npc) {
                     // while the point is not path, sGrass, tGrass, or not a NULL (double negative)
 
         clayer(npc->y, npc->x) = npc;
+        // npc->addPokemon(201, 201);
     }
-}
-
-
-void generate_pokemon (map_t* m) {
-
 }
 
 

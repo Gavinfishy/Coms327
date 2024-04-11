@@ -38,7 +38,7 @@ int trainers_window(map_t *m, WINDOW *parent_WIN) {
         wclear(trainer_win);
 
         wbkgd(trainer_win, COLOR_PAIR(e));
-
+        // int pokemonIndex = 1;
         for (i = 0; i < num_rows; i++) {
 
             if ((i + shift) >= m->num_trainers) {
@@ -74,6 +74,11 @@ int trainers_window(map_t *m, WINDOW *parent_WIN) {
                 default:
                     break;
                 }
+                
+                // for (const auto& pokemon : m->turn_table[i + shift].character->pokemons) {
+                //     wprintw(trainer_win, "\n    Pokemon %d: %s (Level: %d)", pokemonIndex, pokemon.name.c_str(), pokemon.level);
+                //     pokemonIndex++;
+                // }
             }
 
             if (i < (num_rows)) {
@@ -171,19 +176,6 @@ int pokemon_encounter_window(world_t *wrld, std::list<pokemon_t> pokemons, int i
     uint8_t begin_x = 6;
     int input = 0;
     WINDOW *pEncntr_win = subwin(main_w, num_rows, num_cols, begin_y, begin_x);
-
-    // int manhattan = (abs(wrld->curr_idx[0]-200) + abs(wrld->curr_idx[1]-200));
-    // int minLevel;
-    // int maxLevel;
-    // if (manhattan <= 200) {
-    //     minLevel = 1;
-    //     maxLevel = (manhattan > 0) ? manhattan / 2 : 1;
-    // }
-    // else {
-    //     minLevel = (manhattan - 200) / 2;
-    //     maxLevel = 100;
-    // }
-    // int level = minLevel + rand() % (maxLevel - minLevel + 1);
     bool placed = false;
     while(1) {
         if (input == 27) {
@@ -192,10 +184,9 @@ int pokemon_encounter_window(world_t *wrld, std::list<pokemon_t> pokemons, int i
         else if (input == 'Q' || input == 'q') {
             return 'Q';
         }
-        // auto it = std::next(pokemons.begin(), index);
         if (!placed) {
             wclear(pEncntr_win);
-            Pokemon encounteredPokemon(200, 200);
+            Pokemon encounteredPokemon(wrld->curr_idx[0], wrld->curr_idx[1]);
             int moveIndex = 1;
             mvwprintw(main_w, 5, 30, "A wild %s appeared!", encounteredPokemon.name.c_str());
             mvwprintw(main_w, 6, 30, "Level: %d", encounteredPokemon.level);
@@ -219,5 +210,38 @@ int pokemon_encounter_window(world_t *wrld, std::list<pokemon_t> pokemons, int i
         input = wgetch(pEncntr_win);
     }
     delwin(pEncntr_win);
+    return 0;
+}
+
+int pokemon_start_win(world_t *wrld) {
+    uint8_t num_rows = 21;
+    uint8_t num_cols = 78;
+    uint8_t begin_y = 1;
+    uint8_t begin_x = 1;
+    int input = 0;
+
+    WINDOW *pStart_win = subwin(main_w, num_rows, num_cols,
+                                    begin_y, begin_x);
+
+    while(1) {
+        if (input == '1' || input == '2' || input == '3') {
+            //TODO if 1 create bulb, 2 char, 3 squirt, assign to PC
+            break;
+        }
+
+        wclear(pStart_win);
+
+        mvwprintw(main_w, 5, 30, "Choose Starting Pokemon");
+        mvwprintw(main_w, 12, 10, "Bulbosaur: 1");
+        mvwprintw(main_w, 12, 35, "Charmander: 2");
+        mvwprintw(main_w, 12, 60, "Squirtle: 3");
+
+        wrefresh(pStart_win);
+
+        input = wgetch(pStart_win);
+    }
+
+    delwin(pStart_win);
+    
     return 0;
 }

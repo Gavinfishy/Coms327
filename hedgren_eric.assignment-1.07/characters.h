@@ -217,19 +217,29 @@ class Character {
         bool isDefeated;
         cardinal_t direction;
         std::vector<Pokemon> pokemons;
-        // void new_pokemon(name, level) {
-
-        // }
-        // void new_pokemon(x,y){
-
-        // }
+        virtual void addPokemon(int x, int y) = 0;
 };
 
 class PC : public Character {
-
+    public:
+        void addPokemon(int x, int y) override {
+            pokemons.push_back(Pokemon(x, y));
+        }
 };
 
 class NPC : public Character {
+    public:
+        void addPokemon(int x, int y) override {
+            pokemons.push_back(Pokemon(x, y)); 
+
+            for (int i = 0; i < 5; i++) {
+                if ((rand() % 100) < 60) {
+                    pokemons.push_back(Pokemon(x, y));
+                } else {
+                    break;
+                }
+            }
+        }
 };
 
 typedef struct turn {

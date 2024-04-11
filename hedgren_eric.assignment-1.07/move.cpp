@@ -59,6 +59,7 @@ char move_player(world_t *wrld, heap_t *turn_heap) {
     bool is_valid;
 
     print_map(wrld);
+    //TODO start window goes here
     do { 
         y = pc_y;
         x = pc_x;
@@ -489,7 +490,7 @@ void turn_move(world_t *wrld) {
         wrld->curr_map->turn_table[i].hn = heap_insert(&h,
                                             &wrld->curr_map->turn_table[i]);
     }
-    
+
     while ((t = (turn_t*) heap_remove_min(&h))) {
         char rtrn;
 
@@ -503,6 +504,7 @@ void turn_move(world_t *wrld) {
             }
         }
         else {
+            
             move_npc(wrld, t);
         }
 
