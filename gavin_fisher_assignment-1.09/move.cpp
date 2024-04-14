@@ -199,8 +199,7 @@ char move_player(world_t *wrld, heap_t *turn_heap) {
         }
 
 
-        if (input == 'Q')
-        {
+        if (input == 'Q' || input == 'q') {
             return 'Q';
         }
         

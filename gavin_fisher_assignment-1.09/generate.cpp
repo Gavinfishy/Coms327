@@ -3,8 +3,6 @@
 ****************************************/
 
 #include "map.h"
-#include <iostream>
-#include <ostream>
 
 void generate_gate (map_t *m, char cardinal, uint8_t g) {
     switch (cardinal)
@@ -371,8 +369,6 @@ void generate_map(world_t *wrld){
     wrldyx(wrld->curr_idx[dim_y], wrld->curr_idx[dim_x]) = 
                     (map_t*)malloc(sizeof(map_t) + ((num_trainers) * sizeof(turn_t)));
 
-
-
     curr_m = wrldyx(wrld->curr_idx[dim_y], wrld->curr_idx[dim_x]);
     curr_m->num_trainers = num_trainers;
 
@@ -403,7 +399,6 @@ void generate_map(world_t *wrld){
         use this information for generate_road as well (which gates to connect)
     */
 
-    
     // generate gates
     // North
     if (curr_y > 0) {
@@ -482,13 +477,13 @@ void generate_map(world_t *wrld){
 
     generate_trees(curr_m, 50, 150);
     generate_boulders(curr_m, 5, 10);
-    
+
     for (d = 0; d < (curr_m->num_trainers); d++) {
         curr_m->turn_table[d].character = new NPC(wrld->curr_idx[dim_y], wrld->curr_idx[dim_x]);
         curr_m->turn_table[d].seq_num = d + 1;
         generate_npc(curr_m, static_cast<NPC*>(curr_m->turn_table[d].character));
     }
-    
+
     generate_pc(wrld);
 
     // generate cost maps

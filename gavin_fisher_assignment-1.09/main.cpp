@@ -137,10 +137,8 @@ int main(int argc, char *argv[]) {
 
     // windows
     print_top_msg(wrld, false, NULL);
-    
 
     print_bottom_msg(wrld, NULL);
-
 
     // generates and prints center map
     generate_map(wrld);

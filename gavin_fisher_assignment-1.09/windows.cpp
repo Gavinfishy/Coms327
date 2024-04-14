@@ -40,7 +40,7 @@ int trainers_window(map_t *m, WINDOW *parent_WIN) {
         else if (input == 27) { //esc key
             break;
         }
-        else if (input == 'Q') {
+        else if (input == 'Q' || input == 'q') {
             return 'Q';
         }
 
@@ -119,7 +119,7 @@ int poke_mart_window(world_t *wrld) {
         if (input == '<') {
             break;
         }
-        else if (input == 'Q') {
+        else if (input == 'Q' || input == 'q') {
             return 'Q';
         }
 
@@ -156,7 +156,7 @@ int poke_center_window(world_t *wrld) {
         if (input == '<') {
             break;
         }
-        else if (input == 'Q') {
+        else if (input == 'Q' || input == 'q') {
             return 'Q';
         }
 

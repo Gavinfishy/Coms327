@@ -12,8 +12,7 @@
 #include <algorithm>
 #include <cmath>
 #include <list>
-#include <iostream>
-#include <ostream>
+
 #include "db.h"
 #include "heap.h"
 
@@ -50,7 +49,7 @@ class Pokemon {
         bool isShiny;
         bool isKnockedOut;
         std::list<const moves_t*> myMoves;
-        int pokemon_index;
+        int gender;
 
     void add_move (int num_moves) {
         int i, random;
@@ -109,6 +108,7 @@ class Pokemon {
         this->level = level;
         this->xp = 0;
         this->isShiny = rand() % 8192 == 0;
+        this->gender = rand() % 2;
         this->isKnockedOut = false;
         
         auto it = std::find_if(pokemons.begin(), pokemons.end(),
@@ -177,31 +177,18 @@ class Pokemon {
         else {
             this->level = std::min(((man_distance - 200) / 2), 100);
         }
-        if (pokemons.size() != 0) {
-            this->pokemon_index = (rand() % pokemons.size());
-        }
-        else {
-            this->pokemon_index = 0;
-        }
+        
+        this->pokemon_id = (rand() % pokemons.size()) + 1;
         this->xp = 0;
         this->isShiny = rand() % 8192 == 0;
+        this->gender = rand() % 2;
         this->isKnockedOut = false;
-        if (pokemons.empty()) {
-            std::cout << "Error: pokemons vector is empty." << std::endl;
-        }
-        if (!pokemons.empty() && this->pokemon_id < static_cast<int>(pokemons.size())) {
-            const pokemon_s& pokemon = pokemons[this->pokemon_id];
-            this->name = pokemon.identifier;
-        } else {
-            std::cout << "Error: Invalid pokemon_id: " << this->pokemon_id << std::endl;
-        }
-        // this->pokemon = &pokemons[this->pokemon_id];
-        // if (this->pokemon == nullptr) {
-        //     std::cout << "Error: this->pokemon is null. this->pokemon_id: " << this->pokemon_id << std::endl;
-        // }
-        // this->name = this->pokemon->identifier;
-        std::cout << "Made it 2" << std::endl;
+        
+        this->pokemon = &pokemons[this->pokemon_id];
+        this->name = this->pokemon->identifier;
+
         this->hp = iv;
+
         for (i = 1; i <= 6; i++) {
             iv = rand() % 16; // random number 0-15
             auto it = std::find_if(pokemon_stats.begin(), pokemon_stats.end(),
@@ -212,7 +199,9 @@ class Pokemon {
 
 
             const pokemon_stats_t& s = *it;
-            switch (i) {
+            
+            switch (i)
+            {
             case 1:
                 this->hp = floor(((((s.base_stat + iv)*2)*this->level)/100)+this->level+10);
                 break;
@@ -284,7 +273,7 @@ class NPC : public Character {
         cardinal_t direction;
 
         NPC (const int &wrld_y, const int &wrld_x) {
-            
+
             int num_pokemon = 1;
 
             type = (character_t) ((rand() % 6) + h);

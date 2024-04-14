@@ -271,7 +271,7 @@ void print_top_msg(world_t *wrld, bool isInput, const char *msg, ...) {
         vsprintf(frmt_msg, msg, args);
 
         wattron(top_msg_w, COLOR_PAIR(e));
-        mvwprintw(top_msg_w, 0, shift, "%s", frmt_msg);
+        mvwprintw(top_msg_w, 0, shift, frmt_msg);
         wattroff(top_msg_w, COLOR_PAIR(e));
 
         free(frmt_msg);
@@ -343,7 +343,7 @@ void start_screen (world_t *wrld) {
     }
 
     for (i = 0; i < 13; i++) {
-        mvwprintw(main_w, (9 + i), 55, "%s", pikachu_art[i].c_str());
+        mvwprintw(main_w, (9 + i), 55, pikachu_art[i].c_str());
     }
 
     while(1) {
@@ -387,19 +387,20 @@ void start_screen (world_t *wrld) {
         }
     }
 
-    switch (poke_idx) {
-        case 1:
-            wrld->pc.add_pokemon_by_name("squirtle", 1);
-            break;
-        case 2:
-            wrld->pc.add_pokemon_by_name("bulbasaur", 1);
-            break;
-        case 3:
-            wrld->pc.add_pokemon_by_name("charmander", 1);
-            break;
-        
-        default:
-            break;
+    switch (poke_idx)
+    {
+    case 1:
+        wrld->pc.add_pokemon_by_name("squirtle", 1);
+        break;
+    case 2:
+        wrld->pc.add_pokemon_by_name("bulbasaur", 1);
+        break;
+    case 3:
+        wrld->pc.add_pokemon_by_name("charmander", 1);
+        break;
+    
+    default:
+        break;
     }
 
     wbkgd(main_w, COLOR_PAIR(0));

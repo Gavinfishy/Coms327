@@ -6,7 +6,6 @@ I will keep the README the same and add a 1.09 section
 
 
 
-
 # Pokemon
 
 ## 1.08
