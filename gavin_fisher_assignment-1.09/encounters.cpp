@@ -3,18 +3,18 @@
 ****************************************/
 
 #include "map.h"
-
+#include <unistd.h>
 #include "db.h"
 
 /*
     returns whether bool of is trainer defeated
 */
 bool trainer_battle(world_t *wrld, NPC* trainer) {
-    // uint8_t start_txt_y = 5;
-    uint8_t start_txt_y_pc = 3;
-    uint8_t start_txt_x_pc = 5;
-    uint8_t start_txt_y_t = 10;
-    uint8_t start_txt_x_t = 55;
+    uint8_t start_txt_y_t = 3;
+    uint8_t start_txt_x_t = 5;
+    uint8_t start_txt_y_pc = 10;
+    uint8_t start_txt_x_pc = 55;
+
     // uint8_t i;
     bool knocked = false;
 
@@ -26,7 +26,7 @@ bool trainer_battle(world_t *wrld, NPC* trainer) {
     // print pc stuff
     mvwprintw(main_w, start_txt_y_pc, start_txt_x_pc, pc_pokemon.name.c_str());
     mvwprintw(main_w, start_txt_y_pc + 1, start_txt_x_pc, "L:%d %c", pc_pokemon.level, pc_pokemon.gender == 1 ? 'M' : 'F');
-    mvwprintw(main_w, start_txt_y_pc + 2, start_txt_x_pc, "hp: %d", pc_pokemon.hp);
+    mvwprintw(main_w, start_txt_y_pc + 2, start_txt_x_pc, "hp: %d", pc_pokemon.total_hp);
     // mvwprintw(main_w, start_txt_y_pc, start_txt_x_pc, "PC");
     // mvwprintw(main_w, start_txt_y_pc + 2, start_txt_x_pc, "xp: %d", pc_pokemon.xp);
     // mvwprintw(main_w, start_txt_y_pc + 4, start_txt_x_pc, "atk: %d", pc_pokemon.atk);
@@ -44,7 +44,7 @@ bool trainer_battle(world_t *wrld, NPC* trainer) {
 
     mvwprintw(main_w, start_txt_y_t, start_txt_x_t, t_pokemon.name.c_str());
     mvwprintw(main_w, start_txt_y_t + 1, start_txt_x_t, "L:%d %c", t_pokemon.level, t_pokemon.gender == 1 ? 'M' : 'F');
-    mvwprintw(main_w, start_txt_y_t + 2, start_txt_x_t, "hp: %d", t_pokemon .hp);
+    mvwprintw(main_w, start_txt_y_t + 2, start_txt_x_t, "hp: %d", t_pokemon .total_hp);
     // mvwprintw(main_w, start_txt_y_t, start_txt_x_t, "Trainer");
     // mvwprintw(main_w, start_txt_y_t + 2, start_txt_x_t, "xp: %d", t_pokemon .xp);
     // mvwprintw(main_w, start_txt_y_t + 4, start_txt_x_t, "atk: %d", t_pokemon .atk);
@@ -75,77 +75,128 @@ bool trainer_battle(world_t *wrld, NPC* trainer) {
 
 
 bool pokemon_encounter (world_t *wrld, Pokemon &pokemon) {
+    uint8_t start_txt_y_w = 3;
+    uint8_t start_txt_x_w = 5;
+    uint8_t start_txt_y_pc = 10;
+    uint8_t start_txt_x_pc = 55;
     uint8_t start_txt_y = 5;
     uint8_t start_txt_x = 32;
     bool captured = false;
     bool fled = false;
     bool knocked = false;
     int input = 0;
+    int direction = 1;
+    // double curr_health = 0.0;
     // int i;
 
     wclear(main_w);
+    Pokemon &pc_pokemon = wrld->pc.pokemon_collection[0];
+
+    mvwprintw(main_w, start_txt_y + 12, start_txt_x - 6, "A wild %s appeared!", pokemon.name.c_str());
+    wrefresh(main_w);
+    sleep(1);
+    wclear(main_w);
+    mvwprintw(main_w, start_txt_y + 12, start_txt_x - 6, "Go! %s!", pc_pokemon.name.c_str());
+    wrefresh(main_w);
+    sleep(1);
+    wclear(main_w);
+
 
     while(1) {
-        if (input == KEY_RIGHT) {
-            captured = false;
-        }
-        else if (input == KEY_LEFT) {
-            captured = true;
-        }
-        else if (input == '\n') {
+        if (input == '\n') {
             break;
         }
         if (captured || fled || knocked) {
             break;
         }
+        
+        if (input == KEY_RIGHT) {
+            if (direction < 4) {
+                direction += 1;
+            }
+        }
+        else if (input == KEY_LEFT) {
+            if (direction > 1) {
+                direction -= 1;
+            }
+        }
+        mvwprintw(main_w, start_txt_y + 12, start_txt_x - 6, "(Press enter to select)");
+        mvwprintw(main_w, start_txt_y + 13, start_txt_x - 12, "Fight");
+        mvwprintw(main_w, start_txt_y + 13, start_txt_x - 2, "Pack");
+        mvwprintw(main_w, start_txt_y + 13, start_txt_x + 8, "PKMN");
+        mvwprintw(main_w, start_txt_y + 13, start_txt_x + 18, "Run");
 
-        // mvwprintw(main_w, start_txt_y, start_txt_x, pokemon.name.c_str());
+        if (direction == 1) {
+            wattron(main_w, COLOR_PAIR(e)); 
+            mvwprintw(main_w, start_txt_y + 13, start_txt_x - 12, "Fight");
+            wattroff(main_w, COLOR_PAIR(e));
+        }
+        else if (direction == 2) {
+            wattron(main_w, COLOR_PAIR(e)); 
+            mvwprintw(main_w, start_txt_y + 13, start_txt_x - 2, "Pack");
+            wattroff(main_w, COLOR_PAIR(e));
+        }
+        else if (direction == 3) {
+            wattron(main_w, COLOR_PAIR(e)); 
+            mvwprintw(main_w, start_txt_y + 13, start_txt_x + 8, "PKMN");
+            wattroff(main_w, COLOR_PAIR(e));
+        }
+        else if (direction == 4) {
+            wattron(main_w, COLOR_PAIR(e)); 
+            mvwprintw(main_w, start_txt_y + 13, start_txt_x + 18, "Run");
+            wattroff(main_w, COLOR_PAIR(e));
+        }
+
+
+
+        mvwprintw(main_w, start_txt_y_pc, start_txt_x_pc, pc_pokemon.name.c_str());
+        mvwprintw(main_w, start_txt_y_pc + 1, start_txt_x_pc, "L:%d %c", pc_pokemon.level, pc_pokemon.gender == 1 ? 'M' : 'F');
+        double health_percentage_pc = static_cast<double>(pc_pokemon.current_hp) / pc_pokemon.total_hp;
+        int health_bar_length_pc = static_cast<int>(health_percentage_pc * 10);
+        mvwprintw(main_w, start_txt_y_pc + 2, start_txt_x_pc, "HP: [");
+        for (int i = 0; i < health_bar_length_pc; i++) {
+            waddch(main_w, '|'); 
+        }
+        for (int i = health_bar_length_pc; i < 10; i++) {
+            waddch(main_w, ' ');   
+        }
+        waddch(main_w, ']');
+        mvwprintw(main_w, start_txt_y_pc + 3, start_txt_x_pc, "%d/%d", pc_pokemon.current_hp, pc_pokemon.total_hp);
+        
+        mvwprintw(main_w, start_txt_y_w, start_txt_x_w, pokemon.name.c_str());
+        mvwprintw(main_w, start_txt_y_w + 1, start_txt_x_w, "L:%d %c", pokemon.level, pokemon.gender == 1 ? 'M' : 'F');
+        double health_percentage = static_cast<double>(pokemon.current_hp) / pokemon.total_hp;
+        int health_bar_length = static_cast<int>(health_percentage * 10);
+        mvwprintw(main_w, start_txt_y_w + 2, start_txt_x_w, "HP: [");
+        for (int i = 0; i < health_bar_length; i++) {
+            waddch(main_w, '|'); 
+        }
+        for (int i = health_bar_length; i < 10; i++) {
+            waddch(main_w, ' ');   
+        }
+        waddch(main_w, ']');
+        mvwprintw(main_w, start_txt_y_w + 3, start_txt_x_w, "%d/%d", pokemon.current_hp, pokemon.total_hp);
         // mvwprintw(main_w, start_txt_y + 1, start_txt_x, "xp: %d", pokemon.xp);
-        // mvwprintw(main_w, start_txt_y + 2, start_txt_x, "hp: %d", pokemon.hp);
         // mvwprintw(main_w, start_txt_y + 3, start_txt_x, "atk: %d", pokemon.atk);
         // mvwprintw(main_w, start_txt_y + 4, start_txt_x, "def: %d", pokemon.def);
         // mvwprintw(main_w, start_txt_y + 5, start_txt_x, "speed: %d", pokemon.speed);
         // mvwprintw(main_w, start_txt_y + 6, start_txt_x, "special atk: %d", pokemon.special_atk);
         // mvwprintw(main_w, start_txt_y + 7, start_txt_x, "special def: %d", pokemon.special_def);
-        // mvwprintw(main_w, start_txt_y + 8, start_txt_x, "level: %d", pokemon.level);
         // pokemon.hp += 1;
-        // display moves
         // i = 0;
         // for (const moves_t* mv : pokemon.myMoves) {
+        //     mv.
         //     mvwprintw(main_w, start_txt_y + 9 + i, start_txt_x,
         //                 "move %d: %s", (i + 1), mv->identifier.c_str());
         //     i++;
         // }
-        mvwprintw(main_w, start_txt_y, start_txt_x, "Pokemon: %s", pokemon.name.c_str());
-        mvwprintw(main_w, start_txt_y + 1, start_txt_x, "Level: %d", pokemon.level);
+        
 
-        // Calculate health bar length (e.g., 1 HP = 1 character)
-        int health_bar_length = pokemon.hp;
-
-        // Print health bar
-        mvwprintw(main_w, start_txt_y + 2, start_txt_x, "HP: ");
-        for (int i = 0; i < health_bar_length; i++) {
-            waddch(main_w, '|');  // Use '|' character for health bar
-        }
-
-
-        mvwprintw(main_w, start_txt_y + 12, start_txt_x - 6, "(Press enter to select)");
-        mvwprintw(main_w, start_txt_y + 13, start_txt_x + 3, "y");
-        mvwprintw(main_w, start_txt_y + 13, start_txt_x + 6, "n");
-
-        if (captured) {
-            wattron(main_w, COLOR_PAIR(e)); 
-            mvwprintw(main_w, start_txt_y + 13, start_txt_x + 3, "y");
-            wattroff(main_w, COLOR_PAIR(e));
-        }
-        else {
-            wattron(main_w, COLOR_PAIR(e)); 
-            mvwprintw(main_w, start_txt_y + 13, start_txt_x + 6, "n");
-            wattroff(main_w, COLOR_PAIR(e));
-        }
+        // mvwprintw(main_w, start_txt_y + 12, start_txt_x - 6, "(Press enter to select)");
+        // mvwprintw(main_w, start_txt_y + 13, start_txt_x + 3, "y");
+        // mvwprintw(main_w, start_txt_y + 13, start_txt_x + 6, "n");
 
         wrefresh(main_w);
-
         input = wgetch(main_w);
     }
 

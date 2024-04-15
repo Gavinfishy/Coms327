@@ -40,7 +40,8 @@ class Pokemon {
         int pokemon_id;
         int level;
         int xp;
-        int hp;
+        int total_hp;
+        int current_hp;
         int atk;
         int def;
         int speed;
@@ -123,7 +124,7 @@ class Pokemon {
         this->pokemon = &p;
         this->pokemon_id = p.id;
 
-        this->hp = iv;
+        this->total_hp = iv;
 
         for (i = 1; i <= 6; i++) {
             iv = rand() % 16; // random number 0-15
@@ -139,7 +140,8 @@ class Pokemon {
             switch (i)
             {
             case 1:
-                this->hp = floor(((((s.base_stat + iv)*2)*this->level)/100)+this->level+10);
+                this->total_hp = floor(((((s.base_stat + iv)*2)*this->level)/100)+this->level+10);
+                this->current_hp = this->total_hp;
                 break;
             case 2:
                 this->atk = floor(((((s.base_stat + iv)*2)*this->level)/100)+5);
@@ -187,7 +189,7 @@ class Pokemon {
         this->pokemon = &pokemons[this->pokemon_id];
         this->name = this->pokemon->identifier;
 
-        this->hp = iv;
+        this->total_hp = iv;
 
         for (i = 1; i <= 6; i++) {
             iv = rand() % 16; // random number 0-15
@@ -203,7 +205,8 @@ class Pokemon {
             switch (i)
             {
             case 1:
-                this->hp = floor(((((s.base_stat + iv)*2)*this->level)/100)+this->level+10);
+                this->total_hp = floor(((((s.base_stat + iv)*2)*this->level)/100)+this->level+10);
+                this->current_hp = this->total_hp;
                 break;
             case 2:
                 this->atk = floor(((((s.base_stat + iv)*2)*this->level)/100)+5);
@@ -225,6 +228,7 @@ class Pokemon {
                 break;
             }
         }
+
 
         add_move (2);
     }

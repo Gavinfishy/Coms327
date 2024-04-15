@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/Users/BlueD/git_repos/327_poke/Coms327/gavin_fisher_assignment-1.09",
-      "program": "c:/Users/BlueD/git_repos/327_poke/Coms327/gavin_fisher_assignment-1.09/build/Debug/outDebug",
+      "cwd": "u:/327/Coms327/hedgren_eric.assignment-1.08/gavin_fisher_assignment-1.09",
+      "program": "u:/327/Coms327/hedgren_eric.assignment-1.08/gavin_fisher_assignment-1.09/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
