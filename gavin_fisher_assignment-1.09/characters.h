@@ -246,6 +246,7 @@ class Character {
         character_t type;
         bool isDefeated;
         std::vector<Pokemon> pokemon_collection;
+        int bag[3];
 
         void add_pokemon (const int &wrld_y, const int &wrld_x) {
             this->pokemon_collection.push_back(Pokemon(wrld_y, wrld_x));
@@ -263,6 +264,9 @@ class PC : public Character {
             this->x = 0;
             this->type = player;
             this->isDefeated = false;
+            for (int i = 0; i < 3; i++) {
+                bag[i] = 10;
+            }
         }
 
         void add_pokemon_by_name (std::string name, int level) {
