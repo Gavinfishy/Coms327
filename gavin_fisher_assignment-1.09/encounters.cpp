@@ -129,39 +129,89 @@ bool pokemon_encounter (world_t *wrld, Pokemon &pokemon) {
             else if (fightScreen) {
                 int pc_damage;
                 int w_damage;
-                if (direction == 1) {
-                    pc_damage = pc_pokemon.atk;
-                }
-                else if (direction == 2) {
-                    pc_damage = pc_pokemon.atk;
-                }
-                pc_damage = ((((2*pc_pokemon.level)/5 + 2) * (pc_pokemon.atk/pokemon.def))/50 + 2) * 1 * 1 * 1 * 1;
-                if (pokemon.current_hp - pc_damage <= 0) {
-                    pokemon.isKnockedOut = true;
-                    pokemon.current_hp = 0;
-                }
-                else {
-                    pokemon.current_hp -= pc_damage;
-                }
-
-
-
-
-
-                w_damage = ((((2*pokemon.level)/5 + 2) * (pokemon.atk/pc_pokemon.def))/50 + 2) * 1 * 1 * 1 * 1;
-                if (pc_pokemon.current_hp - w_damage <= 0) {
-                    pc_pokemon.isKnockedOut = true;
-                    pc_pokemon.current_hp = 0;
+                if (!pc_pokemon.isKnockedOut) {
+                    if (direction == 1) {
+                        pc_damage = pc_pokemon.atk;
+                    }
+                    else if (direction == 2) {
+                        pc_damage = pc_pokemon.atk;
+                    }
+                    pc_damage = ((((2*pc_pokemon.level)/5 + 2) * (pc_pokemon.atk/pokemon.def))/50 + 2) * 1 * 1 * 1 * 1;
+                    if (pokemon.current_hp - pc_damage <= 0) {
+                        pokemon.isKnockedOut = true;
+                        pokemon.current_hp = 0;
+                    }
+                    else {
+                        pokemon.current_hp -= pc_damage;
+                    }
                 }
                 else {
-                    pc_pokemon.current_hp -= w_damage;
+                    wmove(main_w, start_txt_y + 12, 0);
+                    wclrtoeol(main_w);
+                    wmove(main_w, start_txt_y + 13, 0);
+                    wclrtoeol(main_w);
+                    mvwprintw(main_w, start_txt_y + 12, start_txt_x - 5, "Pokemon is knocked");
+                    wrefresh(main_w);
+                    sleep(1);
                 }
 
+
+
+                if (!pokemon.isKnockedOut) {
+                    w_damage = ((((2*pokemon.level)/5 + 2) * (pokemon.atk/pc_pokemon.def))/50 + 2) * 1 * 1 * 1 * 1;
+                    if (pc_pokemon.current_hp - w_damage <= 0) {
+                        pc_pokemon.isKnockedOut = true;
+                        pc_pokemon.current_hp = 0;
+                    }
+                    else {
+                        pc_pokemon.current_hp -= w_damage;
+                    }
+                }
+            
 
                 fightScreen = false;
                 mainScreen = true;
             }
             else if (packScreen) {
+                //revive
+                if (direction == 1) {
+
+                }
+                //potion
+                else if (direction == 2) {
+                    if (pc_pokemon.current_hp < pc_pokemon.total_hp) {
+                        if (pc_pokemon.current_hp + 20 > pc_pokemon.total_hp) {
+                            pc_pokemon.current_hp = pc_pokemon.total_hp;
+                        }
+                        else {
+                            pc_pokemon.current_hp += 20;
+                        }
+                        wrld->pc.bag[1] -= 1;
+                        pc_pokemon.isKnockedOut = false;
+                    }
+                    else {
+                        wmove(main_w, start_txt_y + 12, 0);
+                        wclrtoeol(main_w);
+                        wmove(main_w, start_txt_y + 13, 0);
+                        wclrtoeol(main_w);
+                        mvwprintw(main_w, start_txt_y + 12, start_txt_x - 5, "Full health!");
+                        wrefresh(main_w);
+                        sleep(1);
+                    }
+                }
+                //pokeballs
+                else if (direction == 3) {
+                    wrld->pc.add_pokemon_by_capture(pokemon);
+                    wrld->pc.bag[2] -= 1;
+                    wmove(main_w, start_txt_y + 12, 0);
+                    wclrtoeol(main_w);
+                    wmove(main_w, start_txt_y + 13, 0);
+                    wclrtoeol(main_w);
+                    mvwprintw(main_w, start_txt_y + 12, start_txt_x - 5, "Pokemon captured!");
+                    wrefresh(main_w);
+                    sleep(1);
+                    break;
+                }
                 packScreen = false;
                 mainScreen = true;
             }
@@ -293,7 +343,16 @@ bool pokemon_encounter (world_t *wrld, Pokemon &pokemon) {
             
         }
         else if (pkmnScreen) {
-
+            wmove(main_w, start_txt_y + 13, 0);
+            wclrtoeol(main_w);
+            for (std::vector<Pokemon>::size_type i = 0; i < 6; i++) {
+                if (i < wrld->pc.pokemon_collection.size()) {
+                    Pokemon &pc_pokemon = wrld->pc.pokemon_collection[i];
+                    mvwprintw(main_w, start_txt_y + 13, (15 + i * 15) - 15, "%s", pc_pokemon.name.c_str());
+                } else {
+                    mvwprintw(main_w, start_txt_y + 13, (15 + i * 15) - 15, "-");
+                }
+            }
         }
         else if (runScreen) {
             wmove(main_w, start_txt_y + 12, 0);

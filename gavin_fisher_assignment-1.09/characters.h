@@ -273,6 +273,15 @@ class PC : public Character {
             this->pokemon_collection.push_back(Pokemon(name, level));
         }
 
+        void add_pokemon_by_capture(Pokemon new_pokemon) {
+            if (this->pokemon_collection.size() < 6) {
+                this->pokemon_collection.push_back(new_pokemon);
+            }
+            // else {
+            //     std::cout << "No more space for new Pokemon." << std::endl;
+            // }
+        }
+
 };
 
 class NPC : public Character {
