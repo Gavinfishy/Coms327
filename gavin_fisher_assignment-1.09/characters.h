@@ -277,9 +277,6 @@ class PC : public Character {
             if (this->pokemon_collection.size() < 6) {
                 this->pokemon_collection.push_back(new_pokemon);
             }
-            // else {
-            //     std::cout << "No more space for new Pokemon." << std::endl;
-            // }
         }
 
 };
