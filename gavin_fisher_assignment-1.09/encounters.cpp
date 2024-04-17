@@ -127,6 +127,37 @@ bool pokemon_encounter (world_t *wrld, Pokemon &pokemon) {
                 }
             }
             else if (fightScreen) {
+                int pc_damage;
+                int w_damage;
+                if (direction == 1) {
+                    pc_damage = pc_pokemon.atk;
+                }
+                else if (direction == 2) {
+                    pc_damage = pc_pokemon.atk;
+                }
+                pc_damage = ((((2*pc_pokemon.level)/5 + 2) * (pc_pokemon.atk/pokemon.def))/50 + 2) * 1 * 1 * 1 * 1;
+                if (pokemon.current_hp - pc_damage <= 0) {
+                    pokemon.isKnockedOut = true;
+                    pokemon.current_hp = 0;
+                }
+                else {
+                    pokemon.current_hp -= pc_damage;
+                }
+
+
+
+
+
+                w_damage = ((((2*pokemon.level)/5 + 2) * (pokemon.atk/pc_pokemon.def))/50 + 2) * 1 * 1 * 1 * 1;
+                if (pc_pokemon.current_hp - w_damage <= 0) {
+                    pc_pokemon.isKnockedOut = true;
+                    pc_pokemon.current_hp = 0;
+                }
+                else {
+                    pc_pokemon.current_hp -= w_damage;
+                }
+
+
                 fightScreen = false;
                 mainScreen = true;
             }
@@ -239,6 +270,8 @@ bool pokemon_encounter (world_t *wrld, Pokemon &pokemon) {
                     direction -= 1;
                 }
             }
+            wmove(main_w, start_txt_y + 13, 0);
+            wclrtoeol(main_w);
             mvwprintw(main_w, start_txt_y + 13, start_txt_x - 13, "Revive:%d", wrld->pc.bag[0]);
             mvwprintw(main_w, start_txt_y + 13, start_txt_x + 1, "Potion:%d", wrld->pc.bag[1]);
             mvwprintw(main_w, start_txt_y + 13, start_txt_x + 14, "Pokeballs:%d", wrld->pc.bag[2]);
@@ -297,6 +330,8 @@ bool pokemon_encounter (world_t *wrld, Pokemon &pokemon) {
             waddch(main_w, ' ');   
         }
         waddch(main_w, ']');
+        wmove(main_w, start_txt_y_pc + 3, 0);
+        wclrtoeol(main_w);
         mvwprintw(main_w, start_txt_y_pc + 3, start_txt_x_pc, "%d/%d", pc_pokemon.current_hp, pc_pokemon.total_hp);
         
         mvwprintw(main_w, start_txt_y_w, start_txt_x_w, pokemon.name.c_str());
@@ -311,6 +346,8 @@ bool pokemon_encounter (world_t *wrld, Pokemon &pokemon) {
             waddch(main_w, ' ');   
         }
         waddch(main_w, ']');
+        wmove(main_w, start_txt_y_w + 3, 0);
+        wclrtoeol(main_w);
         mvwprintw(main_w, start_txt_y_w + 3, start_txt_x_w, "%d/%d", pokemon.current_hp, pokemon.total_hp);
         // mvwprintw(main_w, start_txt_y + 1, start_txt_x, "xp: %d", pokemon.xp);
         // mvwprintw(main_w, start_txt_y + 3, start_txt_x, "atk: %d", pokemon.atk);
