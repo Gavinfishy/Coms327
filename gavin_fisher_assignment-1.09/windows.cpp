@@ -108,9 +108,10 @@ int poke_mart_window(world_t *wrld) {
                                     begin_y, begin_x);
 
     werase(pMart_win);
-
+    for (int i = 0; i < 3; i++) {
+        wrld->pc.bag[i] = 10;
+    }
     while(1) {
-        input = wgetch(pMart_win);
 
         if (input == 't') {
             input = trainers_window(wrld->curr_map, pMart_win);
@@ -123,9 +124,12 @@ int poke_mart_window(world_t *wrld) {
             return 'Q';
         }
 
-        mvwprintw(main_w, 5, 30, "MART");
+        mvwprintw(main_w, 5, 34, "MART");
+        mvwprintw(main_w, 10, 30, "All items restored");
 
         wrefresh(pMart_win);
+        
+        input = wgetch(pMart_win);
     }
 
     delwin(pMart_win);
@@ -144,11 +148,11 @@ int poke_center_window(world_t *wrld) {
                                     begin_y, begin_x);
 
     werase(pCntr_win);
-
+    for (Pokemon &pc_pokemon : wrld->pc.pokemon_collection) {
+        pc_pokemon.isKnockedOut = false;
+        pc_pokemon.current_hp = pc_pokemon.total_hp;
+    }
     while(1) {
-
-        input = wgetch(pCntr_win);
-
         if (input == 't') {
             input = trainers_window(wrld->curr_map, pCntr_win);
         }
@@ -160,9 +164,11 @@ int poke_center_window(world_t *wrld) {
             return 'Q';
         }
 
-        mvwprintw(main_w, 5, 30, "CENTER");
+        mvwprintw(main_w, 5, 34, "CENTER");
+        mvwprintw(main_w, 10, 30, "All pokemon healed");
 
         wrefresh(pCntr_win);
+        input = wgetch(pCntr_win);
     }
 
     delwin(pCntr_win);

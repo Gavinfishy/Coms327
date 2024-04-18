@@ -136,6 +136,191 @@ char move_player(world_t *wrld, heap_t *turn_heap) {
             input = trainers_window(wrld->curr_map, main_w);
             continue;
         }
+
+
+        else if (input == 'B') {
+            uint8_t num_rows = 15;
+            uint8_t num_cols = 68;
+            uint8_t begin_y = 4;
+            uint8_t begin_x = 6;
+            int input = 0;
+            int direction = 1;
+            uint8_t start_txt_y = 5;
+            uint8_t start_txt_x = 32;
+            bool bag_main = true;
+            bool item_is_revive = true;
+
+            WINDOW *bag_win = subwin(main_w, num_rows, num_cols,
+                                            begin_y, begin_x);
+            keypad(bag_win, TRUE);
+            werase(bag_win);
+            while(1) {
+                wclear(bag_win);
+                if (input == 'q' || input == 'Q') {
+                    break;
+                }
+                if (input == '\n') {
+                    if (bag_main) {
+                        if (direction == 1) {
+                            item_is_revive = true;
+                        }
+                        else if (direction == 2) {
+                            item_is_revive = false;
+                        }
+                        bag_main = false;
+                        direction = 1;
+                    }
+                    else {
+                        Pokemon* pc_pokemon = &wrld->pc.pokemon_collection[0];
+                        if (direction == 1) {
+                            pc_pokemon = &wrld->pc.pokemon_collection[0];
+                        }
+                        else if (direction == 2) {
+                            pc_pokemon = &wrld->pc.pokemon_collection[1];
+                        }
+                        else if (direction == 3) {
+                            pc_pokemon = &wrld->pc.pokemon_collection[2];
+                        }
+                        else if (direction == 4) {
+                            pc_pokemon = &wrld->pc.pokemon_collection[3];
+                        }
+                        else if (direction == 5) {
+                            pc_pokemon = &wrld->pc.pokemon_collection[4];
+                        }
+                        else if (direction == 6) {
+                            pc_pokemon = &wrld->pc.pokemon_collection[5];
+                        }
+                        if (item_is_revive) {
+                            if (pc_pokemon->current_hp == 0) {
+                                pc_pokemon->current_hp = pc_pokemon->total_hp;
+                                wrld->pc.bag[0] -= 1;
+                                pc_pokemon->isKnockedOut = false;
+                                mvwprintw(bag_win, start_txt_y + 5, start_txt_x - 10, "Pokemon is revived");
+                                wrefresh(bag_win);
+                                sleep(1);
+                                mvwprintw(bag_win, start_txt_y + 5, start_txt_x - 10, "                  ");
+                            }
+                            else {
+                                mvwprintw(bag_win, start_txt_y+5, start_txt_x - 10, "Pokemon is not knocked");
+                                wrefresh(bag_win);
+                                sleep(1);
+                                mvwprintw(bag_win, start_txt_y+5, start_txt_x - 10, "                      ");
+                            }
+                        }
+                        else {
+                            // break;
+                            if (pc_pokemon->current_hp < pc_pokemon->total_hp) {
+                                if (pc_pokemon->current_hp > 0) {
+                                    if (pc_pokemon->current_hp + 20 > pc_pokemon->total_hp) {
+                                        pc_pokemon->current_hp = pc_pokemon->total_hp;
+                                    }
+                                    else {
+                                        pc_pokemon->current_hp += 20;
+                                    }
+                                    wrld->pc.bag[1] -= 1;
+                                    mvwprintw(bag_win, start_txt_y + 5, start_txt_x - 10, "Pokemon is healed");
+                                    wrefresh(bag_win);
+                                    sleep(1);
+                                    mvwprintw(bag_win, start_txt_y + 5, start_txt_x - 10, "                 ");
+                                }
+                                else {
+                                    mvwprintw(bag_win, start_txt_y + 5, start_txt_x - 10, "Pokemon is not hurt");
+                                    wrefresh(bag_win);
+                                    sleep(1);
+                                    mvwprintw(bag_win, start_txt_y + 5, start_txt_x - 10, "                   ");
+                                }
+                            }
+                            else {
+                                mvwprintw(bag_win, start_txt_y + 5, start_txt_x - 10, "Full health!");
+                                wrefresh(bag_win);
+                                sleep(1);
+                                mvwprintw(bag_win, start_txt_y + 5, start_txt_x - 10, "            ");
+                            }
+                        }
+                        bag_main = true;
+                    }
+                }
+                if (bag_main) {
+                    if (input == KEY_RIGHT) {
+                        if (direction < 2) {
+                            direction += 1;
+                        }
+                    }
+                    else if (input == KEY_LEFT) {
+                        if (direction > 1) {
+                            direction -= 1;
+                        }
+                    }
+                    // wrefresh(bag_win);
+                    mvwprintw(bag_win, 3, 32, "Bag");
+                    mvwprintw(bag_win, start_txt_y, start_txt_x - 10, "Revive:%d", wrld->pc.bag[0]);
+                    mvwprintw(bag_win, start_txt_y, start_txt_x + 4, "Potion:%d", wrld->pc.bag[1]);
+                    if (direction == 1) {
+                        wattron(bag_win, COLOR_PAIR(e)); 
+                        mvwprintw(bag_win, start_txt_y, start_txt_x - 10, "Revive:%d", wrld->pc.bag[0]);
+                        wattroff(bag_win, COLOR_PAIR(e));
+                    }
+                    else if (direction == 2) {
+                        wattron(bag_win, COLOR_PAIR(e)); 
+                        mvwprintw(bag_win, start_txt_y, start_txt_x + 4, "Potion:%d", wrld->pc.bag[1]);
+                        wattroff(bag_win, COLOR_PAIR(e));
+                    }
+                }
+                else if (!bag_main) {
+                    if (input == KEY_RIGHT) {
+                        if (direction < 6) {
+                            direction += 1;
+                        }
+                    }
+                    else if (input == KEY_LEFT) {
+                        if (direction > 1) {
+                            direction -= 1;
+                        }
+                    }
+                    for (std::vector<Pokemon>::size_type i = 0; i < 6; i++) {
+                        if (direction == (int) i + 1) {
+                            wattron(bag_win, COLOR_PAIR(e)); 
+                        }
+                        if (i < 3) {
+                            if (i < wrld->pc.pokemon_collection.size()) {
+                                Pokemon &pcPokemon = wrld->pc.pokemon_collection[i];
+                                mvwprintw(bag_win, start_txt_y + 3, (13 + i * 22), "%s", pcPokemon.name.c_str());
+                            } else {
+                                mvwprintw(bag_win, start_txt_y + 3, (13 + i * 22), "-");
+                            }
+                        }
+                        else {
+                            if (i < wrld->pc.pokemon_collection.size()) {
+                                Pokemon &pcPokemon = wrld->pc.pokemon_collection[i];
+                                mvwprintw(bag_win, start_txt_y + 4, (13 + (i - 3) * 22), "%s", pcPokemon.name.c_str());
+                            } else {
+                                mvwprintw(bag_win, start_txt_y + 4, (13 + (i - 3) * 22), "-");
+                            }
+                        }
+                        if (direction == (int) i + 1) {
+                            wattroff(bag_win, COLOR_PAIR(e)); 
+                        }
+                    }
+                }
+                mvwprintw(bag_win, 3, 32, "Bag");
+                wrefresh(bag_win);
+                input = wgetch(bag_win);
+            }
+
+            delwin(bag_win);
+            
+            return 0;
+        }
+
+
+
+
+
+
+
+
+
+
         else if (input == 'f') { // command for flying
             const char *str = "Fly to (%d, %d)";
             char num_one[4];

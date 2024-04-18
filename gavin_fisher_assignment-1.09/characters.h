@@ -294,7 +294,7 @@ class NPC : public Character {
             direction = (cardinal_t) (rand() % 4);
             isDefeated = false;
 
-            add_pokemon(wrld_y, wrld_x); //@todo change lvl by distance
+            add_pokemon(wrld_y, wrld_x); 
             while ((rand() % 10) < 6 && num_pokemon < 6) {
                 add_pokemon(wrld_y, wrld_x) ;
                 num_pokemon++;

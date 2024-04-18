@@ -4,7 +4,7 @@ I will keep the README the same and add a 1.09 section
 
 1.09
 
-
+Catch pokemon, in tall grass with pokeballs and can add them to PC storage. Revives, Postions, Pokeballs in game. Pokemart restores items, Pokecenter heals pokemon. Pokemon can be healed in revived while in battle and in the main screen with B. Cannot escape Trainer battles but can run from wild encounters. 
 
 # Pokemon
 
