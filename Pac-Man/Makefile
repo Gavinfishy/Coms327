@@ -1,5 +1,4 @@
-map: map.cpp
-	g++ map.cpp -o map -ggdb -lm -lncurses
-
+pacman: pacman.cpp
+	g++ pacman.cpp -o pacman -ggdb -lm -lncurses
 clean:
-	rm -f map *~ core map.exe
+	rm -f pacman *~ core pacman.exe
