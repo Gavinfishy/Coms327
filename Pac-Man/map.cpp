@@ -124,9 +124,6 @@ gameCharacter* newGameCharacter(int id, int x, int y, int type, int movementCost
     return character;
 }
 
-//TODO array of pointers
-// gameCharacter NPC[10];
-
 class adjacencyListNode {
     public:
         int dest;
@@ -1062,7 +1059,7 @@ void placeCharacters(struct map_key *map, bool new_map) {
 int moveCharacter(struct map_key *map, struct gameCharacter *character, int dx, int dy, 
 WINDOW *comment_win, WINDOW *action_win, WINDOW *map_win, WINDOW *status_win, bool visited) {
     int newX = character->x + dx;
-    int newY = character->y +dy;
+    int newY = character->y + dy;
     int row_lim = ROW - 2;
     int col_lim = COL - 2;
     int terrain = world[currentX + world_size_a][currentY + world_size_a]->terrain_type[newX][newY];
@@ -1382,21 +1379,6 @@ void gameLoop() {
         world[currentX + world_size_a][currentY + world_size_a]->NPC[i] = *npc;
     }
     setTurnHeap(world[currentX + world_size_a][currentY + world_size_a]);
-
-
-
-    // struct minHeap* turnHeap = createMinHeap(sizeof(world[currentX + world_size_a][currentY + world_size_a]->NPC) + 1);
-    // // world[currentX + world_size_a][currentY + world_size_a]->turnHeap = createMinHeap(sizeof(world[currentX + world_size_a][currentY + world_size_a]->NPC) + 1);
-    // // world[currentX + world_size_a][currentY + world_size_a]->turnHeap = createMinHeap(1);
-    // struct gameCharacter* pc = newGameCharacter(-1, world[currentX + world_size_a][currentY + world_size_a]->PC.x,
-    //                                             world[currentX + world_size_a][currentY + world_size_a]->PC.y, 0, 0);
-    // addCharacterToHeap(turnHeap, pc->id, -1);
-    // for (int i = 0; i < 10; i++) {
-    //     struct gameCharacter* npc = newGameCharacter(i, world[currentX + world_size_a][currentY + world_size_a]->NPC[i].x, world[currentX + world_size_a][currentY + world_size_a]->NPC[i].y, 1, 0);
-    //     npc->battleReady = true;
-    //     addCharacterToHeap(turnHeap, npc->id, 0);
-    // }
-    // // setTurnHeap(world[currentX + world_size_a][currentY + world_size_a]);
     nodelay(input_win, true);
     fly(0, 0, comment_win, map_win, status_win);
     int i = 0;
