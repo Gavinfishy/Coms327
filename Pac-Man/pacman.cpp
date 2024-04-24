@@ -36,6 +36,15 @@
 #define SPACE 5
 #define LG 0 // left gate
 #define RG 1 // right gate
+// Starting coordinates for game restart
+#define START_PA_X 26
+#define START_PA_Y 23
+#define START_B_X 28
+#define START_B_Y 11
+#define START_P_X 23
+#define START_I_X 27
+#define START_C_X 31
+#define START_BOX_Y 14
 
 class gameCharacter {
     public:
@@ -49,6 +58,9 @@ class map_key{
     public:
         int terrain_type[ROW][COL];
         int character_type[ROW][COL];
+        int lives;
+        int GameOver;
+        int score;
         gameCharacter* PM;
         gameCharacter* B;
         gameCharacter* P;
@@ -172,38 +184,85 @@ void mapGen(struct map_key *map) {
             map->character_type[i][j] = -1;
         }
     }
-    map->character_type[23][26] = PACMAN;
-    map->character_type[11][28] = BLINKY;
-    map->character_type[14][23] = PINKY;
-    map->character_type[14][27] = INKY;
-    map->character_type[14][31] = CLYDE;
-    map->PM = newGameCharacter(PACMAN, 23, 26);
-    map->B = newGameCharacter(BLINKY, 11, 28);
-    map->P = newGameCharacter(PINKY, 14, 23);
-    map->I = newGameCharacter(INKY, 14, 27);
-    map->C = newGameCharacter(CLYDE, 14, 31);
+    
+    map->character_type[START_PA_Y][START_PA_X] = PACMAN;
+    map->character_type[START_B_Y][START_B_X] = BLINKY;
+    map->character_type[START_BOX_Y][START_P_X] = PINKY;
+    map->character_type[START_BOX_Y][START_I_X] = INKY;
+    map->character_type[START_BOX_Y][START_C_X] = CLYDE;
+    map->PM = newGameCharacter(PACMAN, START_PA_Y, START_PA_X);
+    map->B = newGameCharacter(BLINKY, START_B_Y, START_B_X);
+    map->P = newGameCharacter(PINKY, START_BOX_Y, START_P_X);
+    map->I = newGameCharacter(INKY, START_BOX_Y, START_I_X);
+    map->C = newGameCharacter(CLYDE, START_BOX_Y, START_C_X);
+    map->lives = 3;
+    map->GameOver = false;
 }
+
+
+void deathRestart(struct map_key *map) {
+    if (map->lives < 1) {
+        map->GameOver = true;
+    }
+    else {
+        map->lives -= 1;
+        map->character_type[map->PM->x][map->PM->y] = -1;
+        map->character_type[START_PA_Y][START_PA_X] = PACMAN;
+        map->PM->x = START_PA_Y;
+        map->PM->y = START_PA_X;
+    }
+}
+
 
 int moveCharacter(struct map_key *map, struct gameCharacter *character, int dx, int dy, 
 WINDOW *map_win) {
     int newX = character->x + dx;
     int newY = character->y + dy;
     int terrain = map->terrain_type[newX][newY];
-    if (terrain != WALL) {
+    int npc_present = map->character_type[newX][newY];
+    if (terrain != WALL && terrain != FENCE) {
         if (character->id == PACMAN) {
-            map->character_type[character->x][character->y] = -1;
-            character->x = newX;
-            character->y = newY;
-            map->character_type[character->x][character->y] = PACMAN;
-            return 1;
+            if (npc_present != -1) {
+                deathRestart(map);
+            }
+            else {
+                map->character_type[character->x][character->y] = -1;
+                character->x = newX;
+                character->y = newY;
+                map->character_type[character->x][character->y] = PACMAN;
+
+                if (terrain == PELLET) {
+                    map->terrain_type[newX][newY] = SPACE;
+                    map->score += 10;
+                }
+                else if (terrain == BIG_PELLET) {
+                    map->terrain_type[newX][newY] = SPACE;
+                    map->score += 50;
+                }
+                return 1;
+            }
+        }
+        else if (character->id == BLINKY) {
+
+        }
+        else if (character->id == PINKY) {
+
+        }
+        else if (character->id == INKY) {
+
+        }
+        else if (character->id = CLYDE) {
+
         }
     }
     return 0;
 }
 
 void gameLoop() {
-    WINDOW *map_win = newwin(ROW, COL, 1, 0);
-    WINDOW *input_win = newwin(1, COL, ROW + 2, 0);
+    WINDOW *score_win = newwin(3, COL, 1, 0);
+    WINDOW *map_win = newwin(ROW, COL, 4, 0);
+    WINDOW *life_win = newwin(2, COL, ROW + 3, 0);
+    WINDOW *input_win = newwin(1, COL, ROW + 5, 0);
     char command[10];
     struct map_key *map = (struct map_key*) malloc(sizeof(struct map_key));
     mapGen(map);
@@ -211,6 +270,18 @@ void gameLoop() {
     wrefresh(map_win);
     nodelay(input_win, true);
     while (1) {
+        if (map->GameOver == true) {
+            break;
+        }
+        mvwprintw(score_win, 1, 6, "%d", map->score);
+        wrefresh(score_win);
+        wclrtoeol(life_win);
+        wmove(life_win, 1, 1);
+        for (int i = 0; i < map->lives; i++) {
+            waddch(life_win, 'O');
+            waddch(life_win, ' ');
+        }
+        wrefresh(life_win);
         printMap(map, map_win);
         wmove(input_win, 0, 0);
         wrefresh(input_win);
