@@ -45,6 +45,7 @@
 #define START_I_X 27
 #define START_C_X 31
 #define START_BOX_Y 14
+#define TOTAL_PELLET 244
 
 class gameCharacter {
     public:
@@ -58,9 +59,11 @@ class map_key{
     public:
         int terrain_type[ROW][COL];
         int character_type[ROW][COL];
-        int lives;
-        int GameOver;
+        int lives = 3;
+        int GameOver = false;
         int score;
+        int curr_pellets;
+        int num_moves;
         gameCharacter* PM;
         gameCharacter* B;
         gameCharacter* P;
@@ -195,10 +198,16 @@ void mapGen(struct map_key *map) {
     map->P = newGameCharacter(PINKY, START_BOX_Y, START_P_X);
     map->I = newGameCharacter(INKY, START_BOX_Y, START_I_X);
     map->C = newGameCharacter(CLYDE, START_BOX_Y, START_C_X);
-    map->lives = 3;
+    if (map->lives == 0) {
+        map->lives = 3;
+    }
     map->GameOver = false;
+    map->curr_pellets = TOTAL_PELLET;
 }
 
+void nextLevel(struct map_key *map) {
+    mapGen(map);
+}
 
 void deathRestart(struct map_key *map) {
     if (map->lives < 1) {
@@ -220,6 +229,10 @@ WINDOW *map_win) {
     int newY = character->y + dy;
     int terrain = map->terrain_type[newX][newY];
     int npc_present = map->character_type[newX][newY];
+    if (map->curr_pellets < 1) {
+        nextLevel(map);
+        return 1;
+    }
     if (terrain != WALL && terrain != FENCE) {
         if (character->id == PACMAN) {
             if (npc_present != -1) {
@@ -234,10 +247,12 @@ WINDOW *map_win) {
                 if (terrain == PELLET) {
                     map->terrain_type[newX][newY] = SPACE;
                     map->score += 10;
+                    map->curr_pellets -= 1;
                 }
                 else if (terrain == BIG_PELLET) {
                     map->terrain_type[newX][newY] = SPACE;
                     map->score += 50;
+                    map->curr_pellets -= 1;
                 }
                 return 1;
             }
