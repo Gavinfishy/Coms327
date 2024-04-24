@@ -42,24 +42,22 @@ class gameCharacter {
         int id;
         int x;
         int y;
+        gameCharacter(int id, int x, int y) : id(id), x(x), y(y) {}
 };
 
 class map_key{
     public:
         int terrain_type[ROW][COL];
         int character_type[ROW][COL];
-        gameCharacter PM;
-        gameCharacter B;
-        gameCharacter P;
-        gameCharacter I;
-        gameCharacter C;
+        gameCharacter* PM;
+        gameCharacter* B;
+        gameCharacter* P;
+        gameCharacter* I;
+        gameCharacter* C;
 };
 
 gameCharacter* newGameCharacter(int id, int x, int y) {
-    gameCharacter* character = new gameCharacter;
-    character->id = id;
-    character->x = x;
-    character->y = y;
+    gameCharacter* character = new gameCharacter(id, x, y);
     return character;
 }
 
@@ -179,6 +177,11 @@ void mapGen(struct map_key *map) {
     map->character_type[14][23] = PINKY;
     map->character_type[14][27] = INKY;
     map->character_type[14][31] = CLYDE;
+    map->PM = newGameCharacter(PACMAN, 23, 26);
+    map->B = newGameCharacter(BLINKY, 11, 28);
+    map->P = newGameCharacter(PINKY, 14, 23);
+    map->I = newGameCharacter(INKY, 14, 27);
+    map->C = newGameCharacter(CLYDE, 14, 31);
 }
 
 int moveCharacter(struct map_key *map, struct gameCharacter *character, int dx, int dy, 
@@ -186,16 +189,16 @@ WINDOW *map_win) {
     int newX = character->x + dx;
     int newY = character->y + dy;
     int terrain = map->terrain_type[newX][newY];
-    if (character->id == PACMAN) {
-        map->character_type[character->x][character->y] = -1;
-        character->x = dx;
-        character->y = dy;
-        map->character_type[character->x][character->y] = PACMAN;
-        return 1;
+    if (terrain != WALL) {
+        if (character->id == PACMAN) {
+            map->character_type[character->x][character->y] = -1;
+            character->x = newX;
+            character->y = newY;
+            map->character_type[character->x][character->y] = PACMAN;
+            return 1;
+        }
     }
-    else {
-        return 0;
-    }
+    return 0;
 }
 
 void gameLoop() {
@@ -220,15 +223,19 @@ void gameLoop() {
 
         if (strcmp(command, "w") == 0 || strcmp(command, "8") == 0) {
             //move up
+            moveCharacter(map, map->PM, -1, 0, map_win);
         }
         else if (strcmp(command, "a") == 0 || strcmp(command, "4") == 0) {
             //left
+            moveCharacter(map, map->PM, 0, -2, map_win);
         }
         else if (strcmp(command, "s") == 0 || strcmp(command, "2") == 0) {
             //down
+            moveCharacter(map, map->PM, 1, 0, map_win);
         }
         else if (strcmp(command, "d") == 0 || strcmp(command, "6") == 0) {
             //right
+            moveCharacter(map, map->PM, 0, 2, map_win);
         }
         else if (strcmp(command, "q") == 0) {
             //quit
@@ -238,8 +245,11 @@ void gameLoop() {
     }
 
 
-
-
+    delete map->PM;
+    delete map->B;
+    delete map->P;
+    delete map->I;
+    delete map->C;
     free(map);
 
     
