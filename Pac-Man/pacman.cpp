@@ -24,11 +24,17 @@
 // #define COL 28
 #define COL 56
 #define PACMAN 0 // pacman, yellow
+#define PACMAN_COLOR 10
 #define BLINKY 1 // shadow, red
+#define BLINKY_COLOR 11
 #define PINKY 2 // speedy, pink
+#define PINKY_COLOR 12
 #define INKY 3 // bashful, blue
+#define INKY_COLOR 13
 #define CLYDE 4 // pokey, orange
+#define CLYDE_COLOR 14
 #define WALL 0
+#define WALL_COLOR 15
 #define FENCE 1
 #define PELLET 2
 #define BIG_PELLET 3
@@ -87,26 +93,38 @@ void printMap(struct map_key *map, WINDOW *map_win) {
                 switch(map->character_type[i][j]) {
                     case PACMAN:
                         // ^, <, >, v, O
+                        wattron(map_win, COLOR_PAIR(PACMAN_COLOR));
                         mvwaddch(map_win, i, j, 'O');
+                        wattroff(map_win, COLOR_PAIR(PACMAN_COLOR));
                         break;
                     case BLINKY:
+                        wattron(map_win, COLOR_PAIR(BLINKY_COLOR));
                         mvwaddch(map_win, i, j, 'B');
+                        wattroff(map_win, COLOR_PAIR(BLINKY_COLOR));
                         break;
                     case PINKY:
+                        wattron(map_win, COLOR_PAIR(PINKY_COLOR));
                         mvwaddch(map_win, i, j, 'P');
+                        wattroff(map_win, COLOR_PAIR(PINKY_COLOR));
                         break;
                     case INKY:
+                        wattron(map_win, COLOR_PAIR(INKY_COLOR));
                         mvwaddch(map_win, i, j, 'I');
+                        wattroff(map_win, COLOR_PAIR(INKY_COLOR));
                         break;
                     case CLYDE:
+                        wattron(map_win, COLOR_PAIR(CLYDE_COLOR));
                         mvwaddch(map_win, i, j, 'C');
+                        wattroff(map_win, COLOR_PAIR(CLYDE_COLOR));
                         break;
                 }
             }
             else {
                 switch (map->terrain_type[i][j]) {
                     case WALL:
+                        wattron(map_win, COLOR_PAIR(WALL_COLOR));
                         mvwaddch(map_win, i, j, '%');
+                        wattroff(map_win, COLOR_PAIR(WALL_COLOR));
                         break;
                     case FENCE:
                         mvwaddch(map_win, i, j, '-');
@@ -132,37 +150,37 @@ void printMap(struct map_key *map, WINDOW *map_win) {
 
 void mapGen(struct map_key *map) {
     std::string game_map[ROW] = {
-        "% % % % % % % % % % % % % % % % % % % % % % % % % % % %",
+        "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",
         "% . . . . . . . . . . . . % % . . . . . . . . . . . . %",
-        "% . % % % % . % % % % % . % % . % % % % % . % % % % . %",
-        "% o % % % % . % % % % % . % % . % % % % % . % % % % o %",
-        "% . % % % % . % % % % % . % % . % % % % % . % % % % . %",
+        "% . %%%%%%% . %%%%%%%%% . % % . %%%%%%%%% . %%%%%%% . %",
+        "% o %     % . %       % . % % . %       % . %     % o %",
+        "% . %%%%%%% . %%%%%%%%% . %%% . %%%%%%%%% . %%%%%%% . %",
         "% . . . . . . . . . . . . . . . . . . . . . . . . . . %",
-        "% . % % % % . % % . % % % % % % % % . % % . % % % % . %",
-        "% . % % % % . % % . % % % % % % % % . % % . % % % % . %",
+        "% . %%%%%%% . %%% . %%%%%%%%%%%%%%% . %%% . %%%%%%% . %",
+        "% . %%%%%%% . % % . %%%%%%% %%%%%%% . % % . %%%%%%% . %",
         "% . . . . . . % % . . . . % % . . . . % % . . . . . . %",
-        "% % % % % % . % % % % %   % %   % % % % % . % % % % % %",
-        "          % . % % % % %   % %   % % % % % . %          ",
+        "%%%%%%%%%%% . % %%%%%%%   % %   %%%%%%% % . %%%%%%%%%%%",
+        "          % . % %%%%%%%   %%%   %%%%%%% % . %          ",
         "          % . % %                     % % . %          ",
-        "          % . % %   % % % - - % % %   % % . %          ",
-        "% % % % % % . % %   %             %   % % . % % % % % %",
+        "          % . % %   %%%%%-----%%%%%   % % . %          ",
+        "%%%%%%%%%%% . %%%   %             %   %%% . %%%%%%%%%%%",
         "            .       %             %       .            ",
-        "% % % % % % . % %   %             %   % % . % % % % % %",
-        "          % . % %   % % % % % % % %   % % . %          ",
+        "%%%%%%%%%%% . %%%   %             %   %%% . %%%%%%%%%%%",
+        "          % . % %   %%%%%%%%%%%%%%%   % % . %          ",
         "          % . % %                     % % . %          ",
-        "          % . % %   % % % % % % % %   % % . %          ",
-        "% % % % % % . % %   % % % % % % % %   % % . % % % % % %",
+        "          % . % %   %%%%%%%%%%%%%%%   % % . %          ",
+        "%%%%%%%%%%% . %%%   %%%%%%% %%%%%%%   %%% . %%%%%%%%%%%",
         "% . . . . . . . . . . . . % % . . . . . . . . . . . . %",
-        "% . % % % % . % % % % % . % % . % % % % % . % % % % . %",
-        "% . % % % % . % % % % % . % % . % % % % % . % % % % . %",
+        "% . %%%%%%% . %%%%%%%%% . % % . %%%%%%%%% . %%%%%%% . %",
+        "% . %%%%% % . %%%%%%%%% . %%% . %%%%%%%%% . % %%%%% . %",
         "% o . . % % . . . . . . .     . . . . . . . % % . . o %",
-        "% % % . % % . % % . % % % % % % % % . % % . % % . % % %",
-        "% % % . % % . % % . % % % % % % % % . % % . % % . % % %",
+        "%%%%% . % % . %%% . %%%%%%%%%%%%%%% . %%% . % % . %%%%%",
+        "%%%%% . %%% . % % . %%%%%%% %%%%%%% . % % . %%% . %%%%%",
         "% . . . . . . % % . . . . % % . . . . % % . . . . . . %",
-        "% . % % % % % % % % % % . % % . % % % % % % % % % % . %",
-        "% . % % % % % % % % % % . % % . % % % % % % % % % % . %",
+        "% . %%%%%%%%%%% %%%%%%% . % % . %%%%%%% %%%%%%%%%%% . %",
+        "% . %%%%%%%%%%%%%%%%%%% . %%% . %%%%%%%%%%%%%%%%%%% . %",
         "% . . . . . . . . . . . . . . . . . . . . . . . . . . %",
-        "% % % % % % % % % % % % % % % % % % % % % % % % % % % %"
+        "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
     };
 
     for (int i = 0; i < ROW; i++) {
@@ -238,6 +256,7 @@ WINDOW *map_win) {
     int terrain = map->terrain_type[newX][newY];
     int npc_present = map->character_type[newX][newY];
     int directions[4][2] = {{-1, 0}, {1, 0}, {0, -2}, {0, 2}};
+    // for ghosts change in direction
     int gdx = directions[character->direction][0];
     int gdy = directions[character->direction][1];
     if (map->curr_pellets < 1) {
@@ -248,7 +267,7 @@ WINDOW *map_win) {
     if (character->id == PACMAN) {
         if (terrain != WALL && terrain != FENCE) {
             if (npc_present != -1) {
-                deathRestart(map);
+                // deathRestart(map);
             }
             else {
                 map->character_type[character->x][character->y] = -1;
@@ -270,7 +289,7 @@ WINDOW *map_win) {
             }
         }
     }
-    else if (character->id == BLINKY) {
+    else if (character->id == BLINKY && map->GameOver) {
         if (map->terrain_type[character->x + gdx][character->y + gdy] == WALL || 
         map->terrain_type[character->x + gdx][character->y + gdy] == FENCE) {
             do {
@@ -280,13 +299,17 @@ WINDOW *map_win) {
             } while (map->terrain_type[character->x + gdx][character->y + gdy] == WALL ||
             map->terrain_type[character->x + gdx][character->y + gdy] == FENCE);
         }
+        npc_present = map->character_type[character->x + gdx][character->y + gdy];
+        if (npc_present == PACMAN) {
+            deathRestart(map);
+        }
         map->character_type[character->x][character->y] = -1;
         character->x += gdx;
         character->y += gdy;
         map->character_type[character->x][character->y] = BLINKY;
         return 1;
     }
-    else if (character->id == PINKY) {
+    else if (character->id == PINKY && map->GameOver) {
         if (map->num_moves > 5 && !map->P_INIT) {
             map->P_INIT = true;
             map->character_type[character->x][character->y] = -1;
@@ -425,11 +448,20 @@ void gameLoop() {
 }
 
 int main(int argc, char* argv[]) {
+
     initscr();
     cbreak();
     raw();
+    start_color();
     keypad(stdscr, true);
     noecho();
+    init_pair(PACMAN_COLOR, COLOR_YELLOW, COLOR_BLACK);
+    init_pair(BLINKY_COLOR, COLOR_RED, COLOR_BLACK);
+    init_pair(PINKY_COLOR, COLOR_MAGENTA, COLOR_BLACK);
+    init_pair(INKY_COLOR, COLOR_CYAN, COLOR_BLACK);
+    init_pair(CLYDE_COLOR, COLOR_YELLOW, COLOR_BLACK);
+    init_pair(WALL_COLOR, COLOR_BLUE, COLOR_BLUE);
+
     srand(time(NULL));
     gameLoop();
     endwin();
