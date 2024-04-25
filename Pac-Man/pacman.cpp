@@ -270,22 +270,39 @@ WINDOW *map_win) {
                 // deathRestart(map);
             }
             else {
-                map->character_type[character->x][character->y] = -1;
-                character->x = newX;
-                character->y = newY;
-                map->character_type[character->x][character->y] = PACMAN;
+                if (newY != COL - 2 && newY != 0) {
+                    map->character_type[character->x][character->y] = -1;
+                    character->x = newX;
+                    character->y = newY;
+                    map->character_type[character->x][character->y] = PACMAN;
 
-                if (terrain == PELLET) {
-                    map->terrain_type[newX][newY] = SPACE;
-                    map->score += 10;
-                    map->curr_pellets -= 1;
+                    if (terrain == PELLET) {
+                        map->terrain_type[newX][newY] = SPACE;
+                        map->score += 10;
+                        map->curr_pellets -= 1;
+                    }
+                    else if (terrain == BIG_PELLET) {
+                        map->terrain_type[newX][newY] = SPACE;
+                        map->score += 50;
+                        map->curr_pellets -= 1;
+                    }
+                    return 1;
                 }
-                else if (terrain == BIG_PELLET) {
-                    map->terrain_type[newX][newY] = SPACE;
-                    map->score += 50;
-                    map->curr_pellets -= 1;
+                else if (newY == COL - 2) {
+                    map->character_type[character->x][character->y] = -1;
+                    character->x = 14;
+                    character->y = 2;
+                    map->character_type[character->x][character->y] = PACMAN;
+                    return 1;
                 }
-                return 1;
+                else if (newY == 0) {
+                    map->character_type[character->x][character->y] = -1;
+                    character->x = 14;
+                    character->y = COL - 4;
+                    map->character_type[character->x][character->y] = PACMAN;
+                    return 1;
+                }
+                
             }
         }
     }
@@ -328,6 +345,10 @@ WINDOW *map_win) {
                 } while (map->terrain_type[character->x + gdx][character->y + gdy] == WALL ||
                 map->terrain_type[character->x + gdx][character->y + gdy] == FENCE);
             }
+            npc_present = map->character_type[character->x + gdx][character->y + gdy];
+            if (npc_present == PACMAN) {
+                deathRestart(map);
+            }
             map->character_type[character->x][character->y] = -1;
             character->x += gdx;
             character->y += gdy;
@@ -354,6 +375,10 @@ WINDOW *map_win) {
                     gdy = directions[character->direction][1];
                 } while (map->terrain_type[character->x + gdx][character->y + gdy] == WALL ||
                 map->terrain_type[character->x + gdx][character->y + gdy] == FENCE);
+            }
+            npc_present = map->character_type[character->x + gdx][character->y + gdy];
+            if (npc_present == PACMAN) {
+                deathRestart(map);
             }
             map->character_type[character->x][character->y] = -1;
             character->x += gdx;
@@ -382,6 +407,10 @@ WINDOW *map_win) {
                 } while (map->terrain_type[character->x + gdx][character->y + gdy] == WALL ||
                 map->terrain_type[character->x + gdx][character->y + gdy] == FENCE);
             }
+            npc_present = map->character_type[character->x + gdx][character->y + gdy];
+            if (npc_present == PACMAN) {
+                deathRestart(map);
+            }
             map->character_type[character->x][character->y] = -1;
             character->x += gdx;
             character->y += gdy;
@@ -407,7 +436,7 @@ void gameLoop() {
     nodelay(input_win, true);
     while (1) {
         if (map->GameOver == true) {
-            // break;
+            break;
         }
         mvwprintw(score_win, 1, 6, "%d", map->score);
         wrefresh(score_win);
