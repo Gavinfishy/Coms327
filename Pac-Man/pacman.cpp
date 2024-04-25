@@ -41,8 +41,8 @@
 #define START_PA_Y 23
 #define START_B_X 28
 #define START_B_Y 11
-#define START_P_X 23
-#define START_I_X 27
+#define START_I_X 23
+#define START_P_X 27
 #define START_C_X 31
 #define START_BOX_Y 14
 #define TOTAL_PELLET 244
@@ -52,6 +52,7 @@ class gameCharacter {
         int id;
         int x;
         int y;
+        int direction;
         gameCharacter(int id, int x, int y) : id(id), x(x), y(y) {}
 };
 
@@ -64,6 +65,9 @@ class map_key{
         int score;
         int curr_pellets;
         int num_moves;
+        bool P_INIT;
+        bool I_INIT;
+        bool C_INIT;
         gameCharacter* PM;
         gameCharacter* B;
         gameCharacter* P;
@@ -203,6 +207,10 @@ void mapGen(struct map_key *map) {
     }
     map->GameOver = false;
     map->curr_pellets = TOTAL_PELLET;
+    map->num_moves = 0;
+    map->P_INIT = false;
+    map->I_INIT = false;
+    map->C_INIT = false;
 }
 
 void nextLevel(struct map_key *map) {
@@ -229,12 +237,16 @@ WINDOW *map_win) {
     int newY = character->y + dy;
     int terrain = map->terrain_type[newX][newY];
     int npc_present = map->character_type[newX][newY];
+    int directions[4][2] = {{-1, 0}, {1, 0}, {0, -2}, {0, 2}};
+    int gdx = directions[character->direction][0];
+    int gdy = directions[character->direction][1];
     if (map->curr_pellets < 1) {
         nextLevel(map);
         return 1;
     }
-    if (terrain != WALL && terrain != FENCE) {
-        if (character->id == PACMAN) {
+    
+    if (character->id == PACMAN) {
+        if (terrain != WALL && terrain != FENCE) {
             if (npc_present != -1) {
                 deathRestart(map);
             }
@@ -257,19 +269,85 @@ WINDOW *map_win) {
                 return 1;
             }
         }
-        else if (character->id == BLINKY) {
-
-        }
-        else if (character->id == PINKY) {
-
-        }
-        else if (character->id == INKY) {
-
-        }
-        else if (character->id = CLYDE) {
-
-        }
     }
+    else if (character->id == BLINKY) {
+        if (map->terrain_type[character->x + gdx][character->y + gdy] == WALL || 
+        map->terrain_type[character->x + gdx][character->y + gdy] == FENCE) {
+            do {
+                character->direction = rand() % 4;
+                gdx = directions[character->direction][0];
+                gdy = directions[character->direction][1];
+            } while (map->terrain_type[character->x + gdx][character->y + gdy] == WALL ||
+            map->terrain_type[character->x + gdx][character->y + gdy] == FENCE);
+        }
+        map->character_type[character->x][character->y] = -1;
+        character->x += gdx;
+        character->y += gdy;
+        map->character_type[character->x][character->y] = BLINKY;
+        return 1;
+    }
+    else if (character->id == PINKY) {
+        if (map->num_moves > 5 && !map->P_INIT) {
+            map->P_INIT = true;
+            map->character_type[character->x][character->y] = -1;
+            character->x = START_B_Y;
+            character->y = START_B_X;
+            map->character_type[character->x][character->y] = PINKY;
+
+        }
+        if (map->P_INIT) {
+            if (map->terrain_type[character->x + gdx][character->y + gdy] == WALL || 
+            map->terrain_type[character->x + gdx][character->y + gdy] == FENCE) {
+                do {
+                    character->direction = rand() % 4;
+                    gdx = directions[character->direction][0];
+                    gdy = directions[character->direction][1];
+                } while (map->terrain_type[character->x + gdx][character->y + gdy] == WALL ||
+                map->terrain_type[character->x + gdx][character->y + gdy] == FENCE);
+            }
+            map->character_type[character->x][character->y] = -1;
+            character->x += gdx;
+            character->y += gdy;
+            map->character_type[character->x][character->y] = PINKY;
+            return 1;
+        }
+
+    }
+    else if (character->id == INKY && map->num_moves == -1) {
+        if (map->terrain_type[character->x + gdx][character->y + gdy] == WALL || 
+        map->terrain_type[character->x + gdx][character->y + gdy] == FENCE) {
+            do {
+                character->direction = rand() % 4;
+                gdx = directions[character->direction][0];
+                gdy = directions[character->direction][1];
+            } while (map->terrain_type[character->x + gdx][character->y + gdy] == WALL ||
+            map->terrain_type[character->x + gdx][character->y + gdy] == FENCE);
+        }
+        map->character_type[character->x][character->y] = -1;
+        character->x += gdx;
+        character->y += gdy;
+        map->character_type[character->x][character->y] = INKY;
+        return 1;
+
+    }
+    else if (character->id = CLYDE && map->num_moves == -1) {
+        if (map->terrain_type[character->x + gdx][character->y + gdy] == WALL || 
+        map->terrain_type[character->x + gdx][character->y + gdy] == FENCE) {
+            do {
+                character->direction = rand() % 4;
+                gdx = directions[character->direction][0];
+                gdy = directions[character->direction][1];
+            } while (map->terrain_type[character->x + gdx][character->y + gdy] == WALL ||
+            map->terrain_type[character->x + gdx][character->y + gdy] == FENCE);
+        }
+        map->character_type[character->x][character->y] = -1;
+        character->x += gdx;
+        character->y += gdy;
+        map->character_type[character->x][character->y] = CLYDE;
+        return 1;
+
+    }
+    
     return 0;
 }
 
@@ -286,7 +364,7 @@ void gameLoop() {
     nodelay(input_win, true);
     while (1) {
         if (map->GameOver == true) {
-            break;
+            // break;
         }
         mvwprintw(score_win, 1, 6, "%d", map->score);
         wrefresh(score_win);
@@ -306,7 +384,7 @@ void gameLoop() {
         }
         command[0] = ch;
         command[1] = '\0';
-
+        map->num_moves += 1;
         if (strcmp(command, "w") == 0 || strcmp(command, "8") == 0) {
             //move up
             moveCharacter(map, map->PM, -1, 0, map_win);
@@ -327,6 +405,11 @@ void gameLoop() {
             //quit
             break;
         }
+        moveCharacter(map, map->B, 0, 0, map_win);
+        moveCharacter(map, map->P, 0, 0, map_win);
+        moveCharacter(map, map->I, 0, 0, map_win);
+        moveCharacter(map, map->C, 0, 0, map_win);
+        
 
     }
 
