@@ -289,7 +289,7 @@ WINDOW *map_win) {
             }
         }
     }
-    else if (character->id == BLINKY && map->GameOver) {
+    else if (character->id == BLINKY) {
         if (map->terrain_type[character->x + gdx][character->y + gdy] == WALL || 
         map->terrain_type[character->x + gdx][character->y + gdy] == FENCE) {
             do {
@@ -309,7 +309,7 @@ WINDOW *map_win) {
         map->character_type[character->x][character->y] = BLINKY;
         return 1;
     }
-    else if (character->id == PINKY && map->GameOver) {
+    else if (character->id == PINKY) {
         if (map->num_moves > 5 && !map->P_INIT) {
             map->P_INIT = true;
             map->character_type[character->x][character->y] = -1;
@@ -336,38 +336,58 @@ WINDOW *map_win) {
         }
 
     }
-    else if (character->id == INKY && map->num_moves == -1) {
-        if (map->terrain_type[character->x + gdx][character->y + gdy] == WALL || 
-        map->terrain_type[character->x + gdx][character->y + gdy] == FENCE) {
-            do {
-                character->direction = rand() % 4;
-                gdx = directions[character->direction][0];
-                gdy = directions[character->direction][1];
-            } while (map->terrain_type[character->x + gdx][character->y + gdy] == WALL ||
-            map->terrain_type[character->x + gdx][character->y + gdy] == FENCE);
+    else if (character->id == INKY) {
+        if (map->num_moves > 10 && !map->I_INIT) {
+            map->I_INIT = true;
+            map->character_type[character->x][character->y] = -1;
+            character->x = START_B_Y;
+            character->y = START_B_X;
+            map->character_type[character->x][character->y] = INKY;
+
         }
-        map->character_type[character->x][character->y] = -1;
-        character->x += gdx;
-        character->y += gdy;
-        map->character_type[character->x][character->y] = INKY;
-        return 1;
+        if (map->I_INIT) {
+            if (map->terrain_type[character->x + gdx][character->y + gdy] == WALL || 
+            map->terrain_type[character->x + gdx][character->y + gdy] == FENCE) {
+                do {
+                    character->direction = rand() % 4;
+                    gdx = directions[character->direction][0];
+                    gdy = directions[character->direction][1];
+                } while (map->terrain_type[character->x + gdx][character->y + gdy] == WALL ||
+                map->terrain_type[character->x + gdx][character->y + gdy] == FENCE);
+            }
+            map->character_type[character->x][character->y] = -1;
+            character->x += gdx;
+            character->y += gdy;
+            map->character_type[character->x][character->y] = INKY;
+            return 1;
+        }
 
     }
-    else if (character->id = CLYDE && map->num_moves == -1) {
-        if (map->terrain_type[character->x + gdx][character->y + gdy] == WALL || 
-        map->terrain_type[character->x + gdx][character->y + gdy] == FENCE) {
-            do {
-                character->direction = rand() % 4;
-                gdx = directions[character->direction][0];
-                gdy = directions[character->direction][1];
-            } while (map->terrain_type[character->x + gdx][character->y + gdy] == WALL ||
-            map->terrain_type[character->x + gdx][character->y + gdy] == FENCE);
+    else if (character->id = CLYDE) {
+        if (map->num_moves > 10 && !map->C_INIT) {
+            map->C_INIT = true;
+            map->character_type[character->x][character->y] = -1;
+            character->x = START_B_Y;
+            character->y = START_B_X;
+            map->character_type[character->x][character->y] = CLYDE;
+
         }
-        map->character_type[character->x][character->y] = -1;
-        character->x += gdx;
-        character->y += gdy;
-        map->character_type[character->x][character->y] = CLYDE;
-        return 1;
+        if (map->C_INIT) {
+            if (map->terrain_type[character->x + gdx][character->y + gdy] == WALL || 
+            map->terrain_type[character->x + gdx][character->y + gdy] == FENCE) {
+                do {
+                    character->direction = rand() % 4;
+                    gdx = directions[character->direction][0];
+                    gdy = directions[character->direction][1];
+                } while (map->terrain_type[character->x + gdx][character->y + gdy] == WALL ||
+                map->terrain_type[character->x + gdx][character->y + gdy] == FENCE);
+            }
+            map->character_type[character->x][character->y] = -1;
+            character->x += gdx;
+            character->y += gdy;
+            map->character_type[character->x][character->y] = CLYDE;
+            return 1;
+        }
 
     }
     
