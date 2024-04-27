@@ -102,24 +102,52 @@ void printMap(struct map_key *map, WINDOW *map_win) {
                         wattroff(map_win, COLOR_PAIR(PACMAN_COLOR));
                         break;
                     case BLINKY:
-                        wattron(map_win, COLOR_PAIR(BLINKY_COLOR));
-                        mvwaddch(map_win, i, j, 'B');
-                        wattroff(map_win, COLOR_PAIR(BLINKY_COLOR));
+                        if (map->B->vulnerable) {
+                            wattron(map_win, COLOR_PAIR(VULNERABLE_COLOR));
+                            mvwaddch(map_win, i, j, 'B');
+                            wattroff(map_win, COLOR_PAIR(VULNERABLE_COLOR));
+                        }
+                        else {
+                            wattron(map_win, COLOR_PAIR(BLINKY_COLOR));
+                            mvwaddch(map_win, i, j, 'B');
+                            wattroff(map_win, COLOR_PAIR(BLINKY_COLOR));
+                        }
                         break;
                     case PINKY:
-                        wattron(map_win, COLOR_PAIR(PINKY_COLOR));
-                        mvwaddch(map_win, i, j, 'P');
-                        wattroff(map_win, COLOR_PAIR(PINKY_COLOR));
+                        if (map->P->vulnerable) {
+                            wattron(map_win, COLOR_PAIR(VULNERABLE_COLOR));
+                            mvwaddch(map_win, i, j, 'P');
+                            wattroff(map_win, COLOR_PAIR(VULNERABLE_COLOR));
+                        }
+                        else {
+                            wattron(map_win, COLOR_PAIR(PINKY_COLOR));
+                            mvwaddch(map_win, i, j, 'P');
+                            wattroff(map_win, COLOR_PAIR(PINKY_COLOR));
+                        }
                         break;
                     case INKY:
-                        wattron(map_win, COLOR_PAIR(INKY_COLOR));
-                        mvwaddch(map_win, i, j, 'I');
-                        wattroff(map_win, COLOR_PAIR(INKY_COLOR));
+                        if (map->I->vulnerable) {
+                            wattron(map_win, COLOR_PAIR(VULNERABLE_COLOR));
+                            mvwaddch(map_win, i, j, 'I');
+                            wattroff(map_win, COLOR_PAIR(VULNERABLE_COLOR));
+                        }
+                        else {
+                            wattron(map_win, COLOR_PAIR(INKY_COLOR));
+                            mvwaddch(map_win, i, j, 'I');
+                            wattroff(map_win, COLOR_PAIR(INKY_COLOR));
+                        }
                         break;
                     case CLYDE:
-                        wattron(map_win, COLOR_PAIR(CLYDE_COLOR));
-                        mvwaddch(map_win, i, j, 'C');
-                        wattroff(map_win, COLOR_PAIR(CLYDE_COLOR));
+                        if (map->C->vulnerable) {
+                            wattron(map_win, COLOR_PAIR(VULNERABLE_COLOR));
+                            mvwaddch(map_win, i, j, 'C');
+                            wattroff(map_win, COLOR_PAIR(VULNERABLE_COLOR));
+                        }
+                        else {
+                            wattron(map_win, COLOR_PAIR(CLYDE_COLOR));
+                            mvwaddch(map_win, i, j, 'C');
+                            wattroff(map_win, COLOR_PAIR(CLYDE_COLOR));
+                        }
                         break;
                 }
             }
@@ -242,12 +270,24 @@ void mapGen(struct map_key *map) {
     map->C->vulnerable = false;
 }
 
-void vulnerableMode(struct map_key *map) {
-    map->B->vulnerable = true;
-    map->P->vulnerable = true;
-    map->I->vulnerable = true;
-    map->C->vulnerable = true;
-
+void vulnerableMode(struct map_key *map, bool vulnerable) {
+    if (vulnerable) {
+        map->B->vulnerable = true;
+        map->P->vulnerable = true;
+        map->I->vulnerable = true;
+        map->C->vulnerable = true;
+        map->vulnerable_mode = true;
+        //turn on color
+    }
+    else {
+        //turn off color
+        map->B->vulnerable = false;
+        map->P->vulnerable = false;
+        map->I->vulnerable = false;
+        map->C->vulnerable = false;
+        map->vulnerable_mode = true;
+        map->vulnerable_count = 0;
+    }
 }
 
 void nextLevel(struct map_key *map) {
@@ -325,6 +365,7 @@ WINDOW *map_win) {
                         map->terrain_type[newX][newY] = SPACE;
                         map->score += 50;
                         map->curr_pellets -= 1;
+                        vulnerableMode(map, true);
                     }
                     return 1;
                 }
@@ -482,6 +523,12 @@ void gameLoop() {
     while (1) {
         if (map->GameOver == true) {
             break;
+        }
+        if (map->vulnerable_mode && map->vulnerable_count <= 30) {
+            map->vulnerable_count += 1;
+        }
+        else {
+            vulnerableMode(map, false);
         }
         mvwprintw(score_win, 1, 6, "%d", map->score);
         wrefresh(score_win);
