@@ -35,6 +35,7 @@
 #define CLYDE_COLOR 14
 #define WALL 0
 #define WALL_COLOR 15
+#define VULNERABLE_COLOR 16
 #define FENCE 1
 #define PELLET 2
 #define BIG_PELLET 3
@@ -59,6 +60,7 @@ class gameCharacter {
         int x;
         int y;
         int direction;
+        bool vulnerable;
         gameCharacter(int id, int x, int y) : id(id), x(x), y(y) {}
 };
 
@@ -71,6 +73,8 @@ class map_key{
         int score;
         int curr_pellets;
         int num_moves;
+        bool vulnerable_mode;
+        int vulnerable_count;
         bool P_INIT;
         bool I_INIT;
         bool C_INIT;
@@ -226,9 +230,24 @@ void mapGen(struct map_key *map) {
     map->GameOver = false;
     map->curr_pellets = TOTAL_PELLET;
     map->num_moves = 0;
+    map->vulnerable_mode = false;
+    map->vulnerable_count = 0;
     map->P_INIT = false;
     map->I_INIT = false;
     map->C_INIT = false;
+    map->PM->vulnerable = false;
+    map->B->vulnerable = false;
+    map->P->vulnerable = false;
+    map->I->vulnerable = false;
+    map->C->vulnerable = false;
+}
+
+void vulnerableMode(struct map_key *map) {
+    map->B->vulnerable = true;
+    map->P->vulnerable = true;
+    map->I->vulnerable = true;
+    map->C->vulnerable = true;
+
 }
 
 void nextLevel(struct map_key *map) {
@@ -242,9 +261,29 @@ void deathRestart(struct map_key *map) {
     else {
         map->lives -= 1;
         map->character_type[map->PM->x][map->PM->y] = -1;
+        map->character_type[map->B->x][map->B->y] = -1;
+        map->character_type[map->P->x][map->P->y] = -1;
+        map->character_type[map->I->x][map->I->y] = -1;
+        map->character_type[map->C->x][map->C->y] = -1;
         map->character_type[START_PA_Y][START_PA_X] = PACMAN;
-        map->PM->x = START_PA_Y;
-        map->PM->y = START_PA_X;
+        map->character_type[START_B_Y][START_B_X] = BLINKY;
+        map->character_type[START_BOX_Y][START_P_X] = PINKY;
+        map->character_type[START_BOX_Y][START_I_X] = INKY;
+        map->character_type[START_BOX_Y][START_C_X] = CLYDE;
+        delete map->PM;
+        delete map->B;
+        delete map->P;
+        delete map->I;
+        delete map->C;
+        map->PM = newGameCharacter(PACMAN, START_PA_Y, START_PA_X);
+        map->B = newGameCharacter(BLINKY, START_B_Y, START_B_X);
+        map->P = newGameCharacter(PINKY, START_BOX_Y, START_P_X);
+        map->I = newGameCharacter(INKY, START_BOX_Y, START_I_X);
+        map->C = newGameCharacter(CLYDE, START_BOX_Y, START_C_X);
+        map->num_moves = 0;
+        map->P_INIT = false;
+        map->I_INIT = false;
+        map->C_INIT = false;        
     }
 }
 
@@ -254,7 +293,7 @@ WINDOW *map_win) {
     int newX = character->x + dx;
     int newY = character->y + dy;
     int terrain = map->terrain_type[newX][newY];
-    int npc_present = map->character_type[newX][newY];
+    int npc_present;
     int directions[4][2] = {{-1, 0}, {1, 0}, {0, -2}, {0, 2}};
     // for ghosts change in direction
     int gdx = directions[character->direction][0];
@@ -266,7 +305,8 @@ WINDOW *map_win) {
     
     if (character->id == PACMAN) {
         if (terrain != WALL && terrain != FENCE) {
-            if (npc_present != -1) {
+            npc_present = map->character_type[newX][newY];
+            if (npc_present == BLINKY) {
                 // deathRestart(map);
             }
             else {
@@ -320,14 +360,16 @@ WINDOW *map_win) {
         if (npc_present == PACMAN) {
             deathRestart(map);
         }
-        map->character_type[character->x][character->y] = -1;
-        character->x += gdx;
-        character->y += gdy;
-        map->character_type[character->x][character->y] = BLINKY;
+        else {
+            map->character_type[character->x][character->y] = -1;
+            character->x += gdx;
+            character->y += gdy;
+            map->character_type[character->x][character->y] = BLINKY;
+        }
         return 1;
     }
     else if (character->id == PINKY) {
-        if (map->num_moves > 5 && !map->P_INIT) {
+        if (map->num_moves > 10 && !map->P_INIT) {
             map->P_INIT = true;
             map->character_type[character->x][character->y] = -1;
             character->x = START_B_Y;
@@ -349,16 +391,17 @@ WINDOW *map_win) {
             if (npc_present == PACMAN) {
                 deathRestart(map);
             }
-            map->character_type[character->x][character->y] = -1;
-            character->x += gdx;
-            character->y += gdy;
-            map->character_type[character->x][character->y] = PINKY;
+            else {
+                map->character_type[character->x][character->y] = -1;
+                character->x += gdx;
+                character->y += gdy;
+                map->character_type[character->x][character->y] = PINKY;
+            }
             return 1;
         }
-
     }
     else if (character->id == INKY) {
-        if (map->num_moves > 10 && !map->I_INIT) {
+        if (map->num_moves > 20 && !map->I_INIT) {
             map->I_INIT = true;
             map->character_type[character->x][character->y] = -1;
             character->x = START_B_Y;
@@ -380,16 +423,18 @@ WINDOW *map_win) {
             if (npc_present == PACMAN) {
                 deathRestart(map);
             }
-            map->character_type[character->x][character->y] = -1;
-            character->x += gdx;
-            character->y += gdy;
-            map->character_type[character->x][character->y] = INKY;
+            else {
+                map->character_type[character->x][character->y] = -1;
+                character->x += gdx;
+                character->y += gdy;
+                map->character_type[character->x][character->y] = INKY;
+            }
             return 1;
         }
 
     }
     else if (character->id = CLYDE) {
-        if (map->num_moves > 10 && !map->C_INIT) {
+        if (map->num_moves > 30 && !map->C_INIT) {
             map->C_INIT = true;
             map->character_type[character->x][character->y] = -1;
             character->x = START_B_Y;
@@ -411,15 +456,15 @@ WINDOW *map_win) {
             if (npc_present == PACMAN) {
                 deathRestart(map);
             }
-            map->character_type[character->x][character->y] = -1;
-            character->x += gdx;
-            character->y += gdy;
-            map->character_type[character->x][character->y] = CLYDE;
+            else {
+                map->character_type[character->x][character->y] = -1;
+                character->x += gdx;
+                character->y += gdy;
+                map->character_type[character->x][character->y] = CLYDE;
+            }
             return 1;
         }
-
     }
-    
     return 0;
 }
 
@@ -509,6 +554,7 @@ int main(int argc, char* argv[]) {
     init_pair(PINKY_COLOR, COLOR_MAGENTA, COLOR_BLACK);
     init_pair(INKY_COLOR, COLOR_CYAN, COLOR_BLACK);
     init_pair(CLYDE_COLOR, COLOR_YELLOW, COLOR_BLACK);
+    init_pair(VULNERABLE_COLOR, COLOR_BLUE, COLOR_BLACK);
     init_pair(WALL_COLOR, COLOR_BLUE, COLOR_BLUE);
 
     srand(time(NULL));
