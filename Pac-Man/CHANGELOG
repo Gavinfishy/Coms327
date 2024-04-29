@@ -4,4 +4,5 @@ PacMan project
 4/23/2024 11am-11:40am, 5:30pm-6:50pm, 8:30pm-10:40pm created background map
 4/24/2024 2:30pm-6:30pm, 7:50pm-11:20pm pacman moving, pellets eatable, game losable, ghosts random movement
 4/25/2024 10:15am-11:40am, 2:30pm-4:30pm ghosts all moving and can kill, pacman can jump across map
-4/27/2024 3pm- fixed ghost encounter bug
+4/27/2024 3pm-5pm fixed ghost encounter bug, ghosts turn blue
+4/29/2024 10am-11am ghosts eatable in vulnerable mode

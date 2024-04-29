@@ -75,6 +75,7 @@ class map_key{
         int num_moves;
         bool vulnerable_mode;
         int vulnerable_count;
+        int num_vulnerable_eaten;
         bool P_INIT;
         bool I_INIT;
         bool C_INIT;
@@ -260,6 +261,7 @@ void mapGen(struct map_key *map) {
     map->num_moves = 0;
     map->vulnerable_mode = false;
     map->vulnerable_count = 0;
+    map->num_vulnerable_eaten = 0;
     map->P_INIT = false;
     map->I_INIT = false;
     map->C_INIT = false;
@@ -277,16 +279,17 @@ void vulnerableMode(struct map_key *map, bool vulnerable) {
         map->I->vulnerable = true;
         map->C->vulnerable = true;
         map->vulnerable_mode = true;
-        //turn on color
+        map->vulnerable_count = 0;
+        map->num_vulnerable_eaten = 0;
     }
     else {
-        //turn off color
         map->B->vulnerable = false;
         map->P->vulnerable = false;
         map->I->vulnerable = false;
         map->C->vulnerable = false;
         map->vulnerable_mode = true;
         map->vulnerable_count = 0;
+        map->num_vulnerable_eaten = 0;
     }
 }
 
@@ -326,7 +329,6 @@ void deathRestart(struct map_key *map) {
         map->C_INIT = false;        
     }
 }
-
 
 int moveCharacter(struct map_key *map, struct gameCharacter *character, int dx, int dy, 
 WINDOW *map_win) {
@@ -398,8 +400,28 @@ WINDOW *map_win) {
             map->terrain_type[character->x + gdx][character->y + gdy] == FENCE);
         }
         npc_present = map->character_type[character->x + gdx][character->y + gdy];
-        if (npc_present == PACMAN) {
+        if (npc_present == PACMAN && !map->B->vulnerable) {
             deathRestart(map);
+        }
+        else if (npc_present == PACMAN && map->B->vulnerable) {
+            map->character_type[map->B->x][map->B->y] = -1;
+            map->character_type[START_B_Y][START_B_X] = BLINKY;
+            delete map->B;
+            map->B = newGameCharacter(BLINKY, START_B_Y, START_B_X);
+            map->B->vulnerable = false;
+            if (map->num_vulnerable_eaten == 0) {
+                map->score += 200;
+            }
+            else if (map->num_vulnerable_eaten == 1) {
+                map->score += 400;
+            }
+            else if (map->num_vulnerable_eaten == 2) {
+                map->score += 800;
+            }
+            else if (map->num_vulnerable_eaten == 3) {
+                map->score += 1600;
+            }
+            map->num_vulnerable_eaten += 1;
         }
         else {
             map->character_type[character->x][character->y] = -1;
@@ -429,8 +451,29 @@ WINDOW *map_win) {
                 map->terrain_type[character->x + gdx][character->y + gdy] == FENCE);
             }
             npc_present = map->character_type[character->x + gdx][character->y + gdy];
-            if (npc_present == PACMAN) {
+            if (npc_present == PACMAN && !map->P->vulnerable) {
                 deathRestart(map);
+            }
+            else if (npc_present == PACMAN && map->P->vulnerable) {
+                map->character_type[map->P->x][map->P->y] = -1;
+                map->character_type[START_BOX_Y][START_P_X] = PINKY;
+                delete map->P;
+                map->P = newGameCharacter(PINKY, START_BOX_Y, START_P_X);
+                map->P_INIT = false;
+                map->P->vulnerable = false;
+                if (map->num_vulnerable_eaten == 0) {
+                    map->score += 200;
+                }
+                else if (map->num_vulnerable_eaten == 1) {
+                    map->score += 400;
+                }
+                else if (map->num_vulnerable_eaten == 2) {
+                    map->score += 800;
+                }
+                else if (map->num_vulnerable_eaten == 3) {
+                    map->score += 1600;
+                }
+                map->num_vulnerable_eaten += 1;
             }
             else {
                 map->character_type[character->x][character->y] = -1;
@@ -461,8 +504,29 @@ WINDOW *map_win) {
                 map->terrain_type[character->x + gdx][character->y + gdy] == FENCE);
             }
             npc_present = map->character_type[character->x + gdx][character->y + gdy];
-            if (npc_present == PACMAN) {
+            if (npc_present == PACMAN && !map->I->vulnerable) {
                 deathRestart(map);
+            }
+            else if (npc_present == PACMAN && map->I->vulnerable) {
+                map->character_type[map->I->x][map->I->y] = -1;
+                map->character_type[START_BOX_Y][START_I_X] = INKY;
+                delete map->I;
+                map->I = newGameCharacter(INKY, START_BOX_Y, START_I_X);
+                map->I_INIT = false;
+                map->I->vulnerable = false;
+                if (map->num_vulnerable_eaten == 0) {
+                    map->score += 200;
+                }
+                else if (map->num_vulnerable_eaten == 1) {
+                    map->score += 400;
+                }
+                else if (map->num_vulnerable_eaten == 2) {
+                    map->score += 800;
+                }
+                else if (map->num_vulnerable_eaten == 3) {
+                    map->score += 1600;
+                }
+                map->num_vulnerable_eaten += 1;
             }
             else {
                 map->character_type[character->x][character->y] = -1;
@@ -494,8 +558,29 @@ WINDOW *map_win) {
                 map->terrain_type[character->x + gdx][character->y + gdy] == FENCE);
             }
             npc_present = map->character_type[character->x + gdx][character->y + gdy];
-            if (npc_present == PACMAN) {
+            if (npc_present == PACMAN && !map->C->vulnerable) {
                 deathRestart(map);
+            }
+            else if (npc_present == PACMAN && map->C->vulnerable) {
+                map->character_type[map->C->x][map->C->y] = -1;
+                map->character_type[START_BOX_Y][START_C_X] = CLYDE;
+                delete map->C;
+                map->C = newGameCharacter(CLYDE, START_BOX_Y, START_C_X);
+                map->C_INIT = false;
+                map->C->vulnerable = false;
+                if (map->num_vulnerable_eaten == 0) {
+                    map->score += 200;
+                }
+                else if (map->num_vulnerable_eaten == 1) {
+                    map->score += 400;
+                }
+                else if (map->num_vulnerable_eaten == 2) {
+                    map->score += 800;
+                }
+                else if (map->num_vulnerable_eaten == 3) {
+                    map->score += 1600;
+                }
+                map->num_vulnerable_eaten += 1;
             }
             else {
                 map->character_type[character->x][character->y] = -1;
