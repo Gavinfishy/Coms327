@@ -18,6 +18,7 @@
 #include <sstream>
 #include <sys/stat.h>
 #include <climits>
+#include <chrono>
 
 #define GAME_ROW 36
 #define ROW 31
@@ -53,6 +54,10 @@
 #define START_C_X 31
 #define START_BOX_Y 14
 #define TOTAL_PELLET 244
+#define NORTH 1
+#define SOUTH 2
+#define EAST 3
+#define WEST 4
 
 class gameCharacter {
     public:
@@ -272,6 +277,7 @@ void mapGen(struct map_key *map) {
     map->P->vulnerable = false;
     map->I->vulnerable = false;
     map->C->vulnerable = false;
+    map->PM->cardinalDirection = EAST;
 }
 
 void vulnerableMode(struct map_key *map, bool vulnerable) {
@@ -281,18 +287,16 @@ void vulnerableMode(struct map_key *map, bool vulnerable) {
         map->I->vulnerable = true;
         map->C->vulnerable = true;
         map->vulnerable_mode = true;
-        map->vulnerable_count = 0;
-        map->num_vulnerable_eaten = 0;
     }
     else {
         map->B->vulnerable = false;
         map->P->vulnerable = false;
         map->I->vulnerable = false;
         map->C->vulnerable = false;
-        map->vulnerable_mode = true;
-        map->vulnerable_count = 0;
-        map->num_vulnerable_eaten = 0;
+        map->vulnerable_mode = false;
     }
+    map->vulnerable_count = 0;
+    map->num_vulnerable_eaten = 0;
 }
 
 void nextLevel(struct map_key *map) {
@@ -320,6 +324,7 @@ void deathRestart(struct map_key *map) {
         delete map->P;
         delete map->I;
         delete map->C;
+        vulnerableMode(map, false);
         map->PM = newGameCharacter(PACMAN, START_PA_Y, START_PA_X);
         map->B = newGameCharacter(BLINKY, START_B_Y, START_B_X);
         map->P = newGameCharacter(PINKY, START_BOX_Y, START_P_X);
@@ -328,7 +333,8 @@ void deathRestart(struct map_key *map) {
         map->num_moves = 0;
         map->P_INIT = false;
         map->I_INIT = false;
-        map->C_INIT = false;        
+        map->C_INIT = false;
+        map->PM->cardinalDirection = EAST;
     }
 }
 
@@ -691,6 +697,8 @@ void gameLoop() {
     printMap(map, map_win);
     wrefresh(map_win);
     nodelay(input_win, true);
+    auto lastInputTime = std::chrono::steady_clock::now();
+    map->PM->cardinalDirection = EAST;
     while (1) {
         if (map->GameOver == true) {
             break;
@@ -713,39 +721,124 @@ void gameLoop() {
         printMap(map, map_win);
         wmove(input_win, 0, 0);
         wrefresh(input_win);
+
+        usleep(250000);
+        // int ch = wgetch(input_win);
+        // while (ch == ERR) {
+        //     ch = wgetch(input_win);
+        // }
+        // command[0] = ch;
+        // command[1] = '\0';
+
         int ch = wgetch(input_win);
-        while (ch == ERR) {
-            ch = wgetch(input_win);
+        if (ch != ERR) {
+            lastInputTime = std::chrono::steady_clock::now();
+            command[0] = ch;
+            command[1] = '\0';
         }
-        command[0] = ch;
-        command[1] = '\0';
+        else {
+            auto currentTime = std::chrono::steady_clock::now();
+            auto elapsedSeconds = std::chrono::duration_cast<std::chrono::seconds>(currentTime - lastInputTime).count();
+            if (elapsedSeconds >= 1) {
+                if (map->PM->cardinalDirection == NORTH) {
+                    command[0] = 'w';
+                }
+                else if (map->PM->cardinalDirection == SOUTH) {
+                    command[0] = 's';
+                }
+                else if (map->PM->cardinalDirection == EAST) {
+                    command[0] = 'd';
+                }
+                else if (map->PM->cardinalDirection == WEST) {
+                    command[0] = 'a';
+                }
+                command[1] = '\0';
+            }
+        }
+
+
+        
+
+        bool moved = false;
+        while(!moved) {
+            if ((strcmp(command, "w") == 0 || strcmp(command, "8") == 0) && 
+            (map->terrain_type[map->PM->x - 1][map->PM->y] != WALL)) {
+                //move up
+                map->PM->cardinalDirection = NORTH;
+                moveCharacter(map, map->PM, -1, 0, map_win);
+                moved = true;
+            }
+            else if ((strcmp(command, "a") == 0 || strcmp(command, "4") == 0) && 
+            (map->terrain_type[map->PM->x][map->PM->y - 2] != WALL)) {
+                //left
+                map->PM->cardinalDirection = WEST;
+                moveCharacter(map, map->PM, 0, -2, map_win);
+                moved = true;
+            }
+            else if ((strcmp(command, "s") == 0 || strcmp(command, "2") == 0) && 
+            (map->terrain_type[map->PM->x + 1][map->PM->y] != WALL)) {
+                //down
+                map->PM->cardinalDirection = SOUTH;
+                moveCharacter(map, map->PM, 1, 0, map_win);
+                moved = true;
+            }
+            else if ((strcmp(command, "d") == 0 || strcmp(command, "6") == 0) && 
+            (map->terrain_type[map->PM->x][map->PM->y + 2] != WALL)) {
+                //right
+                map->PM->cardinalDirection = EAST;
+                moveCharacter(map, map->PM, 0, 2, map_win);
+                moved = true;
+            }
+            else if (strcmp(command, "q") == 0) {
+                //quit
+                map->GameOver = true;
+                break;
+            }
+            else if (strcmp(command, "5") == 0) {
+                moveCharacter(map, map->PM, 0, 0, map_win);
+                moved = true;
+            }
+            else {
+                if (map->PM->cardinalDirection == NORTH) {
+                    if (map->terrain_type[map->PM->x - 1][map->PM->y] == WALL) {
+                        command[0] = '5';
+                    }
+                    else {
+                        command[0] = 'w';
+                    }
+                }
+                else if (map->PM->cardinalDirection == SOUTH) {
+                    if (map->terrain_type[map->PM->x + 1][map->PM->y] == WALL) {
+                        command[0] = '5';
+                    }
+                    else {
+                        command[0] = 's';
+                    }
+                }
+                else if (map->PM->cardinalDirection == EAST) {
+                    if (map->terrain_type[map->PM->x][map->PM->y + 2] == WALL) {
+                        command[0] = '5';
+                    }
+                    else {
+                        command[0] = 'd';
+                    }
+                }
+                else if (map->PM->cardinalDirection == WEST) {
+                    if (map->terrain_type[map->PM->x][map->PM->y - 2] == WALL) {
+                        command[0] = '5';
+                    }
+                    else {
+                        command[0] = 'a';
+                    }
+                }
+                command[1] = '\0';
+            }
+        }
         map->num_moves += 1;
-        if (strcmp(command, "w") == 0 || strcmp(command, "8") == 0) {
-            //move up
-            moveCharacter(map, map->PM, -1, 0, map_win);
-        }
-        else if (strcmp(command, "a") == 0 || strcmp(command, "4") == 0) {
-            //left
-            moveCharacter(map, map->PM, 0, -2, map_win);
-        }
-        else if (strcmp(command, "s") == 0 || strcmp(command, "2") == 0) {
-            //down
-            moveCharacter(map, map->PM, 1, 0, map_win);
-        }
-        else if (strcmp(command, "d") == 0 || strcmp(command, "6") == 0) {
-            //right
-            moveCharacter(map, map->PM, 0, 2, map_win);
-        }
-        else if (strcmp(command, "q") == 0) {
-            //quit
-            break;
-        }
         moveCharacter(map, map->B, 0, 0, map_win);
         moveCharacter(map, map->P, 0, 0, map_win);
         moveCharacter(map, map->I, 0, 0, map_win);
         moveCharacter(map, map->C, 0, 0, map_win);
-        
-
     }
 
 
