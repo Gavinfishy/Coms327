@@ -315,7 +315,6 @@ void mapGen(struct map_key *map) {
     map->I->cardinalDirection = WEST;
     map->C->cardinalDirection = WEST;
     map->pac_rotation = false;
-
 }
 
 void vulnerableMode(struct map_key *map, bool vulnerable) {
