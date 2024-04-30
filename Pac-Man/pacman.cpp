@@ -86,6 +86,7 @@ class map_key{
         bool P_INIT;
         bool I_INIT;
         bool C_INIT;
+        bool pac_rotation;
         gameCharacter* PM;
         gameCharacter* B;
         gameCharacter* P;
@@ -105,9 +106,41 @@ void printMap(struct map_key *map, WINDOW *map_win) {
                 switch(map->character_type[i][j]) {
                     case PACMAN:
                         // ^, <, >, v, O
-                        wattron(map_win, COLOR_PAIR(PACMAN_COLOR));
-                        mvwaddch(map_win, i, j, 'O');
-                        wattroff(map_win, COLOR_PAIR(PACMAN_COLOR));
+                        if (map->pac_rotation == false) {
+                            wattron(map_win, COLOR_PAIR(PACMAN_COLOR));
+                            mvwaddch(map_win, i, j, 'O');
+                            wattroff(map_win, COLOR_PAIR(PACMAN_COLOR));
+                            map->pac_rotation = true;
+                        }
+                        else if (map->PM->cardinalDirection == NORTH) {
+                            wattron(map_win, COLOR_PAIR(PACMAN_COLOR));
+                            mvwaddch(map_win, i, j, 'v');
+                            wattroff(map_win, COLOR_PAIR(PACMAN_COLOR));
+                            map->pac_rotation = false;
+                        }
+                        else if (map->PM->cardinalDirection == EAST) {
+                            wattron(map_win, COLOR_PAIR(PACMAN_COLOR));
+                            mvwaddch(map_win, i, j, '<');
+                            wattroff(map_win, COLOR_PAIR(PACMAN_COLOR));
+                            map->pac_rotation = false;
+                        }
+                        else if (map->PM->cardinalDirection == WEST) {
+                            wattron(map_win, COLOR_PAIR(PACMAN_COLOR));
+                            mvwaddch(map_win, i, j, '>');
+                            wattroff(map_win, COLOR_PAIR(PACMAN_COLOR));
+                            map->pac_rotation = false;
+                        }
+                        else if (map->PM->cardinalDirection == SOUTH) {
+                            wattron(map_win, COLOR_PAIR(PACMAN_COLOR));
+                            mvwaddch(map_win, i, j, '^');
+                            wattroff(map_win, COLOR_PAIR(PACMAN_COLOR));
+                            map->pac_rotation = false;
+                        }
+                        else {
+                            wattron(map_win, COLOR_PAIR(PACMAN_COLOR));
+                            mvwaddch(map_win, i, j, 'O');
+                            wattroff(map_win, COLOR_PAIR(PACMAN_COLOR));
+                        }
                         break;
                     case BLINKY:
                         if (map->B->vulnerable) {
@@ -281,6 +314,7 @@ void mapGen(struct map_key *map) {
     map->P->cardinalDirection = WEST;
     map->I->cardinalDirection = WEST;
     map->C->cardinalDirection = WEST;
+    map->pac_rotation = false;
 
 }
 
@@ -305,6 +339,7 @@ void vulnerableMode(struct map_key *map, bool vulnerable) {
 
 void nextLevel(struct map_key *map) {
     mapGen(map);
+    sleep(1);
 }
 
 void deathRestart(struct map_key *map) {
@@ -339,6 +374,7 @@ void deathRestart(struct map_key *map) {
         map->I_INIT = false;
         map->C_INIT = false;
         map->PM->cardinalDirection = EAST;
+        sleep(1);
     }
 }
 
@@ -537,7 +573,7 @@ WINDOW *map_win) {
                 if (map->terrain_type[character->x][character->y + 2] != WALL && map->terrain_type[character->x][character->y + 2] != FENCE) {
                     numValidDirections++;
                 }
-                if (numValidDirections > 2 && rand() % 100 < 20) {
+                if (numValidDirections > 2 && rand() % 100 < 22) {
                     numValidDirections = 0;
                     bool available = false;
                     int char_dir = rand() % 2;
@@ -615,13 +651,13 @@ WINDOW *map_win) {
         return 1;
     }
     else if (character->id == PINKY) {
+        bool border = false;
         if (map->num_moves > 10 && !map->P_INIT) {
             map->P_INIT = true;
             map->character_type[character->x][character->y] = -1;
             character->x = START_B_Y;
             character->y = START_B_X;
             map->character_type[character->x][character->y] = PINKY;
-
         }
         if (map->P_INIT) {
             if (map->terrain_type[character->x + gdx][character->y + gdy] == WALL || 
@@ -632,6 +668,7 @@ WINDOW *map_win) {
                     gdy = directions[character->direction][1];
                 } while (map->terrain_type[character->x + gdx][character->y + gdy] == WALL ||
                 map->terrain_type[character->x + gdx][character->y + gdy] == FENCE);
+                border = true;
             }
             npc_present = map->character_type[character->x + gdx][character->y + gdy];
             if (npc_present == PACMAN && !map->P->vulnerable) {
@@ -659,6 +696,91 @@ WINDOW *map_win) {
                 map->num_vulnerable_eaten += 1;
             }
             else {
+                if (map->terrain_type[character->x + gdx][character->y + gdy] != WALL &&
+                map->terrain_type[character->x + gdx][character->y + gdy] != FENCE && !border) {
+                    int numValidDirections = 0;
+                    if (map->terrain_type[character->x - 1][character->y] != WALL && map->terrain_type[character->x - 1][character->y] != FENCE) {
+                        numValidDirections++;
+                    }
+                    if (map->terrain_type[character->x + 1][character->y] != WALL && map->terrain_type[character->x + 1][character->y] != FENCE) {
+                        numValidDirections++;
+                    }
+                    if (map->terrain_type[character->x][character->y - 2] != WALL && map->terrain_type[character->x][character->y - 2] != FENCE) {
+                        numValidDirections++;
+                    }
+                    if (map->terrain_type[character->x][character->y + 2] != WALL && map->terrain_type[character->x][character->y + 2] != FENCE) {
+                        numValidDirections++;
+                    }
+                    if (numValidDirections > 2 && rand() % 100 < 22) {
+                        numValidDirections = 0;
+                        bool available = false;
+                        int char_dir = rand() % 2;
+                        if (character->direction == 0 || character->direction == 1) {
+                            if (map->terrain_type[character->x][character->y - 2] != WALL && map->terrain_type[character->x][character->y - 2] != FENCE) {
+                                numValidDirections++;
+                                available = true;
+                            }
+                            if (map->terrain_type[character->x][character->y + 2] != WALL && map->terrain_type[character->x][character->y + 2] != FENCE) {
+                                numValidDirections++;
+                            }
+                            if (numValidDirections > 1) {
+                                if (char_dir == 0) {
+                                    character->direction = 2;
+                                    gdx = directions[character->direction][0];
+                                    gdy = directions[character->direction][1];
+                                }
+                                else {
+                                    character->direction = 3;
+                                    gdx = directions[character->direction][0];
+                                    gdy = directions[character->direction][1];
+                                }
+                            }
+                            else if (available) {
+                                character->direction = 2;
+                                gdx = directions[character->direction][0];
+                                gdy = directions[character->direction][1];
+                            }
+                            else {
+                                character->direction = 3;
+                                gdx = directions[character->direction][0];
+                                gdy = directions[character->direction][1];
+
+                            }
+                        }
+                        else {
+                            if (map->terrain_type[character->x - 1][character->y] != WALL && map->terrain_type[character->x - 1][character->y] != FENCE) {
+                                numValidDirections++;
+                                available = true;
+                            }
+                            if (map->terrain_type[character->x + 1][character->y] != WALL && map->terrain_type[character->x + 1][character->y] != FENCE) {
+                                numValidDirections++;
+                            }
+                            if (numValidDirections > 1) {
+                                if (char_dir == 0) {
+                                    character->direction = 0;
+                                    gdx = directions[character->direction][0];
+                                    gdy = directions[character->direction][1];
+                                }
+                                else {
+                                    character->direction = 1;
+                                    gdx = directions[character->direction][0];
+                                    gdy = directions[character->direction][1];
+                                }
+                            }
+                            else if (available) {
+                                character->direction = 0;
+                                gdx = directions[character->direction][0];
+                                gdy = directions[character->direction][1];
+                            }
+                            else {
+                                character->direction = 1;
+                                gdx = directions[character->direction][0];
+                                gdy = directions[character->direction][1];
+                            }
+
+                        }
+                    }
+                }
                 map->character_type[character->x][character->y] = -1;
                 character->x += gdx;
                 character->y += gdy;
@@ -668,6 +790,7 @@ WINDOW *map_win) {
         }
     }
     else if (character->id == INKY) {
+        bool border = false;
         if (map->num_moves > 20 && !map->I_INIT) {
             map->I_INIT = true;
             map->character_type[character->x][character->y] = -1;
@@ -685,6 +808,7 @@ WINDOW *map_win) {
                     gdy = directions[character->direction][1];
                 } while (map->terrain_type[character->x + gdx][character->y + gdy] == WALL ||
                 map->terrain_type[character->x + gdx][character->y + gdy] == FENCE);
+                border = true;
             }
             npc_present = map->character_type[character->x + gdx][character->y + gdy];
             if (npc_present == PACMAN && !map->I->vulnerable) {
@@ -712,6 +836,91 @@ WINDOW *map_win) {
                 map->num_vulnerable_eaten += 1;
             }
             else {
+                if (map->terrain_type[character->x + gdx][character->y + gdy] != WALL &&
+                map->terrain_type[character->x + gdx][character->y + gdy] != FENCE && !border) {
+                    int numValidDirections = 0;
+                    if (map->terrain_type[character->x - 1][character->y] != WALL && map->terrain_type[character->x - 1][character->y] != FENCE) {
+                        numValidDirections++;
+                    }
+                    if (map->terrain_type[character->x + 1][character->y] != WALL && map->terrain_type[character->x + 1][character->y] != FENCE) {
+                        numValidDirections++;
+                    }
+                    if (map->terrain_type[character->x][character->y - 2] != WALL && map->terrain_type[character->x][character->y - 2] != FENCE) {
+                        numValidDirections++;
+                    }
+                    if (map->terrain_type[character->x][character->y + 2] != WALL && map->terrain_type[character->x][character->y + 2] != FENCE) {
+                        numValidDirections++;
+                    }
+                    if (numValidDirections > 2 && rand() % 100 < 22) {
+                        numValidDirections = 0;
+                        bool available = false;
+                        int char_dir = rand() % 2;
+                        if (character->direction == 0 || character->direction == 1) {
+                            if (map->terrain_type[character->x][character->y - 2] != WALL && map->terrain_type[character->x][character->y - 2] != FENCE) {
+                                numValidDirections++;
+                                available = true;
+                            }
+                            if (map->terrain_type[character->x][character->y + 2] != WALL && map->terrain_type[character->x][character->y + 2] != FENCE) {
+                                numValidDirections++;
+                            }
+                            if (numValidDirections > 1) {
+                                if (char_dir == 0) {
+                                    character->direction = 2;
+                                    gdx = directions[character->direction][0];
+                                    gdy = directions[character->direction][1];
+                                }
+                                else {
+                                    character->direction = 3;
+                                    gdx = directions[character->direction][0];
+                                    gdy = directions[character->direction][1];
+                                }
+                            }
+                            else if (available) {
+                                character->direction = 2;
+                                gdx = directions[character->direction][0];
+                                gdy = directions[character->direction][1];
+                            }
+                            else {
+                                character->direction = 3;
+                                gdx = directions[character->direction][0];
+                                gdy = directions[character->direction][1];
+
+                            }
+                        }
+                        else {
+                            if (map->terrain_type[character->x - 1][character->y] != WALL && map->terrain_type[character->x - 1][character->y] != FENCE) {
+                                numValidDirections++;
+                                available = true;
+                            }
+                            if (map->terrain_type[character->x + 1][character->y] != WALL && map->terrain_type[character->x + 1][character->y] != FENCE) {
+                                numValidDirections++;
+                            }
+                            if (numValidDirections > 1) {
+                                if (char_dir == 0) {
+                                    character->direction = 0;
+                                    gdx = directions[character->direction][0];
+                                    gdy = directions[character->direction][1];
+                                }
+                                else {
+                                    character->direction = 1;
+                                    gdx = directions[character->direction][0];
+                                    gdy = directions[character->direction][1];
+                                }
+                            }
+                            else if (available) {
+                                character->direction = 0;
+                                gdx = directions[character->direction][0];
+                                gdy = directions[character->direction][1];
+                            }
+                            else {
+                                character->direction = 1;
+                                gdx = directions[character->direction][0];
+                                gdy = directions[character->direction][1];
+                            }
+
+                        }
+                    }
+                }
                 map->character_type[character->x][character->y] = -1;
                 character->x += gdx;
                 character->y += gdy;
@@ -722,6 +931,7 @@ WINDOW *map_win) {
 
     }
     else if (character->id = CLYDE) {
+        bool border = false;
         if (map->num_moves > 30 && !map->C_INIT) {
             map->C_INIT = true;
             map->character_type[character->x][character->y] = -1;
@@ -739,6 +949,7 @@ WINDOW *map_win) {
                     gdy = directions[character->direction][1];
                 } while (map->terrain_type[character->x + gdx][character->y + gdy] == WALL ||
                 map->terrain_type[character->x + gdx][character->y + gdy] == FENCE);
+                border = true;
             }
             npc_present = map->character_type[character->x + gdx][character->y + gdy];
             if (npc_present == PACMAN && !map->C->vulnerable) {
@@ -766,6 +977,91 @@ WINDOW *map_win) {
                 map->num_vulnerable_eaten += 1;
             }
             else {
+                if (map->terrain_type[character->x + gdx][character->y + gdy] != WALL &&
+                map->terrain_type[character->x + gdx][character->y + gdy] != FENCE && !border) {
+                    int numValidDirections = 0;
+                    if (map->terrain_type[character->x - 1][character->y] != WALL && map->terrain_type[character->x - 1][character->y] != FENCE) {
+                        numValidDirections++;
+                    }
+                    if (map->terrain_type[character->x + 1][character->y] != WALL && map->terrain_type[character->x + 1][character->y] != FENCE) {
+                        numValidDirections++;
+                    }
+                    if (map->terrain_type[character->x][character->y - 2] != WALL && map->terrain_type[character->x][character->y - 2] != FENCE) {
+                        numValidDirections++;
+                    }
+                    if (map->terrain_type[character->x][character->y + 2] != WALL && map->terrain_type[character->x][character->y + 2] != FENCE) {
+                        numValidDirections++;
+                    }
+                    if (numValidDirections > 2 && rand() % 100 < 22) {
+                        numValidDirections = 0;
+                        bool available = false;
+                        int char_dir = rand() % 2;
+                        if (character->direction == 0 || character->direction == 1) {
+                            if (map->terrain_type[character->x][character->y - 2] != WALL && map->terrain_type[character->x][character->y - 2] != FENCE) {
+                                numValidDirections++;
+                                available = true;
+                            }
+                            if (map->terrain_type[character->x][character->y + 2] != WALL && map->terrain_type[character->x][character->y + 2] != FENCE) {
+                                numValidDirections++;
+                            }
+                            if (numValidDirections > 1) {
+                                if (char_dir == 0) {
+                                    character->direction = 2;
+                                    gdx = directions[character->direction][0];
+                                    gdy = directions[character->direction][1];
+                                }
+                                else {
+                                    character->direction = 3;
+                                    gdx = directions[character->direction][0];
+                                    gdy = directions[character->direction][1];
+                                }
+                            }
+                            else if (available) {
+                                character->direction = 2;
+                                gdx = directions[character->direction][0];
+                                gdy = directions[character->direction][1];
+                            }
+                            else {
+                                character->direction = 3;
+                                gdx = directions[character->direction][0];
+                                gdy = directions[character->direction][1];
+
+                            }
+                        }
+                        else {
+                            if (map->terrain_type[character->x - 1][character->y] != WALL && map->terrain_type[character->x - 1][character->y] != FENCE) {
+                                numValidDirections++;
+                                available = true;
+                            }
+                            if (map->terrain_type[character->x + 1][character->y] != WALL && map->terrain_type[character->x + 1][character->y] != FENCE) {
+                                numValidDirections++;
+                            }
+                            if (numValidDirections > 1) {
+                                if (char_dir == 0) {
+                                    character->direction = 0;
+                                    gdx = directions[character->direction][0];
+                                    gdy = directions[character->direction][1];
+                                }
+                                else {
+                                    character->direction = 1;
+                                    gdx = directions[character->direction][0];
+                                    gdy = directions[character->direction][1];
+                                }
+                            }
+                            else if (available) {
+                                character->direction = 0;
+                                gdx = directions[character->direction][0];
+                                gdy = directions[character->direction][1];
+                            }
+                            else {
+                                character->direction = 1;
+                                gdx = directions[character->direction][0];
+                                gdy = directions[character->direction][1];
+                            }
+
+                        }
+                    }
+                }
                 map->character_type[character->x][character->y] = -1;
                 character->x += gdx;
                 character->y += gdy;
@@ -951,6 +1247,7 @@ int main(int argc, char* argv[]) {
     start_color();
     keypad(stdscr, true);
     noecho();
+    curs_set(0);
     init_pair(PACMAN_COLOR, COLOR_YELLOW, COLOR_BLACK);
     init_pair(BLINKY_COLOR, COLOR_RED, COLOR_BLACK);
     init_pair(PINKY_COLOR, COLOR_MAGENTA, COLOR_BLACK);
@@ -964,5 +1261,3 @@ int main(int argc, char* argv[]) {
     endwin();
     return 0;
 }
-
-
