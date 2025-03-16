@@ -1,4 +1,4 @@
-//Author: Gavin D Fisher gdf73278
+// Author: Gavin D Fisher gdf73278
 // https://gameinternals.com/understanding-pac-man-ghost-behavior
 #include <cstdio>
 #include <cstring>

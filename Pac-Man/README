@@ -1,9 +1,22 @@
 This project is a C++ version of the classic pacman game
-Ghosts will have random movements
+Ghosts currently have random movements
 Eating a large pellet will make the ghosts eatable
 Eating all of the pellets advances to the next level
 Controls:
 w,a,s,d or 8,4,2,6 for up, left, down, right respectfully
+
+To run locally:
+Clone the repository
+Open the repository in a linux environment
+Install ncurses:
+    sudo apt install libncurses-dev
+Compile the game:
+    make
+    ./pacman
+    make clean
+
+If that's a lot of work checkout this project redone on my portfolio site!
+(coming soon)
 
 TODO:
 Implement ghost movements
