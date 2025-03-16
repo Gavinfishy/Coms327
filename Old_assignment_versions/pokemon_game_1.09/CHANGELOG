@@ -1,0 +1,907 @@
+Project 9
+04/13/2024 5:45pm-7pm, 10pm-12am Began project, this code base is from Eric Hedgrens 1.08 code drop. Below first line is my old worklog, below second line is Eric Hedgrens commits. Tried to fix Eric's errors prohibiting the program from running.
+04/14/2024 8am-9am, 11:30am-1pm, 4:45pm-8pm added battle mechanics for pokemon battles
+04/16/2024 2pm-6:35pm, 9:45pm-10:30 added button functionality in pokemon battles
+04/17/2024 9:30am-11am, 12pm-12:30pm, 3pm-8:45pm capture/heal/revive pokemon, change pokemon, trainer swap pokemon. Done Early!
+----------------------------------------------------------------------------------------
+
+Project 1
+01/26/2024 9pm-11pm Began project
+01/27/2024 2pm-5pm Set up basics of printing the map
+01/28/2024 6pm-11pm Gates randomly placed, roads randomly placed and connected to each other and gate, perimeter rocks
+01/29/2024 7pm-11pm Attempted to generate background (could randomly place types but could not get it to expand)
+01/30/2024 5pm-7pm Randomly place buildings next to roads, changing background generation to use queues
+01/30/2024 8:30pm-11pm can choose a starting location and the rest of the map will be filled using queues
+01/31/2024 8am-10:30am Random seed generation works!
+
+Project 2
+02/03/2024 3pm-6pm Began project
+02/04/2024 1pm-2:15pm, 4:15pm-6pm, 7:15pm-10:40pm The roads connect
+02/05/2024 5pm-10pm gates on farthest walls do not appear
+02/07/2024 2-4pm; 8:45-10pm probability on houses finished
+
+Project 3
+02/11/2024 2pm-4pm Spawning PC and NPC without errors moving maps
+02/12/2024 9am-11am, 4pm-6pm, 8:30pm-10pm Weight maps for each character type, heaps and Dijkstra started
+02/13/2024 3pm-7pm, 8:30pm-10:15pm minHeap and Dijkstra work and print properly
+02/14/2024 9:30am-10:45am minor updates
+02/17/2024 6pm-11pm trying to make Dijkstra's take an argument for any weight map
+02/18/2024 1pm-5pm Dijkstra's takes any weight map, printing rival and hiker, removed enemy printing for this project,
+changing characters from being placed in terrain map to being placed in character map
+02/19/2024 9am-11am fixed error with previously generated maps sometimes printing all INT_MAX with PC in map struct
+
+Project 4
+02/24/2024 8:30am-10am, 9:30pm-11pm cleaned up repository so that all future code will be built with branches
+Started to add other NPC's
+02/25/2024 12pm-1pm, 2pm-4:30pm Commented code, made player movable, started to work on NPC movement
+02/26/2024 10:30am-11:30am, 3:30pm-6pm, 8:15pm-10pm attempting to have NPC move correctly
+02/27/2024 6am-7:45am, 9am-9:20am, 11am-12pm, 2pm-4:15pm One NPC can be added and follow the PC around following the
+minimum path.
+8pm-12:15pm Updating NPC's, multiple can be added. r, h, s work, p, s, e, w need work
+02/28/2024 8am-11:30am, 7:45pm-10pm Wanderer fixed, all code works due to specifications
+
+Project 5
+02/29/2024 9:45am-t 10:45am Adding directionals to PC movement (diagonals)
+03/12/2024 10pm-11pm added commands
+03/18/2024 10am-11am, 3pm-5pm started to implement ncurses
+03/19/2024 4pm-5pm, 9:30pm-11:30 ncurses printing working
+03/20/2024 9am-11am, 12pm-1pm, 2:30pm-2am(rough) ncurses window started, will not print on first iteration.
+8 and a half hours later the map prints on the first iteration.
+trainer window open and close, store window open and close on stores
+
+Project 6
+03/24/2024 4pm-6:45pm, 8pm-9:30pm Converted to C++ minus structs to classes
+03/25/2024 2pm-4pm, 10pm-11pm tried to fix true variable that won't change at office hours (battleReady), converted some structs to classes
+03/26/2024 9am-10am, 2:30pm-6pm started to add back in move_maps and fly along with fixing input stream
+03/27/2024 8:30am-11am, 2:30pm-6:45pm, 7pm-9:30pm can walk onto gate to transport maps, player placed in right spot, fly works
+
+Project 7
+03/31/2024 5pm-7pm, 9pm-10pm NPC array and heap being placed into map struct (needs more work)
+04/01/2024 9pm-10:30pm added csv read functionality
+04/02/2024 8am-9am, 5pm-6:50pm, 9:45pm - 10:30pm can read all three data locations and print the first csv contents after creating struct
+04/03/2024 9:30am-11am, 12pm-12:30pm, 6pm-7:15pm, 8pm-11pm added structs, print vectors, populate vectors, ignores int_max
+
+Project 8
+04/07/2024 1:30pm-6pm Fixed PC heap issues not finished in proj 6 (Sorry Sheaffer)
+04/08/2024 7pm-10:30pm Attempting to fix NPC heap issues, TLDR the npc's did not want to be fixed
+04/09/2024 10:09am It's been a good run with my one file c program but the NPC's did not want to cooperate. It is finally time to accept defeat and switch code. All comments below the first line are from my poke_game file which made it through 70% of the class. I am switching to Eric Hedgren's code drop from 1.07, below the second line is his changelog.
+1pm-1:30pm, 2pm-6pm, 7:45pm-9:45pm Added pokemon encounter screen which prints name and level
+04/10/2024 12pm-1pm, 2:15pm-6pm, 6:30pm-10:15pm added Pokemon class and functions along with start screen and NPC pokemon generation, encounter random with stats
+
+----------------------------------------------------------------------------------------
+
+commit 01856025e8fc907beeef8fd50d631f0752638db0
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Mon Apr 8 12:22:56 2024 -0500
+
+    display moves when showing stats
+
+commit f0d85da351804db9bb12f6a8ff41dfff541b9842
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Sun Apr 7 16:42:31 2024 -0500
+
+    added knocked out bool to pokemon
+
+commit 3ef49657b09b3fd6fd4211cc16646b50ec0917fb
+Merge: aee4734 6c4c6b6
+Author: Eric <97715730+hedgreneric@users.noreply.github.com>
+Date:   Sun Apr 7 16:38:40 2024 -0500
+
+    Merge pull request #54 from hedgreneric/ass1.08
+    
+    Ass1.08
+
+commit 6c4c6b6e8bdeaf647964fd7f66b77f7829a6d04d
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Sun Apr 7 16:22:30 2024 -0500
+
+    updated READMEN and CHANGELOG
+
+commit d1c5642b9b56d64392b86a39edb737d133e0dec2
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Sun Apr 7 16:08:43 2024 -0500
+
+    added level for output
+
+commit 4d319fc8a23c52c3453a068f9b670812cb960035
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Sun Apr 7 16:02:23 2024 -0500
+
+    display pokemon stats when encounters or trainer battle
+
+commit 970bf218d0ff3aa85afc5efe3d6adbd328d62d99
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Sun Apr 7 14:32:59 2024 -0500
+
+    added Pokemon logo and adding trainer pokemon
+
+commit cf20e0407c3b933a8b161577b2c955a5e2266f84
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Sun Apr 7 00:29:34 2024 -0500
+
+    creating pokemon works, and adding moves
+
+commit a291876567ac5be1404b8840bf38630682c7d916
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Sat Apr 6 16:25:22 2024 -0500
+
+    add better constructors and did some refactoring
+
+commit aee47344419159aa321148ed9f9a7903430d9d91
+Author: Eric <97715730+hedgreneric@users.noreply.github.com>
+Date:   Tue Apr 2 13:44:06 2024 -0500
+
+    Update README.md
+
+commit c68aca8259d3bb93de0c9d35295c76daa66d0470
+Author: Eric <97715730+hedgreneric@users.noreply.github.com>
+Date:   Tue Apr 2 13:42:55 2024 -0500
+
+    Update README.md
+
+commit e026618df297b3e27fa33df2e3f0fa42bb47e2a2
+Merge: 9277ed5 e71cdfb
+Author: Eric <97715730+hedgreneric@users.noreply.github.com>
+Date:   Tue Apr 2 12:46:35 2024 -0500
+
+    Merge pull request #51 from hedgreneric/ass1.07
+    
+    README
+
+commit e71cdfb84d462f96a29e0cb773085df65fbac17c
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Tue Apr 2 12:43:42 2024 -0500
+
+    README
+
+commit 9277ed5ed39a0f4e78118bb3a0bb43a11940d726
+Merge: 11f76ff 02f9360
+Author: Eric <97715730+hedgreneric@users.noreply.github.com>
+Date:   Tue Apr 2 12:28:28 2024 -0500
+
+    Merge pull request #50 from hedgreneric/ass1.07
+    
+    Ass1.07
+
+commit 02f93605d3bdb6a16ec2f60225c222218a3618d7
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Tue Apr 2 12:27:38 2024 -0500
+
+    ran make clean
+
+commit b3b3ca0b4444d9c354a4babdb97d2204fc869a64
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Tue Apr 2 12:22:56 2024 -0500
+
+    updated CHANGELOG
+
+commit 2f420bdb0f69806a7b47c8412bbb353d9e014941
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Tue Apr 2 12:22:18 2024 -0500
+
+    updated README
+
+commit 508c6d0e2f2d07d60ed3eea7c4d7805af92d3a78
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Tue Apr 2 12:05:23 2024 -0500
+
+    all csv are parsed and put into vectors of their respected structs, and desired file can be printed out
+
+commit 3c45c563600a6aab656b816b81e7e5c97cb891c1
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Tue Apr 2 10:46:36 2024 -0500
+
+    can store and print data in files up to pokemon_moves
+
+commit 11164720018796cdb9dad889d69de8cbe37dcf3a
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Sat Mar 30 23:40:08 2024 -0500
+
+    mvp is stores pokemon data and prints it out
+
+commit b08d9e5cbb4776d7020e8abbe4e6a1407c3c5689
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Sat Mar 30 20:37:31 2024 -0500
+
+    took out podex
+
+commit a5f7a0b5128bc2ffe40313925e9154b813f6d673
+Author: ehedgren <ehedgren@pyrite-n4.cs.iastate.edu>
+Date:   Sat Mar 30 20:26:36 2024 -0500
+
+    transfering podex
+
+commit a1b3f9f17d9e6e9c971fa7a3abba48a38aa80efa
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Sat Mar 30 18:27:38 2024 -0500
+
+    read filename from cmd
+
+commit e26a95bb45415ba9d50409d9c0f60e1d8a48a74d
+Author: ehedgren <ehedgren@pyrite-n4.cs.iastate.edu>
+Date:   Sat Mar 30 17:39:18 2024 -0500
+
+    added pokedex temporarly
+
+commit 06e8568ad45cce658c735eb0a0ef83b88411658e
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Sat Mar 30 15:31:25 2024 -0500
+
+    created new branch
+
+commit 11f76ffaf61a36212b1b0b523929b8ad02be36e0
+Author: Eric <97715730+hedgreneric@users.noreply.github.com>
+Date:   Sat Mar 30 15:29:28 2024 -0500
+
+    Update README.md
+
+commit 0ad95c52b3fc884934854d6f21038f13f47898ad
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Tue Mar 26 15:25:18 2024 -0500
+
+    change headers files back to .h
+
+commit 1779e9f8e2756f2530fcfc3d44464b114a4f7db5
+Merge: aa28f62 d8019b0
+Author: Eric <97715730+hedgreneric@users.noreply.github.com>
+Date:   Tue Mar 26 14:24:21 2024 -0500
+
+    Merge pull request #49 from hedgreneric/ass1.06
+    
+    Ass1.06
+
+commit d8019b0cdf9c5c4d41ae6c4a0860f666cbb53914
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Tue Mar 26 14:23:03 2024 -0500
+
+    submitted
+
+commit e23eea8a5d816c62f25b15dc0649c0b37d41ca2a
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Tue Mar 26 11:16:01 2024 -0500
+
+    set up link to g++ compiler in Makefile
+
+commit 3c79a6168d025d006b8d896fd7dd81f21c2c9b72
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Mon Mar 25 15:30:58 2024 -0500
+
+    fixed bugs
+
+commit 91e87db761d4fe1cbcaaa3dd1f4d8741d918eae5
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Fri Mar 22 23:47:28 2024 -0500
+
+    flying worksgit add .
+
+commit 0eb6f10aacf604cac9df70ff80d8f86aec4e005f
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Fri Mar 22 20:34:52 2024 -0500
+
+    changed to c to cpp files
+
+commit cc48e1ed9169c5bdb3e72202055c1fb40e4067ab
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Fri Mar 22 20:10:56 2024 -0500
+
+    able to move map through gates
+
+commit aa28f62afeb3bfdee45ba23d525de013ba1df52f
+Merge: f727707 628b0bc
+Author: Eric <97715730+hedgreneric@users.noreply.github.com>
+Date:   Fri Mar 22 13:19:22 2024 -0500
+
+    Merge pull request #45 from hedgreneric/ass1.05
+    
+    Ass1.05
+
+commit 628b0bce6a275c80c5126eccc4346e35c7bd74ef
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Tue Mar 19 10:33:09 2024 -0500
+
+    fixed trainer window up down error for the pMart and pCntr
+
+commit acf5229c5b82ce6dee89a7b326a210a34b02721c
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Tue Mar 19 10:15:49 2024 -0500
+
+    updaed CHANGELOG
+
+commit 61c2a63317198d5a6bc93ae2f94f647cd924d9db
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Tue Mar 19 10:15:27 2024 -0500
+
+    fixed trainer list move up and down bug
+
+commit aad2829845a8c1010eab8808d332c391464673f1
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Mon Mar 18 15:24:33 2024 -0500
+
+    updated CHANGELOG, README, and some potential memory leaks
+
+commit 16ede3fa5d77ff57084ec47b66bc38aac1ff1d64
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Sun Mar 17 18:35:36 2024 -0500
+
+    trainer attack interface and interaction
+
+commit 538cefa938fbf9db8c18f73a1ea8e868f97749f2
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Sat Mar 16 21:27:45 2024 -0400
+
+    fixed seg faults
+
+commit 66734e897fd60bc8722887d8565bc4d41d8cc536
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Thu Mar 14 19:21:15 2024 -0400
+
+    trainer window
+
+commit d205d8307425227976fc5f7419d14453cd7b09a4
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Tue Mar 12 20:40:30 2024 -0400
+
+    working ncurses window with commmands and color
+
+commit f727707f3c789357ad2f62873551710fbea304cc
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Sat Mar 2 13:04:22 2024 -0600
+
+    implemented proper npc movements
+
+commit 7baba174e6c338ad5593b66eeaa11e72c6e778e0
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Tue Feb 27 10:36:10 2024 -0600
+
+    adjust generating shops
+
+commit ba038d026b8f3a663b186f2d654c1c659b3f03eb
+Merge: 94416e3 d9772d6
+Author: Eric <97715730+hedgreneric@users.noreply.github.com>
+Date:   Mon Feb 26 14:13:47 2024 -0600
+
+    Merge pull request #36 from hedgreneric/ass1.04
+    
+    Ass1.04
+
+commit d9772d69904457851fd82ff7f57a924e563a0a9e
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Mon Feb 26 14:13:10 2024 -0600
+
+    pushing CHANGELOG
+
+commit cb87482f6843cfbf344741279086b3280d2af47c
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Sun Feb 25 19:02:45 2024 -0600
+
+    updated README and fixed up the print map sequence
+
+commit d6c8c8c222b66d510ac85514cb3609ef71f830d7
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Sun Feb 25 14:47:23 2024 -0600
+
+    npcs can move nowgit add .
+
+commit 1adc896208198b9c0bd34399ad6956e19b413a11
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Sat Feb 24 22:10:27 2024 -0600
+
+    changed the map to enums rather than chars
+
+commit 74b369d90cd42cfcbdc13c1410db053371d4b312
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Sat Feb 24 21:30:53 2024 -0600
+
+    can move character
+
+commit af2c0d252e9bc058efdf21c352129bfa43fdf471
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Sat Feb 24 20:07:23 2024 -0600
+
+     refactored how I store pc and cost maps
+
+commit 14c43d7a87f1aba22ca5caffe31896fa08316267
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Sun Feb 18 19:53:17 2024 -0600
+
+    create character layer
+
+commit 94416e3d2fff8567781efee1f4c72dfd0edfe300
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Sun Feb 18 18:51:28 2024 -0600
+
+    fixed some errors
+
+commit f67b5432585c8ad4c6ffe272611383bb6550e656
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Wed Feb 14 19:13:24 2024 -0600
+
+    updated CHANGELOG
+
+commit cec298974674671ca6f3bf6d9b417706ffabb013
+Merge: 221a17e b134bac
+Author: Eric <97715730+hedgreneric@users.noreply.github.com>
+Date:   Wed Feb 14 19:12:35 2024 -0600
+
+    Merge pull request #31 from hedgreneric/ass1.03
+    
+    Ass1.03
+
+commit b134bac26df90abd59d8bc34a514d662e3d67702
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Wed Feb 14 19:11:58 2024 -0600
+
+    fixed Makefile
+
+commit 99d260bfe0c9f1791eeae7b681195c57d307bdb9
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Wed Feb 14 14:22:42 2024 -0600
+
+    cleaning up
+
+commit 1ea2ee0f003dfc43165e65eb76c4a165c47cc8a4
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Tue Feb 13 22:11:15 2024 -0600
+
+    added ass1.03 printing out stuff
+
+commit 221a17e150bea830a0944a84cff0be5901cbd3e1
+Merge: fa6aded 666d894
+Author: Eric <97715730+hedgreneric@users.noreply.github.com>
+Date:   Tue Feb 13 21:54:41 2024 -0600
+
+    Merge pull request #27 from hedgreneric/ass1.04
+    
+    Ass1.04
+
+commit 666d894fcfb37db90f0a55560cc3ff36584425b0
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Tue Feb 13 21:53:50 2024 -0600
+
+    added in other trainers onto the map
+
+commit 87100b02755ae32d207d4cb1256265b077747d8a
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Tue Feb 13 19:55:27 2024 -0600
+
+    took out the weight map, instead calling a function to get the weight of a spot
+
+commit 947c43ea01e306b645cdb609b6c2607b689de05b
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Tue Feb 13 18:06:31 2024 -0600
+
+    take out print for dijkstra
+
+commit 7d9e3adb049b3e57ac719bd06d85655852abb0c8
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Tue Feb 13 18:02:08 2024 -0600
+
+    small change for weight map generating gates
+
+commit fa6adedbbb29eac3fd83a4eb47a5dcca43323c18
+Merge: 9c480ef a72f7a1
+Author: Eric <97715730+hedgreneric@users.noreply.github.com>
+Date:   Tue Feb 13 13:10:36 2024 -0600
+
+    Merge pull request #24 from hedgreneric/ass1.03
+    
+    Ass1.03
+
+commit a72f7a1eca2b414d94718a38c891e19eb83d9e3c
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Tue Feb 13 13:09:48 2024 -0600
+
+    CHANGELOG
+
+commit 6c64cefc6642d329db3cd9b744246f00116587c6
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Mon Feb 12 21:13:38 2024 -0600
+
+    updated README.md
+
+commit be1e8d95e0505b0380d68c9ab6030771d9e6dba6
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Mon Feb 12 17:20:42 2024 -0600
+
+    added heap.c heap.h and dijkstra implementation from Sheaffer's solution. Prints out cost map for hiker and rival
+
+commit d1904c840329c1df575b882a2c7a4d56699644a8
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Fri Feb 9 23:32:07 2024 -0600
+
+    added player character to the map
+
+commit bcf311879a9be498c634f32f3546129c05c0f3b3
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Fri Feb 9 23:05:35 2024 -0600
+
+    fixed little bug
+
+commit f0993e317352311f9cfaf7e300f0edaaaf6d6fe9
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Tue Feb 6 18:24:23 2024 -0600
+
+    separated text area and map view when printing
+
+commit 9c480efd88eaea11610c58307720ca68640c492c
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Tue Feb 6 12:57:38 2024 -0600
+
+    fixed memory leak by freeing all pointers in world
+
+commit 6b35f58d0e13b5bbbb7a477667bbea5fd2ec55dd
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Sat Feb 3 22:20:39 2024 -0600
+
+    updated changelog
+
+commit 7e03335dbc79136c83090aa77954b74ff6f8f201
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Sat Feb 3 22:11:45 2024 -0600
+
+    created CMakeLists.txt rather than just Makefile
+
+commit f4b13f1b1b44ca816b17918d3b33a08ebb178ad7
+Merge: 67d9a32 6757a90
+Author: hedgreneric <97715730+hedgreneric@users.noreply.github.com>
+Date:   Sat Feb 3 00:14:24 2024 -0500
+
+    Merge pull request #18 from hedgreneric/ass1.02
+    
+    Ass1.02
+
+commit 6757a90c45b9ebf7a81c2371e8386c8b93f28862
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Sat Feb 3 00:11:52 2024 -0500
+
+    updated README.md
+
+commit ede39001a8b195fe4b908b43ce49335651a3bc48
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Sat Feb 3 00:06:05 2024 -0500
+
+    shop generation probability
+
+commit 3da5cf3310ecf440d18380e8591ec3804608ef83
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Fri Feb 2 20:39:08 2024 -0500
+
+    finnished commands for changing maps with in the world
+
+commit 3183a5870999ec8e4d94695f200ad5c972f0e54d
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Fri Feb 2 15:51:55 2024 -0500
+
+    generate gates when appropriately
+
+commit 823ec7e1fa1b74fdc196c8b2b6e426176da63094
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Fri Feb 2 14:40:08 2024 -0500
+
+    able to align n and w gates with other maps
+
+commit 97bf38c880c73fc4f21c8267251b62cceecf76ef
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Fri Feb 2 13:10:25 2024 -0500
+
+    improved poke stop generation and added options for generating maps
+
+commit 67d9a32b7c60f99a7a96fde229204b0d7cf06e54
+Merge: 32cb900 8c8db6c
+Author: hedgreneric <97715730+hedgreneric@users.noreply.github.com>
+Date:   Fri Feb 2 03:14:47 2024 -0500
+
+    Merge pull request #16 from hedgreneric/ass1.02
+    
+    Ass1.02
+
+commit 032948d8ea93aaa566f5c07059cd41c9b47b4212
+Merge: 8c8db6c 32cb900
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Fri Feb 2 03:13:49 2024 -0500
+
+    Merge branch 'main' into ass1.02
+
+commit 8c8db6cceb47f50cf4220efd115d72eb6f95e91c
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Fri Feb 2 03:13:27 2024 -0500
+
+    stopped water and rocks from blocking gate
+
+commit 115e0c009fe3d8df85e8f2b41b3e52fa70e19e3b
+Author: Eric Hedgren <hedgreneric@gmail.com>
+Date:   Fri Feb 2 01:56:57 2024 -0500
+
+    fixed unknown char issue
+
+commit 956eaeb6eea872d91a2233bf4dee53af3625fdfa
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Thu Feb 1 15:04:04 2024 -0600
+
+    working on terrain gen
+
+commit 24b5cc604f093e9e42e8c20db364bd05cde9f4a4
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Thu Feb 1 15:03:15 2024 -0600
+
+    working on terrain gen
+
+commit 8ddf48333ea2896fb55154bca4e7f584f1e8b9dc
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Thu Feb 1 12:43:12 2024 -0600
+
+    made my code more readable
+
+commit 32cb900ce0704edad56295fabb01ccfc7233e395
+Merge: de93e3c 28a7d6a
+Author: hedgreneric <97715730+hedgreneric@users.noreply.github.com>
+Date:   Thu Feb 1 12:27:57 2024 -0600
+
+    Merge pull request #13 from hedgreneric/ass1.02
+    
+    Ass1.02
+
+commit 28a7d6abfde71d5aaa3b59f795c8b8f0d8709149
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Thu Feb 1 12:26:20 2024 -0600
+
+    going to merge with main
+
+commit d68521df6fb192b4c3547a62a3d1b274d0be9e2c
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Wed Jan 31 21:19:58 2024 -0600
+
+    runs fine in the VM
+
+commit cf9ec60899ca8946ba967b99ed1c5afe86166c92
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Wed Jan 31 21:10:53 2024 -0600
+
+    added cmake file
+
+commit af3315a15e40b8c09eb1c154cc24db9305347be5
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Wed Jan 31 21:07:32 2024 -0600
+
+    added cmake
+
+commit d506e65fd1f52a2aebc247eb3e8146db58636e5a
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Wed Jan 31 20:18:13 2024 -0600
+
+    testing
+
+commit 248548a7df64da0db19cf7e396b51701780aa43e
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Wed Jan 31 20:15:18 2024 -0600
+
+    testing
+
+commit 8577b55da8fe9ef80c2c88cc425eaa21f8e92aae
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Wed Jan 31 20:09:16 2024 -0600
+
+    more testing with pyrite
+
+commit 32160d649a604674b379179d21d71d66bdfc66ae
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Wed Jan 31 20:01:49 2024 -0600
+
+    testing
+
+commit e8b029f420079b2e3dc59bd284498aefdaf5d685
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Wed Jan 31 20:00:31 2024 -0600
+
+    testing again on pyrite
+
+commit 270830a68b28eee8884082f1f928244269d6bd40
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Wed Jan 31 19:57:07 2024 -0600
+
+    thought i fixed it hopefully I did this time
+
+commit 533a3b17e5f2ce78b81ce76f180d1b572e16d42f
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Wed Jan 31 19:53:22 2024 -0600
+
+    fixed up pyrite bug
+
+commit f17ada97732343b51bc1420f2ba7cf468aadaf64
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Wed Jan 31 18:44:58 2024 -0600
+
+    testing with pyrite
+
+commit a88507f15c3f75bda1338e96b38177742044bf4d
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Wed Jan 31 18:08:39 2024 -0600
+
+    test with pyrite again
+
+commit 9915d8d3b540bd9c5303508ce9632a7663646136
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Wed Jan 31 18:06:23 2024 -0600
+
+    testing something on pyrite
+
+commit 84a51033ca3ace67fc2f2fa204b1e75b16de1417
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Wed Jan 31 17:46:54 2024 -0600
+
+    create option for color or not
+
+commit 69ec07822c50c602f0ce3284d58aa6a2978b3f50
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Wed Jan 31 17:24:37 2024 -0600
+
+    took out tree and rock regions and sprinkled tree and rocks around map
+
+commit 17264c3cd61ab9f70de2fb8024e3c1c36dfb1306
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Wed Jan 31 17:00:34 2024 -0600
+
+    added colors and reduced the size of the water region when map is generated
+
+commit de93e3c6dd0bbf139247457d9da75a160f2a7f9e
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Tue Jan 30 17:14:31 2024 -0600
+
+    updated README.d
+
+commit cc276f6f31a287b8f473b8dc8dfccad46b88a2a8
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Tue Jan 30 17:04:23 2024 -0600
+
+    removed print function used for testing
+
+commit 12e8a972b4148166585587fe70e7fe77c2ad0862
+Merge: 0e86dff 05208a2
+Author: hedgreneric <97715730+hedgreneric@users.noreply.github.com>
+Date:   Tue Jan 30 17:03:26 2024 -0600
+
+    Merge pull request #1 from hedgreneric/incremental_terrain_gen
+    
+    Incremental terrain gen
+
+commit 05208a217a2bcad42379c4c4702d1ebfe130b502
+Merge: c6d44be 0e86dff
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Tue Jan 30 17:02:08 2024 -0600
+
+    merged with main
+
+commit c6d44bed20fc423de378ee39d892e4383857270e
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Tue Jan 30 16:56:53 2024 -0600
+
+    finished terrain gen
+
+commit 8bb5ded5e00fde6e60c15b036f2006b496253876
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Tue Jan 30 10:43:37 2024 -0600
+
+    cleaned up generateRoad
+
+commit dd41f188fc71b183982d66409151cb5a2fd9647a
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Tue Jan 30 10:38:04 2024 -0600
+
+    made road gen better
+
+commit 246058d419da89ec4567ad72c9497ad0ed4358e2
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Tue Jan 30 09:57:52 2024 -0600
+
+    made generate terrain better
+
+commit 0e86dffedd8d54643c72592d365977859450ce4f
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Sun Jan 28 20:00:27 2024 -0600
+
+    fixed warnings
+
+commit 0b37522121cc3dfb388a69ed819400bddb42bd85
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Sun Jan 28 19:54:04 2024 -0600
+
+    fixed warnings in main
+
+commit 15ac590807fe2d673f27d8d43d7cf2b2e7a44dd0
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Sun Jan 28 19:15:01 2024 -0600
+
+    fixed warnings
+
+commit 3b89385e067d9832f3b1967dfa6d003487195626
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Sun Jan 28 19:14:26 2024 -0600
+
+    fixed some warnings
+
+commit 6d4935798c19b00abc1cbfc7c1259d2f7909136a
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Sun Jan 28 17:11:43 2024 -0600
+
+    working on a better terrain generator
+
+commit d9395acf5225df1db1955ce93387ea7513c04a93
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Sun Jan 28 16:18:06 2024 -0600
+
+    created Assignment entry in README.md
+
+commit 059c01ae13adb4932d92ca051b1302a511dfc8fb
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Sun Jan 28 16:16:37 2024 -0600
+
+    working on incrementally creating the terrain
+
+commit b5a322585f6b7c47409a29963fedeacbaa02b861
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Sun Jan 28 15:10:56 2024 -0600
+
+    cleaned up unwanted exectuables
+
+commit 23ebbb3108fe324cdd0ac4b9fd183fce66b88f2c
+Author: hedgreneric <97715730+hedgreneric@users.noreply.github.com>
+Date:   Sun Jan 28 15:02:31 2024 -0600
+
+    Delete .vscode directory
+    
+    delete .vscode dir and added it to .gitignore
+
+commit 3b196848ab27f6e5ac78e127f9cf23345f1c65d0
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Sun Jan 28 00:17:26 2024 -0600
+
+    polishing up the shops
+
+commit 6433f9a6526d85530e84c5ed604109c0d515f44f
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Sun Jan 28 00:10:41 2024 -0600
+
+    fixed up the terrain generation to look nicer
+
+commit 15a1c06042cc4e163026e92465c84f4d88a6e096
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Sat Jan 27 23:37:40 2024 -0600
+
+    created roads from N to S and W to East gates, and the Pokemart and Pokemon Center
+
+commit 5689e8b6cfcd960f29b7f2ffc38e4a3e93b08573
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Sat Jan 27 20:18:52 2024 -0600
+
+    completed generate text area, walls, gates, and terrain
+
+commit 365a63016af9c3007f3d832d21a4198bc8a5de3d
+Merge: 0e7eff2 8f8a4a8
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Sat Jan 27 15:48:13 2024 -0600
+
+    created structs, header file, and main
+
+commit 0e7eff21ee79dac09ce470d2275813bc64a1f75d
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Sat Jan 27 15:44:14 2024 -0600
+
+    created structs, header file, and main
+
+commit f0b0fa28d8bd3d569dd79fa102dc6693edfcc0f1
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Wed Jan 17 17:00:35 2024 -0600
+
+    test
+
+commit 53eb8332b3c79e7af723f43de40b0a5ae533e8f2
+Author: ehedgren <ehedgren@Ubuntu-Main.myguest.virtualbox.org>
+Date:   Wed Jan 17 16:58:18 2024 -0600
+
+    first commit
+
+commit 8f8a4a8904a4ff6a29a368951ed12f9cac880935
+Author: ehedgren <hedgreneric@gmail.com>
+Date:   Wed Jan 17 16:56:19 2024 -0600
+
+    first commit

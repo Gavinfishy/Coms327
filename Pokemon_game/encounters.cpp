@@ -5,6 +5,7 @@
 #include "map.h"
 #include <unistd.h>
 #include "db.h"
+#include <curses.h>
 
 /*
 *    returns whether bool of is trainer defeated

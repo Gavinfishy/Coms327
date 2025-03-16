@@ -9,8 +9,8 @@ RM = rm -f
 
 TERM = "S2019"
 
-CFLAGS = -Wall -Werror -ggdb -funroll-loops -DTERM=$(TERM)
-CXXFLAGS = -Wall -Werror -ggdb -funroll-loops -DTERM=$(TERM)
+CFLAGS = -Wall -ggdb -funroll-loops -DTERM=$(TERM)
+CXXFLAGS = -Wall -ggdb -funroll-loops -DTERM=$(TERM)
 
 LDFLAGS = -lncurses
 
